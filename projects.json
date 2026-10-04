@@ -53,9 +53,5 @@
     { "name": "Squash Lab", "description": "Apple Watch + CoreMotion detecting squash strokes and giving real-time technique feedback.", "tags": ["Motion", "Apple Watch", "ML"] },
     { "name": "Bias Detector", "description": "A browser extension that surfaces gendered language, missing voices and coded assumptions on any page.", "tags": ["NLP", "Browser Extension"] },
     { "name": "Architecture Lab", "description": "Visual tools for thinking through system design, from whiteboard to working architecture.", "tags": ["Systems", "Visualization"] }
-  ],
-  "archive": {
-    "githubUser": "nikki30",
-    "exclude": ["nikoftime", "nikita-portfolio", "Placeholders"]
-  }
+  ]
 }

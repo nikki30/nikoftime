@@ -7,7 +7,7 @@ It's a plain static site: HTML, CSS and a little JavaScript. There's no build st
 ```
 index.html      page layout
 styles.css      styling (light + dark)
-main.js         renders projects from projects.json and the live GitHub archive
+main.js         renders projects from projects.json
 projects.json   ← the only file you need to edit to add or change projects
 favicon.svg
 .github/workflows/pages.yml   publishes the site on every push to main
@@ -45,7 +45,6 @@ Edit `projects.json`:
   - `image` / `imageAlt`: screenshot or GIF, plus a text description of it for screen readers
   - `docs`: optional extra links
 - **`upcoming`** lists projects that are planned but not public yet.
-- **`archive`**: every other public, non-fork repo on your GitHub is listed automatically. Use `exclude` to hide some. If a repo's GitHub **Website** field is set, the archive links there instead of to the code.
 
 ## Making each project usable by the public
 

@@ -75,29 +75,6 @@ function renderFilters(projects) {
   });
 }
 
-async function renderArchive({ githubUser, exclude = [] }, featuredRepos) {
-  const list = document.getElementById("archive-list");
-  const skip = new Set([...exclude, ...featuredRepos].map((n) => n.toLowerCase()));
-  try {
-    const res = await fetch(`https://api.github.com/users/${githubUser}/repos?per_page=100&sort=pushed`);
-    if (!res.ok) throw new Error(res.status);
-    const repos = (await res.json()).filter((r) => !r.fork && !r.archived && !skip.has(r.name.toLowerCase()));
-    list.innerHTML = repos
-      .map((r) => `
-        <li><a href="${esc(r.homepage || r.html_url)}" rel="noopener">
-          <div class="name">${esc(r.name.replace(/[-_]/g, " "))}</div>
-          <div class="desc">${esc(r.description || "No description yet.")}</div>
-          <div class="meta">
-            ${r.language ? `<span>${esc(r.language)}</span>` : ""}
-            <span>${new Date(r.pushed_at).getFullYear()}</span>
-            ${r.homepage ? "<span>Live demo</span>" : ""}
-          </div>
-        </a></li>`)
-      .join("");
-  } catch {
-    list.innerHTML = `<li class="muted">Couldn't load the list right now. <a href="https://github.com/${esc(githubUser)}?tab=repositories" rel="noopener">See all repositories on GitHub ↗</a></li>`;
-  }
-}
 
 function wireCopyButtons() {
   document.addEventListener("click", async (e) => {
@@ -129,9 +106,6 @@ async function init() {
       <div class="tags">${u.tags.map((t) => `<span class="tag">${esc(t)}</span>`).join("")}</div></li>`)
     .join("");
   if (!data.upcoming.length) document.getElementById("upcoming").hidden = true;
-
-  const featuredRepos = data.featured.map((p) => p.repo?.split("/").pop()).filter(Boolean);
-  renderArchive(data.archive, featuredRepos);
 }
 
 init();
