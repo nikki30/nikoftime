@@ -27,9 +27,18 @@
           "# open http://localhost:3000"
         ]
       }
+    },
+    {
+      "id": "body-lab",
+      "name": "Body Lab",
+      "tagline": "Your health data, finally readable.",
+      "description": "A personal health aggregator that stitches Strava, Lose It and Apple Health into one dashboard, so training, nutrition and recovery can be read together instead of across three apps.",
+      "status": "building",
+      "tags": ["Health", "Data Viz", "Wearables"],
+      "repo": null,
+      "demo": null,
+      "image": null
     }
   ],
-  "upcoming": [
-    { "name": "Body Lab", "description": "Strava, Lose It and Apple Health stitched into one readable dashboard.", "tags": ["Health", "Data Viz"] }
-  ]
+  "upcoming": []
 }
