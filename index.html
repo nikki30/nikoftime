@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nikita Sivakumar</title>
+  <meta name="description" content="Nikita Sivakumar builds interactive labs for AI, health and the systems they touch. Every project is open source and free to use.">
+  <meta property="og:title" content="Nikita Sivakumar">
+  <meta property="og:description" content="Interactive labs for AI, health and the systems they touch, built in public.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#projects">Skip to projects</a>
+
+  <header class="nav">
+    <a class="brand" href="#top">nikoftime</a>
+    <nav aria-label="Main">
+      <a href="#projects">Projects</a>
+      <a href="#archive">Archive</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+      <button class="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <p class="eyebrow">Nikita Sivakumar</p>
+      <h1>I build software to <span class="grad">think visually.</span></h1>
+      <p class="lede">Interactive labs for AI, health and the systems they touch. Every project here is open source. You can read the code, run it yourself, or try it in the browser where a live demo exists.</p>
+      <div class="cta">
+        <a class="btn primary" href="#projects">See the projects</a>
+        <a class="btn" href="https://github.com/nikki30" rel="noopener">GitHub ↗</a>
+      </div>
+    </section>
+
+    <section id="projects" aria-labelledby="projects-h">
+      <h2 id="projects-h">Projects</h2>
+      <div class="filters" role="group" aria-label="Filter projects by tag"></div>
+      <div id="featured" class="featured"></div>
+    </section>
+
+    <section id="upcoming" aria-labelledby="upcoming-h">
+      <h2 id="upcoming-h">In the works</h2>
+      <ul id="upcoming-list" class="upcoming"></ul>
+    </section>
+
+    <section id="archive" aria-labelledby="archive-h">
+      <h2 id="archive-h">Archive</h2>
+      <p class="muted">Everything else on GitHub, pulled in live, so new public repos show up here on their own.</p>
+      <ul id="archive-list" class="archive"><li class="muted">Loading repositories…</li></ul>
+    </section>
+
+    <section id="about" aria-labelledby="about-h">
+      <h2 id="about-h">About</h2>
+      <p>I like ideas best when I can <strong>see them move</strong>. Each lab on this site takes an abstract problem, such as RAG pipelines, health signals or hidden biases, and makes it interactive enough to actually understand. Building is how I think.</p>
+    </section>
+
+    <section id="contact" aria-labelledby="contact-h">
+      <h2 id="contact-h">Let's build something</h2>
+      <p>If you're building, questioning, or curious about something, reach out.</p>
+      <div class="cta">
+        <a class="btn primary" href="mailto:hello@nikitasivakumar.com">Email me</a>
+        <a class="btn" href="https://github.com/nikki30" rel="noopener">GitHub ↗</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>Nikita Sivakumar · Built in public · <span id="year"></span></footer>
+
+  <script src="main.js" defer></script>
+</body>
+</html>
