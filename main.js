@@ -60,6 +60,7 @@ function projectCard(p) {
 
 function renderFilters(projects) {
   const box = document.querySelector(".filters");
+  if (projects.length < 2) { box.hidden = true; return; }
   const tags = ["All", ...new Set(projects.flatMap((p) => p.tags))];
   box.innerHTML = tags
     .map((t, i) => `<button class="chip" type="button" aria-pressed="${i === 0}">${esc(t)}</button>`)

@@ -65,7 +65,3 @@ Showing a project is easy. Letting a stranger *use* it means hosting it. How dep
 - The backend downloads 90–400 MB embedding models. A Hugging Face Space (CPU basic, 16 GB RAM) handles this. Most free 512 MB hosts can't.
 - Add CORS on the FastAPI app so it allows the Vercel domain.
 - Deploy the frontend to Vercel with `NEXT_PUBLIC_API_URL` set, then put that URL in `demo`.
-
-### Sentinel-DB
-
-It runs locally by design (it indexes your own code), so "usable" means easy to install. Publish it to crates.io (`cargo install sentinel-mcp`) or attach prebuilt binaries to a GitHub Release, then update the `run` steps.

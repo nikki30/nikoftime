@@ -27,31 +27,9 @@
           "# open http://localhost:3000"
         ]
       }
-    },
-    {
-      "id": "sentinel-db",
-      "name": "Sentinel-DB",
-      "tagline": "Long-term memory for AI coding agents.",
-      "description": "A local-first knowledge engine in Rust that parses a codebase with Tree-sitter, embeds every function and lets agents search it by meaning. Your code never leaves your machine.",
-      "status": "building",
-      "tags": ["Rust", "MCP", "Embeddings", "Tree-sitter"],
-      "repo": "https://github.com/nikki30/sentinel-db",
-      "demo": null,
-      "image": null,
-      "run": {
-        "requirements": "Rust (stable) via rustup.",
-        "steps": [
-          "git clone https://github.com/nikki30/sentinel-db.git && cd sentinel-db",
-          "cargo run -p sentinel-mcp -- index",
-          "cargo run -p sentinel-mcp -- search \"how does auth reach the database?\""
-        ]
-      }
     }
   ],
   "upcoming": [
-    { "name": "Body Lab", "description": "Strava, Lose It and Apple Health stitched into one readable dashboard.", "tags": ["Health", "Data Viz"] },
-    { "name": "Squash Lab", "description": "Apple Watch + CoreMotion detecting squash strokes and giving real-time technique feedback.", "tags": ["Motion", "Apple Watch", "ML"] },
-    { "name": "Bias Detector", "description": "A browser extension that surfaces gendered language, missing voices and coded assumptions on any page.", "tags": ["NLP", "Browser Extension"] },
-    { "name": "Architecture Lab", "description": "Visual tools for thinking through system design, from whiteboard to working architecture.", "tags": ["Systems", "Visualization"] }
+    { "name": "Body Lab", "description": "Strava, Lose It and Apple Health stitched into one readable dashboard.", "tags": ["Health", "Data Viz"] }
   ]
 }
