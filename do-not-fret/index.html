@@ -1,0 +1,1601 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%227%22 fill=%22%232f5a34%22/%3E%3Ctext x=%2216%22 y=%2223%22 font-size=%2220%22 text-anchor=%22middle%22 fill=%22%23f3f1e4%22%3E%E2%99%AB%3C/text%3E%3C/svg%3E">
+<title>Do Not Fret</title>
+<meta name="description" content="A free guitar practice app: a daily routine with clean-tempo tracking, theory lessons with play-along fretboards, songs with tab play-along, and a practice diary. Runs in your browser.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a practice journal. One narrow column of paper, staff-ruled section heads,
+   a rosewood fretboard as the centrepiece, metronome docked above the tab bar. */
+:root {
+  --paper: #f3f1e4;
+  --paper-2: #e7ebd6;
+  --paper-3: #d6e0bd;
+  --ink: #1b2819;
+  --ink-soft: #55644c;
+  --rose: #2e5e33;
+  --brass: #d8961f;
+  --brass-ink: #241a05;
+  --line: #c9d3b0;
+  --good: #4f8a32;
+  --olive: #6f7d1c;
+  --hero-1: #23472a;
+  --hero-2: #5f7019;
+  --hero-ink: #f7f3df;
+  --hero-soft: #cfdcae;
+  --wood: #3b1f16;
+  --wood-2: #4a2a1e;
+  --fret: #c9b693;
+  --string: #e7dcc6;
+  --pearl: #f6efe2;
+  --pearl-ink: #2a1a14;
+  --dock: #1d3a22;
+  --shadow: 0 1px 0 rgba(30, 50, 20, .06), 0 12px 30px -18px rgba(30, 60, 20, .5);
+  --display: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
+  --ui: "Work Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #111811; --paper-2: #192319; --paper-3: #233223;
+    --ink: #edf1dc; --ink-soft: #a7b598; --rose: #a3cf86; --brass: #ebb34c; --brass-ink: #1d1404;
+    --line: #2f3f2c; --good: #8fcf6b; --olive: #c2cf5e;
+    --hero-1: #1c3a21; --hero-2: #3f5114; --hero-ink: #f3efd8; --hero-soft: #bccb98;
+    --wood: #26140e; --wood-2: #301a12; --fret: #a8916c;
+    --string: #d8ccb5; --pearl: #efe5d2; --pearl-ink: #24130d; --dock: #0c160d;
+    --shadow: 0 0 0 1px rgba(220, 255, 200, .05); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #111811; --paper-2: #192319; --paper-3: #233223;
+  --ink: #edf1dc; --ink-soft: #a7b598; --rose: #a3cf86; --brass: #ebb34c; --brass-ink: #1d1404;
+  --line: #2f3f2c; --good: #8fcf6b; --olive: #c2cf5e;
+  --hero-1: #1c3a21; --hero-2: #3f5114; --hero-ink: #f3efd8; --hero-soft: #bccb98;
+  --wood: #26140e; --wood-2: #301a12; --fret: #a8916c;
+  --string: #d8ccb5; --pearl: #efe5d2; --pearl-ink: #24130d; --dock: #0c160d;
+  --shadow: 0 0 0 1px rgba(220, 255, 200, .05); color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--paper); color: var(--ink);
+  font: 15px/1.6 var(--ui); -webkit-font-smoothing: antialiased;
+  padding-inline: 16px; padding-block: 0 190px;
+}
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; border-radius: 4px; }
+.wrap { max-width: 720px; margin: 0 auto; }
+
+/* ---------- header + tabs ---------- */
+.top { display: flex; align-items: baseline; justify-content: space-between; padding-block: 22px 6px; gap: 12px; }
+#status { font-size: .75rem; text-align: right; max-width: 55%; }
+.brand { font: italic 600 1.35rem/1 var(--display); color: var(--rose); letter-spacing: .01em; }
+.brand b { font-style: normal; }
+.tabs {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+  display: flex; justify-content: center; gap: 2px;
+  background: var(--paper-2); border-top: 1px solid var(--line);
+  padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+}
+.tabs button {
+  flex: 1; max-width: 130px; background: none; border: 0; cursor: pointer;
+  padding: 8px 4px; border-radius: 10px; font-size: .78rem; font-weight: 500; color: var(--ink-soft);
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.tabs button .g { font: 600 1.15rem/1 var(--display); }
+.tabs button[aria-current="page"] { color: var(--rose); background: var(--paper-3); }
+
+/* ---------- type ---------- */
+h1, h2, h3 { font-family: var(--display); font-weight: 600; text-wrap: balance; margin: 0; color: var(--ink); }
+h1 { font-size: clamp(2.1rem, 7vw, 2.9rem); line-height: 1.02; letter-spacing: -.01em; }
+h2 { font-size: 1.6rem; line-height: 1.1; }
+h3 { font-size: 1.25rem; line-height: 1.15; }
+.eyebrow { font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); font-weight: 600; }
+.soft { color: var(--ink-soft); }
+.small { font-size: .85rem; }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+p { margin: 0; }
+
+/* staff-ruled section head: five hairlines under the title */
+.staff { display: grid; gap: 8px; padding-block: 34px 14px; }
+.staff::after {
+  content: ""; height: 13px;
+  background: repeating-linear-gradient(to bottom, var(--line) 0 1px, transparent 1px 3px);
+  opacity: .9;
+}
+.staff .row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+/* ---------- surfaces ---------- */
+.sheet { background: var(--paper-2); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); }
+.list { display: grid; gap: 0; }
+.item { border-top: 1px solid var(--line); }
+.item:first-child { border-top: 0; }
+.item-head {
+  width: 100%; display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center;
+  padding: 14px 16px; background: none; border: 0; text-align: left; cursor: pointer;
+}
+.item-head .t { font-weight: 600; min-width: 0; }
+.item-head .meta { font-size: .8rem; color: var(--ink-soft); }
+.item-body { padding: 0 16px 16px; display: grid; gap: 12px; }
+.check {
+  width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--ink-soft);
+  display: grid; place-items: center; font-size: .75rem; color: transparent;
+}
+.check.on { background: var(--good); border-color: var(--good); color: var(--paper); }
+.pill {
+  display: inline-flex; align-items: center; gap: 6px; font-size: .74rem; font-weight: 500;
+  padding: 2px 9px; border-radius: 999px; background: var(--paper-3); color: var(--ink-soft); white-space: nowrap;
+}
+.pill.brass { background: var(--brass); color: var(--brass-ink); }
+.pill.rose { background: transparent; border: 1px solid var(--rose); color: var(--rose); }
+.btn {
+  display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--paper); color: var(--ink);
+  padding: 8px 14px; border-radius: 999px; font-weight: 500; font-size: .88rem;
+}
+.btn:hover { border-color: var(--brass); }
+.btn.primary { background: var(--rose); border-color: var(--rose); color: var(--paper); }
+.btn:disabled { opacity: .45; cursor: default; }
+.btns { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.link { background: none; border: 0; padding: 0; color: var(--rose); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; font-weight: 500; }
+textarea, select, input[type="text"] {
+  font: inherit; color: var(--ink); background: var(--paper); border: 1px solid var(--line);
+  border-radius: 10px; padding: 10px 12px; width: 100%;
+}
+textarea { min-height: 84px; resize: vertical; }
+select { width: auto; padding: 7px 10px; }
+.empty { padding: 22px 18px; color: var(--ink-soft); display: grid; gap: 6px; }
+.empty b { color: var(--ink); font-weight: 600; }
+.notice { font-size: .85rem; color: var(--ink-soft); border-left: 2px solid var(--brass); padding: 2px 0 2px 12px; }
+
+/* ---------- today ---------- */
+.hero { display: grid; gap: 10px; padding-block: 18px 4px; }
+.stats { display: flex; gap: 22px; flex-wrap: wrap; padding-top: 6px; }
+.stat b { font: 600 1.6rem/1 var(--display); color: var(--rose); display: block; }
+.stat span { font-size: .78rem; color: var(--ink-soft); }
+.week { display: flex; gap: 6px; }
+.week i { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line); display: grid; place-items: center; font: normal 500 .68rem/1 var(--ui); color: var(--ink-soft); }
+.week i.on { background: var(--brass); border-color: var(--brass); color: var(--brass-ink); }
+.week i.today { border-color: var(--rose); border-width: 1.5px; }
+.runs { display: inline-flex; gap: 5px; }
+.runs i { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--rose); }
+.runs i.on { background: var(--rose); }
+.howto { color: var(--ink-soft); font-size: .92rem; }
+.spark { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center; padding: 12px 16px; border-top: 1px solid var(--line); }
+.spark:first-child { border-top: 0; }
+.spark svg { grid-column: 1 / -1; width: 100%; height: 44px; }
+.spark .s-area { fill: var(--brass); opacity: .14; }
+.spark .s-line { fill: none; stroke: var(--brass); stroke-width: 2; }
+.spark .s-dot { fill: var(--rose); }
+.spark .s-grid { stroke: var(--line); stroke-width: 1; }
+
+/* ---------- theory ---------- */
+.builder { padding: 16px; display: grid; gap: 14px; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+.seg button { border: 0; background: none; padding: 6px 12px; font-size: .82rem; cursor: pointer; color: var(--ink-soft); }
+.seg button[aria-pressed="true"] { background: var(--rose); color: var(--paper); }
+.steps { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 0; font-family: var(--display); }
+.steps .n { font-size: 1.55rem; font-weight: 600; min-width: 2.1ch; text-align: center; color: var(--ink); }
+.steps .n.root { color: var(--rose); }
+.steps .w { font: 600 .66rem/1 var(--ui); color: var(--brass); letter-spacing: .06em; padding: 0 6px; position: relative; top: -2px; }
+.steps .w.h { color: var(--rose); }
+.facts { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: .88rem; color: var(--ink-soft); }
+.facts b { color: var(--ink); font-weight: 600; }
+.fb-scroll { overflow-x: auto; border-radius: 10px; -webkit-overflow-scrolling: touch; }
+.fb { display: block; min-width: 760px; width: 100%; height: auto; }
+.fb .board { fill: var(--wood); }
+.fb .board-2 { fill: var(--wood-2); }
+.fb .nut { fill: var(--pearl); }
+.fb .fretl { stroke: var(--fret); stroke-width: 2; }
+.fb .str { stroke: var(--string); }
+.fb .inlay { fill: var(--pearl); opacity: .5; }
+.fb .num { fill: var(--ink-soft); font: 500 10px var(--ui); text-anchor: middle; }
+.fb .sname { fill: var(--ink-soft); font: 500 11px var(--ui); text-anchor: middle; }
+.fb .note { cursor: pointer; }
+.fb .note circle { fill: var(--pearl); stroke: var(--wood); stroke-width: 1.5; }
+.fb .note text { fill: var(--pearl-ink); font: 600 10px var(--ui); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.fb .note.root circle { fill: var(--brass); }
+.fb .note.root text { fill: var(--brass-ink); }
+.fb .note:hover circle { stroke: var(--brass); stroke-width: 2.5; }
+.topic { padding: 16px; display: grid; gap: 14px; }
+.topic h4 { margin: 0; font: 600 1.1rem/1.2 var(--display); color: var(--rose); }
+.topic .sec { display: grid; gap: 6px; max-width: 64ch; }
+.topic .sec p { white-space: pre-line; }
+.review { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; padding: 16px; }
+.review b { font: 600 2rem/1 var(--display); color: var(--rose); }
+
+/* ---------- songs, classes ---------- */
+.chart { font: 400 .9rem/1.7 var(--mono); background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; overflow-x: auto; white-space: pre; margin: 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: 500 .85rem/1 var(--mono); padding: 6px 10px; border-radius: 8px; background: var(--paper); border: 1px solid var(--line); }
+.timeline { display: grid; gap: 14px; }
+.cls { padding: 16px; display: grid; gap: 12px; }
+.cls-date { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.cls ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
+.hw { display: grid; gap: 6px; }
+.hw label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+.hw input { margin-top: 4px; accent-color: var(--good); }
+.hw .done { text-decoration: line-through; color: var(--ink-soft); }
+.next-class { padding: 16px; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; }
+.next-class b { font: 600 1.9rem/1 var(--display); color: var(--rose); }
+
+/* ---------- notebook pages ---------- */
+.uploader { padding: 16px; display: grid; gap: 12px; }
+.uploader input[type="file"] { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.pages { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 10px; }
+.page { display: grid; gap: 4px; min-width: 0; }
+.page a { display: block; border-radius: 8px; overflow: hidden; border: 1px solid var(--line); background: var(--paper); aspect-ratio: 3 / 4; }
+.page img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.page .pdf { width: 100%; height: 100%; display: grid; place-items: center; font: 600 1.1rem var(--display); color: var(--rose); }
+.page .cap { font-size: .7rem; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.up-status { font-size: .85rem; color: var(--ink-soft); }
+.up-status.err { color: var(--brass); }
+
+/* ---------- metronome dock ---------- */
+.dock {
+  position: fixed; left: 50%; transform: translateX(-50%); z-index: 19;
+  bottom: calc(66px + env(safe-area-inset-bottom, 0px));
+  width: min(720px, calc(100% - 20px));
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px;
+  background: var(--wood); color: var(--pearl); border-radius: 16px; padding: 8px 10px;
+  box-shadow: 0 12px 30px -12px rgba(30, 10, 5, .55);
+}
+.dock .play { width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--brass); color: var(--brass-ink); font-size: 1rem; cursor: pointer; }
+.dock .mid { display: grid; gap: 2px; min-width: 0; }
+.dock .tempo { display: flex; align-items: center; gap: 6px; }
+.dock .tempo button { width: 30px; height: 30px; border-radius: 8px; border: 1px solid rgba(246, 239, 226, .25); background: transparent; color: var(--pearl); cursor: pointer; font-size: 1rem; }
+.dock .bpm { font: 600 1.5rem/1 var(--display); min-width: 4.4ch; text-align: center; font-variant-numeric: tabular-nums; }
+.dock .bpm small { font: 500 .62rem/1 var(--ui); opacity: .7; letter-spacing: .04em; }
+.dock .ctx { font-size: .72rem; opacity: .7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dock .beats { display: flex; gap: 5px; }
+.dock .beats i { width: 8px; height: 8px; border-radius: 50%; background: rgba(246, 239, 226, .22); }
+.dock .beats i.on { background: var(--brass); }
+.dock .side { display: flex; gap: 6px; }
+.dock .side button { border: 1px solid rgba(246, 239, 226, .25); background: transparent; color: var(--pearl); border-radius: 8px; padding: 6px 9px; font-size: .78rem; cursor: pointer; }
+
+/* ---------- quiz overlay, toast ---------- */
+.overlay { position: fixed; inset: 0; z-index: 40; background: rgba(20, 10, 6, .45); display: grid; place-items: center; padding: 16px; }
+.card-q { width: min(520px, 100%); background: var(--paper); border-radius: 18px; padding: 24px; display: grid; gap: 18px; box-shadow: var(--shadow); }
+.card-q .q { font: 600 1.6rem/1.2 var(--display); }
+.card-q .a { font: 500 1.35rem/1.3 var(--display); color: var(--rose); border-top: 1px solid var(--line); padding-top: 14px; }
+.toast {
+  position: fixed; left: 50%; transform: translateX(-50%); z-index: 50;
+  bottom: calc(140px + env(safe-area-inset-bottom, 0px));
+  background: var(--ink); color: var(--paper); padding: 9px 16px; border-radius: 999px; font-size: .85rem;
+}
+
+
+/* ---------- colour: hero bands, categories ---------- */
+.hero {
+  background: radial-gradient(120% 140% at 100% 0%, var(--hero-2) 0%, transparent 60%), var(--hero-1);
+  color: var(--hero-ink); border-radius: 22px; padding: 24px 22px 22px; margin-top: 6px;
+  position: relative; overflow: hidden;
+}
+.hero::after {
+  content: ""; position: absolute; right: -40px; top: 18px; width: 240px; height: 74px; opacity: .22;
+  background: repeating-linear-gradient(to bottom, var(--hero-soft) 0 1px, transparent 1px 15px);
+  transform: rotate(-8deg); pointer-events: none;
+}
+.hero h1 { color: var(--hero-ink); }
+.hero .eyebrow { color: var(--brass); }
+.hero .soft, .hero .stat span { color: var(--hero-soft); }
+.hero .stat b { color: var(--hero-ink); }
+.hero .stat b .soft { color: var(--hero-soft); }
+.hero .week i { border-color: rgba(247, 243, 223, .3); color: var(--hero-soft); }
+.hero .week i.on { background: var(--brass); border-color: var(--brass); color: var(--brass-ink); }
+.hero .week i.today { border-color: var(--hero-ink); }
+.tabs button[aria-current="page"] { background: var(--rose); color: var(--paper); }
+.staff h2 { color: var(--rose); }
+.staff::after { background: repeating-linear-gradient(to bottom, var(--paper-3) 0 1.5px, transparent 1.5px 3px); }
+.sheet { border-color: var(--line); }
+.pill { background: var(--paper-3); color: var(--ink); }
+.pill.cat-warmup { background: var(--brass); color: var(--brass-ink); }
+.pill.cat-scale { background: var(--rose); color: var(--paper); }
+.pill.cat-skill { background: var(--olive); color: var(--paper); }
+.pill.cat-song { background: var(--ink); color: var(--paper); }
+.item-head:hover { background: color-mix(in srgb, var(--paper-3) 45%, transparent); }
+.dock { background: var(--dock); }
+.dock .play { background: var(--brass); }
+.review b, .next-class b { color: var(--olive); }
+.steps .w { color: var(--olive); }
+.steps .w.h { color: var(--brass); }
+.btn.primary { background: var(--rose); border-color: var(--rose); color: var(--paper); }
+
+@media (min-width: 900px) {
+  body { padding-block: 0 120px; }
+  .tabs { position: sticky; top: env(safe-area-inset-top, 0px); bottom: auto; border-top: 0; border-bottom: 1px solid var(--line); background: var(--paper); margin-inline: -16px; }
+  .tabs button { flex-direction: row; font-size: .88rem; gap: 8px; }
+  .dock { bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
+  .toast { bottom: 100px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* ---------- v4: search, filters, lessons, tab ---------- */
+.search { display: flex; gap: 8px; align-items: center; margin-top: 18px; }
+.search input { flex: 1; min-width: 0; }
+.chiprow { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.fchip { font: inherit; font-size: .8rem; padding: 4px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--paper); color: var(--ink-soft); cursor: pointer; }
+.fchip[aria-pressed="true"] { background: var(--rose); color: var(--paper); border-color: var(--rose); }
+.count { font-size: .8rem; color: var(--ink-soft); margin-top: 10px; }
+
+.level { display: grid; gap: 0; }
+.level-head { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; padding: 14px 16px; }
+.level-num { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--rose); color: var(--paper); font: 600 1.05rem var(--display); }
+.bar { height: 6px; border-radius: 999px; background: var(--paper-3); overflow: hidden; width: 90px; }
+.bar i { display: block; height: 100%; background: var(--brass); }
+.lesson { border-top: 1px solid var(--line); }
+.lesson-head { width: 100%; display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; padding: 12px 16px; background: none; border: 0; text-align: left; cursor: pointer; }
+.lesson-body { padding: 0 16px 18px; display: grid; gap: 14px; }
+.steps-list { margin: 0; padding: 0; list-style: none; counter-reset: st; display: grid; gap: 12px; max-width: 66ch; }
+.steps-list li { counter-increment: st; display: grid; grid-template-columns: 26px 1fr; gap: 10px; }
+.steps-list li::before { content: counter(st); width: 24px; height: 24px; border-radius: 50%; background: var(--paper-3); color: var(--rose); display: grid; place-items: center; font: 600 .78rem var(--ui); }
+.steps-list li p { white-space: pre-line; }
+.steps-list li b { color: var(--rose); }
+.tag-claude { font-size: .7rem; font-weight: 600; letter-spacing: .04em; color: var(--olive); border: 1px solid var(--olive); border-radius: 999px; padding: 1px 8px; white-space: nowrap; }
+.callout { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: .9rem; }
+.callout b { color: var(--rose); }
+.fb .note.now circle { fill: var(--olive); stroke: var(--brass); stroke-width: 3; }
+.fb .note.now text { fill: var(--paper); }
+.fb .note.dim { opacity: .35; }
+
+.tabwrap { overflow-x: auto; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 10px 6px 8px; }
+.tabline { display: flex; align-items: stretch; position: relative; min-width: max-content; margin-bottom: 14px; }
+.tabline:last-child { margin-bottom: 0; }
+.tabline .lab, .tabline .col { display: grid; grid-template-rows: 14px repeat(6, 16px); }
+.tabline .lab { font: 500 .7rem var(--mono); color: var(--ink-soft); padding-right: 6px; position: sticky; left: 0; background: var(--paper); z-index: 1; }
+.tabline .lab span { line-height: 16px; }
+.tabline .strings { display: flex; position: relative; }
+.tabline .strings::before { content: ""; position: absolute; left: 0; right: 0; top: 14px; height: 96px; pointer-events: none;
+  background: repeating-linear-gradient(to bottom, transparent 0 7.5px, var(--line) 7.5px 8.5px, transparent 8.5px 16px); }
+.tabline .col { padding: 0 4px; position: relative; cursor: pointer; border-radius: 6px; }
+.tabline .col span { font: 500 .78rem/16px var(--mono); text-align: center; color: var(--ink); position: relative; z-index: 1; white-space: nowrap; }
+.tabline .col span.has { background: var(--paper); padding: 0 1px; }
+.tabline .col .cue { font: 600 .62rem/14px var(--ui); color: var(--olive); text-align: left; white-space: nowrap; }
+.tabline .col.bar { display: block; width: 1px; padding: 0; margin: 14px 3px 0; height: 88px; align-self: flex-start; background: var(--ink-soft); opacity: .55; border-radius: 0; }
+.tabline .col.rest span:nth-child(5) { color: var(--ink-soft); }
+.tabline .col.now { background: color-mix(in srgb, var(--brass) 30%, transparent); }
+.tabline .col.now span.has { background: transparent; color: var(--ink); font-weight: 600; }
+.tab-legend { font-size: .76rem; color: var(--ink-soft); display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.tab-legend code { font: 500 .76rem var(--mono); color: var(--ink); }
+.orig { font-size: .8rem; color: var(--ink-soft); font-style: italic; }
+
+.chordbars { display: flex; flex-wrap: wrap; gap: 6px; }
+.cbar { min-width: 76px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); font: 500 .9rem var(--mono); }
+.cbar.now { background: var(--brass); color: var(--brass-ink); border-color: var(--brass); }
+.cbar small { display: block; font: 500 .68rem var(--ui); color: var(--ink-soft); }
+.cbar.now small { color: var(--brass-ink); }
+
+.player { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 6px); z-index: 4; background: var(--paper-2); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; display: grid; gap: 8px; }
+.player .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.player label { font-size: .8rem; color: var(--ink-soft); display: flex; gap: 6px; align-items: center; }
+.player input[type="range"] { width: 120px; accent-color: var(--rose); }
+.player .now-label { font-size: .85rem; font-weight: 600; color: var(--rose); }
+.sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.sec-head h4 { margin: 0; font: 600 1.15rem/1.2 var(--display); color: var(--rose); }
+.milestone { display: inline-flex; gap: 6px; align-items: center; font-size: .74rem; font-weight: 600; color: var(--brass-ink); background: var(--brass); border-radius: 999px; padding: 2px 9px; }
+.statuspick { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+.statuspick button { border: 0; background: none; padding: 5px 11px; font-size: .78rem; cursor: pointer; color: var(--ink-soft); }
+.statuspick button[aria-pressed="true"] { background: var(--olive); color: var(--paper); }
+.timeline-mini { display: grid; gap: 8px; padding: 14px 16px; }
+.timeline-mini .tm { display: grid; grid-template-columns: 84px 1fr; gap: 10px; font-size: .88rem; }
+.timeline-mini .tm span:first-child { color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+
+.dpill { display: inline-flex; font-size: .72rem; font-weight: 600; padding: 2px 9px; border-radius: 999px; }
+.d-easy { background: color-mix(in srgb, var(--good) 22%, transparent); color: var(--good); }
+.d-med { background: color-mix(in srgb, var(--brass) 26%, transparent); color: color-mix(in srgb, var(--brass) 70%, var(--ink)); }
+.d-hard { background: color-mix(in srgb, #b4442e 22%, transparent); color: #b4442e; }
+:root[data-theme="dark"] .d-hard { color: #f08a72; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .d-hard { color: #f08a72; } }
+.songmap { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 6px; }
+.mapchip { font: inherit; font-size: .82rem; border: 1px solid var(--line); background: var(--paper); border-radius: 8px; padding: 5px 10px; cursor: pointer; color: var(--ink); }
+.mapchip.d-easy, .mapchip.d-med, .mapchip.d-hard { border-color: transparent; }
+.maparrow { color: var(--ink-soft); font-size: .8rem; }
+.logbox { border-top: 1px dashed var(--line); padding-top: 10px; display: grid; gap: 8px; }
+.logbox .spark svg { height: 36px; }
+.tabs button { min-width: 0; }
+.mapchip.d-easy { background: color-mix(in srgb, var(--good) 22%, var(--paper)); color: var(--ink); }
+.mapchip.d-med { background: color-mix(in srgb, var(--brass) 30%, var(--paper)); color: var(--ink); }
+.mapchip.d-hard { background: color-mix(in srgb, #b4442e 24%, var(--paper)); color: var(--ink); }
+
+.startbar { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; justify-content: space-between; margin-top: 8px; padding: 12px 14px; border-radius: 14px; background: var(--paper-2); border: 1px solid var(--line); }
+.btn.big { font-size: 1rem; padding: 11px 20px; }
+.ptimer { position: fixed; z-index: 30; top: calc(env(safe-area-inset-top, 0px) + 10px); right: 12px; display: flex; align-items: center; gap: 8px;
+  background: var(--dock); color: var(--pearl); border-radius: 999px; padding: 6px 6px 6px 12px; font: 600 .95rem var(--mono); font-variant-numeric: tabular-nums; box-shadow: 0 8px 20px -10px rgba(0,0,0,.5); }
+.ptimer .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--good); animation: ptpulse 1.6s infinite; }
+.ptimer.over .dot { background: var(--brass); }
+.ptimer button { border: 0; background: rgba(246,239,226,.16); color: var(--pearl); border-radius: 999px; padding: 4px 10px; font: 500 .78rem var(--ui); cursor: pointer; }
+@keyframes ptpulse { 50% { opacity: .35; } }
+.pwarn { position: fixed; z-index: 31; top: calc(env(safe-area-inset-top, 0px) + 54px); right: 12px; width: min(300px, calc(100% - 24px));
+  background: var(--paper); border: 2px solid var(--brass); border-radius: 14px; padding: 12px 14px; display: grid; gap: 8px; box-shadow: var(--shadow); }
+.pwarn-bar { height: 3px; background: var(--paper-3); border-radius: 999px; overflow: hidden; }
+.pwarn-bar i { display: block; height: 100%; background: var(--brass); animation: pwshrink 25s linear forwards; }
+@keyframes pwshrink { from { width: 100%; } to { width: 0; } }
+[hidden] { display: none !important; }
+
+.cleanrule { display: grid; gap: 4px; padding: 12px 14px; margin-bottom: 12px; border-radius: 12px; background: color-mix(in srgb, var(--brass) 14%, var(--paper)); border: 1px solid color-mix(in srgb, var(--brass) 45%, var(--line)); font-size: .9rem; }
+.cleanrule b { color: var(--ink); }
+
+.check.part { border-color: var(--brass); background: color-mix(in srgb, var(--brass) 30%, transparent); color: var(--ink); }
+
+.bchart { padding: 12px 16px; border-top: 1px solid var(--line); display: grid; gap: 6px; }
+.bchart:first-child { border-top: 0; }
+.bc-head { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.bc-plot { position: relative; }
+.bc-plot svg { width: 100%; height: auto; display: block; overflow: visible; }
+.bc-grid { stroke: var(--line); stroke-width: 1; }
+.bc-grid.base { stroke: var(--ink-soft); opacity: .6; }
+.bc-ytick, .bc-xtick { font: 500 10px var(--mono); fill: var(--ink-soft); }
+.bc-ytick { text-anchor: end; }
+.bc-line { fill: none; stroke: var(--olive); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.bc-pt circle { fill: var(--olive); stroke: var(--paper); stroke-width: 2; }
+.bc-pt.zero circle { fill: var(--paper); stroke: var(--olive); stroke-width: 2; }
+.bc-hit { fill: transparent; }
+.bc-x { stroke: var(--ink-soft); stroke-width: 1; stroke-dasharray: 3 3; opacity: 0; }
+.bc-pt:hover .bc-x { opacity: .7; }
+.bc-pt:hover circle { r: 6.5; }
+.bc-tip { position: absolute; transform: translate(-50%, calc(-100% - 10px)); background: var(--ink); color: var(--paper); font: 500 .76rem var(--ui); padding: 4px 9px; border-radius: 7px; white-space: nowrap; pointer-events: none; z-index: 2; }
+.bc-table table { width: 100%; border-collapse: collapse; font-size: .82rem; margin-top: 6px; }
+.bc-table th, .bc-table td { text-align: left; padding: 3px 6px; border-bottom: 1px solid var(--line); }
+.bc-table summary { cursor: pointer; }
+.ptimer.paused .dot { background: var(--ink-soft); animation: none; }
+.ptimer.paused #ptimer-t { opacity: .6; }
+
+.diary-form { padding: 12px 16px; display: grid; gap: 10px; }
+.diary-form textarea { min-height: 64px; }
+.diary { padding: 4px 16px; }
+.dy { display: grid; grid-template-columns: 54px 1fr; gap: 14px; padding: 14px 0; border-top: 1px solid var(--line); }
+.dy:first-child { border-top: 0; }
+.dy-date { display: grid; justify-items: center; align-content: start; line-height: 1.15; color: var(--ink-soft); font-size: .72rem; font-variant-numeric: tabular-nums; }
+.dy-date b { font: 600 1.6rem/1 var(--display); color: var(--rose); }
+.dy-body { display: grid; gap: 6px; min-width: 0; }
+.dy-mem { margin: 0; font-weight: 600; }
+.dy-mem span { color: var(--brass); }
+.dy-note { margin: 0; white-space: pre-line; font-size: .92rem; }
+.dy-meta { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+
+.setform { padding: 12px 16px; display: grid; gap: 10px; }
+.setform summary { cursor: pointer; }
+.setform[open] summary { margin-bottom: 4px; }
+.setform label.small { display: inline-flex; gap: 6px; align-items: center; color: var(--ink-soft); }
+.setform textarea { min-height: 64px; }
+.ns-sec { display: grid; gap: 8px; padding: 10px; border: 1px dashed var(--line); border-radius: 10px; }
+.ns-sec textarea { font-family: var(--mono); font-size: .85rem; }
+.setform code { font: 500 .78rem var(--mono); }
+</style>
+<script type="application/json" id="seed">{"theory": {"barre-chords": {"cards": [{"a": "6th", "id": "c1", "q": "Root of an E-shape barre is on which string?"}, {"a": "C major", "id": "c2", "q": "A-shape barre at fret 3 is which chord?"}], "exercises": [], "level": 6, "levelName": "Movable shapes", "order": 602, "steps": ["**E-shape barre:** root on the 6th string. F at fret 1, G at fret 3, A at fret 5.", "**A-shape barre:** root on the 5th string. B at fret 2, C at fret 3, D at fret 5.", "For minor, use the Em or Am shape barred.", "Your Bm/B shapes: index barre at fret 2, ring/little finger on frets 4.", "For a clean F, place one finger at a time, starting with the corner (index barre)."], "summary": "E-shape on the 6th string, A-shape on the 5th.", "title": "Barre and movable chords"}, "beats-bars": {"cards": [{"a": "4", "id": "c1", "q": "How many beats in a bar of 4/4?"}, {"a": "1 & 2 & 3 & 4 &", "id": "c2", "q": "How do you count beats divided in two?"}, {"a": "Play on 1 and let it ring through 2", "id": "c3", "q": "Combining beats 1 and 2 means…"}], "exercises": [], "level": 3, "levelName": "Rhythm", "order": 301, "steps": ["**4 beats = 1 bar.** Count 1 2 3 4 with the metronome and strum once per beat.", "**Combining beats:** let one note ring across two beats. Play on 1, hold through 2, then play on 3 and 4. Try ringing 2→3, then 3→4, then 4→1 of the next bar.", "**Dividing the beat:** split each beat in two: 1 & 2 & 3 & 4 &. Downstrum on the numbers, upstrum on the &s.", "Mix them: e.g. beat 1 held through 2, then 3 & 4 &. Practise this over C major and A minor."], "summary": "Four beats make a bar; combine and divide them.", "title": "Beats and bars"}, "blues-scale": {"cards": [{"a": "The ♭5", "id": "c1", "q": "Which note turns minor pentatonic into blues?"}, {"a": "A C D E♭ E G", "id": "c2", "q": "Notes of A blues?"}], "exercises": [{"hi": 8, "lo": 5, "root": "A", "scale": "blues", "title": "A blues, position 1"}], "level": 7, "levelName": "Pentatonics and blues", "order": 704, "steps": ["Add the **♭5** to minor pentatonic: A blues = A C D **E♭** E G.", "The blue note is a passing note. Slide or bend through it, don't sit on it.", "You hear it all over Mary Had a Little Lamb, Still Got the Blues and Cocaine."], "summary": "Minor pentatonic + the ♭5 blue note.", "title": "The blues scale"}, "chord-tones": {"cards": [{"a": "So the solo sounds connected to the harmony", "id": "c1", "q": "Why target chord tones at chord changes?"}], "exercises": [], "level": 8, "levelName": "Improvising", "order": 803, "steps": ["G major chord notes around frets 7–10: 5S10F G, 4S9F B, 3S7F D, 2S8F G, 1S7F B, 1S10F D.", "E minor chord notes around frets 4–8: 6S7F B, 5S7F E, 4S5F G, 3S4F B, 2S5F E, 2S8F G, 1S7F B.", "Improvise across all strings until the chord changes. When it changes, jump to the top 3 strings and hit a chord note.", "Landing on a chord note at the change is what makes a solo sound like it follows the song."], "summary": "Know where each chord's notes sit in your scale position.", "title": "Targeting chord tones"}, "chromatic": {"cards": [{"a": "Two", "id": "c1", "q": "How many frets is a whole step?"}, {"a": "E–F and B–C", "id": "c2", "q": "Which natural notes have no sharp between them?"}, {"a": "B♭", "id": "c3", "q": "Another name for A♯?"}, {"a": "C", "id": "c4", "q": "What note is one fret above B?"}], "exercises": [{"hi": 8, "how": "Index on fret 5, one finger per fret.", "lo": 5, "root": "A", "scale": "chromatic", "title": "A chromatic at the 5th fret"}], "level": 1, "levelName": "The fretboard", "order": 102, "steps": ["There are **12 notes**. Starting from E: E F F♯ G G♯ A A♯ B C C♯ D D♯, then E again an octave higher.", "One fret = a **half step**. Two frets = a **whole step**.", "**E→F** and **B→C** are only one fret apart. Every other pair of neighbouring letters has a sharp/flat between them.", "Going **up** we usually name the in-between notes with sharps (♯). Going **down**, with flats (♭). F♯ and G♭ are the same fret.", "Your teacher's G and A chromatic exercises: start at the 3rd fret (G) or 5th fret (A) on the 6th string and play every fret across the strings. Shift up one fret when you move from the 3rd string to the 2nd."], "summary": "Half steps, whole steps and the two natural half steps.", "title": "The 12 notes, sharps and flats"}, "extended-chords": {"cards": [{"a": "Major triad + minor 7th", "id": "c1", "q": "What makes a chord a dominant 7th?"}, {"a": "The 4th", "id": "c2", "q": "Esus4 replaces the 3rd with…"}, {"a": "A minor with G in the bass", "id": "c3", "q": "What does Am/G mean?"}], "exercises": [], "level": 5, "levelName": "Chords and harmony", "order": 506, "steps": ["**Dominant 7th (B7, A7, E7):** major chord + minor 7th. Bluesy, pulls to the next chord. Used in Dancing Queen, Mary Had a Little Lamb.", "**Major 7th (Fmaj7, Cmaj7):** major chord + major 7th. Soft and dreamy. Let It Be, Can't Stop, Still Got the Blues.", "**Sus chords (Esus4, Dsus2):** replace the 3rd with the 4th or 2nd. Open and unresolved. There She Goes, Gently Weeps.", "**E7♯9:** the Hendrix chord. Major 3rd and a sharp 9th clash on purpose. Mary Had a Little Lamb.", "**Slash chords (Am/G):** chord over a different bass note. Gently Weeps walks the bass down Am → Am/G → F♯m7♭5 → Fmaj7.", "**Half-diminished (F♯m7♭5):** diminished triad + minor 7th."], "summary": "B7, E7♯9, Esus4, Dsus2, Am/G, Fmaj7, F♯m7♭5.", "title": "7ths, sus and slash chords in songs"}, "improv-steps": {"cards": [{"a": "One scale note on beat 1 of every bar", "id": "c1", "q": "Step 1 of improvising?"}, {"a": "G major (the V)", "id": "c2", "q": "Over a C major track, which chord's notes for bar 4?"}], "exercises": [], "level": 8, "levelName": "Improvising", "order": 801, "steps": ["Bookmark a C major or A minor backing track. Use strings 1–4.", "1) On beat 1 of each bar, play one note from the scale.", "2) Play a note on beats 1 and 3. Try random orders.", "3) Pick notes that sound good with the chord. Avoid ones that clash.", "4) Play a different note on all 4 beats, at 0.75 speed.", "5) Add combining beats. 6) Add dividing beats. 7) Mix combining, dividing and normal beats.", "8) On the 4th bar of each phrase, play notes from the G major chord (C major key) or E minor chord (A minor key)."], "summary": "Nine steps, from one note per bar to full phrases.", "title": "Improvising over a backing track"}, "intervals": {"cards": [{"a": "7", "id": "c1", "q": "How many frets is a perfect 5th?"}, {"a": "Major 3rd", "id": "c2", "q": "4 frets from the root is a…"}, {"a": "Minor 3rd", "id": "c3", "q": "3 frets from the root is a…"}, {"a": "Minor 7th", "id": "c4", "q": "10 frets is a…"}], "exercises": [{"hi": 12, "how": "Root, major 3rd, root, minor 3rd, root, 5th, root, octave. Hum each pair.", "root": "A", "scale": "major", "seq": [{"f": 0, "s": 5}, {"f": 4, "s": 5}, {"f": 0, "s": 5}, {"f": 3, "s": 5}, {"f": 0, "s": 5}, {"f": 7, "s": 5}, {"f": 0, "s": 5}, {"f": 12, "s": 5}], "title": "Root to 3rd, 5th and octave on the A string"}], "fix": "Your Sep 2022 interval list says “root → 4 frets = major 2nd”. 4 frets is a major 3rd. A major 2nd is 2 frets.", "level": 2, "levelName": "Intervals", "order": 201, "steps": ["An **interval** is the distance between two notes. The first note is the **root**, the second is the **interval note**.", "Count frets from the root:\n1 fret = minor 2nd · 2 = major 2nd\n3 = minor 3rd · 4 = major 3rd\n5 = perfect 4th · 6 = diminished 5th\n7 = perfect 5th · 8 = minor 6th\n9 = major 6th · 10 = minor 7th\n11 = major 7th · 12 = octave", "**Hum it.** Play the root, then the interval note, and hum both. This is practising intervals by humming. It trains your ear to hear them.", "The 3rd decides major or minor (4 frets = major, 3 = minor). The 5th (7 frets) sounds stable and is the other note in a power chord."], "summary": "Count frets from the root to name any interval.", "title": "Intervals: the distance between two notes"}, "key-chords": {"cards": [{"a": "C Dm Em F G Am B°", "id": "c1", "q": "Chords in C major?"}, {"a": "G Am Bm C D Em F♯°", "id": "c2", "q": "Chords in G major?"}, {"a": "Em", "id": "c3", "q": "The vi chord in G major?"}, {"a": "I ii iii IV V vi vii°", "id": "c4", "q": "Roman numerals in a major key?"}], "exercises": [], "fix": "Your F major key page writes the 4th chord as A♯ major. In F major it's spelled B♭ (each letter once): F G A B♭ C D E.", "level": 5, "levelName": "Chords and harmony", "order": 503, "steps": ["From each scale note, take every other note (1-3-5) to build a chord.", "**C major key:** C · Dm · Em · F · G · Am · B° (I ii iii IV V vi vii°).", "**G major key:** G · Am · Bm · C · D · Em · F♯°.", "**F major key:** F · Gm · Am · B♭ · C · Dm · E°.", "**A minor key:** Am · B° · C · Dm · Em · F · G (i ii° III iv v VI VII).", "Major keys have mostly major chords in I, IV, V; minor keys mostly minor in i, iv, v."], "summary": "Stack every other note of the scale.", "title": "The 7 chords in a key"}, "key-signatures": {"cards": [{"a": "F C G D A E B", "id": "c1", "q": "Order of sharps?"}, {"a": "B E A D G C F", "id": "c2", "q": "Order of flats?"}, {"a": "A major", "id": "c3", "q": "Which major key has 3 sharps?"}, {"a": "F major", "id": "c4", "q": "Which major key has 1 flat?"}], "exercises": [], "level": 4, "levelName": "Scales and keys", "order": 405, "steps": ["**Order of sharps:** F C G D A E B. A key with 2 sharps always has F♯ and C♯.", "**Order of flats:** B E A D G C F. A key with 4 flats (A♭ major) has B♭ E♭ A♭ D♭.", "Going up a 5th adds a sharp: C (0) → G (1) → D (2) → A (3) → E (4) → B (5).", "Going up a 4th adds a flat: C (0) → F (1) → B♭ (2) → E♭ (3) → A♭ (4) → D♭ (5)."], "summary": "Why sharps and flats come in a fixed order.", "title": "Key signatures and the circle of fifths"}, "major-chord": {"cards": [{"a": "Root + major 3rd + perfect 5th", "id": "c1", "q": "Major chord formula?"}, {"a": "C E G", "id": "c2", "q": "Notes of C major chord?"}, {"a": "F A C", "id": "c3", "q": "Notes of F major chord?"}], "exercises": [], "level": 5, "levelName": "Chords and harmony", "order": 501, "steps": ["Formula: **root + major 3rd (4 frets) + perfect 5th (3 more frets)**.", "**C** = C E G · **F** = F A C · **G** = G B D.", "Find them on the neck: C on the 5th string 3rd fret, E on the 4th string 2nd fret, G on the open 3rd string. That's your open C chord.", "Open chords just repeat those three notes across more strings."], "summary": "Root + major 3rd + perfect 5th.", "title": "Building a major chord"}, "major-pent": {"cards": [{"a": "4th and 7th", "id": "c1", "q": "Which notes are removed for major pentatonic?"}, {"a": "C D E G A", "id": "c2", "q": "Notes of C major pentatonic?"}], "exercises": [{"hi": 3, "lo": 0, "root": "C", "scale": "majpent", "title": "C major pentatonic, open position"}], "level": 7, "levelName": "Pentatonics and blues", "order": 701, "steps": ["Take the major scale and drop the **4th and 7th**: C major pentatonic = **C D E G A**.", "Five notes, no half steps, so nothing clashes. That's why it's easy to improvise with.", "C major pentatonic and A minor pentatonic use the same five notes."], "summary": "The major scale without its 4th and 7th.", "title": "Major pentatonic"}, "major-scale": {"cards": [{"a": "W W H W W W H", "id": "c1", "q": "Major scale formula?"}, {"a": "C D E F G A B", "id": "c2", "q": "Notes of C major?"}, {"a": "3→4 and 7→8", "id": "c3", "q": "Which steps are half steps in a major scale?"}], "exercises": [{"hi": 3, "how": "From low E up and back. Start slow.", "lo": 0, "root": "C", "scale": "major", "title": "C major, open position"}, {"hi": 15, "how": "Watch the half steps: 7→8 and 14→15.", "root": "C", "scale": "major", "seq": [{"f": 3, "s": 5}, {"f": 5, "s": 5}, {"f": 7, "s": 5}, {"f": 8, "s": 5}, {"f": 10, "s": 5}, {"f": 12, "s": 5}, {"f": 14, "s": 5}, {"f": 15, "s": 5}], "title": "C major along one string"}], "level": 4, "levelName": "Scales and keys", "order": 401, "steps": ["A major scale picks **7 of the 12 notes**. From the root: whole, whole, half, whole, whole, whole, half (**W W H W W W H**).", "As intervals: root, major 2nd, major 3rd, perfect 4th, perfect 5th, major 6th, major 7th, octave.", "Start on C and it lands only on natural notes: **C D E F G A B C**.", "Play it along **one string** first (e.g. the 5th string from C at fret 3) so you can see the gaps. Then play it in open position."], "summary": "W W H W W W H: seven of the twelve notes.", "title": "The major scale"}, "minor-dim-chord": {"cards": [{"a": "Root + minor 3rd + perfect 5th", "id": "c1", "q": "Minor chord formula?"}, {"a": "D F A", "id": "c2", "q": "Notes of D minor?"}, {"a": "B D F", "id": "c3", "q": "Notes of B diminished?"}], "exercises": [], "level": 5, "levelName": "Chords and harmony", "order": 502, "steps": ["**Minor:** root + **minor 3rd (3 frets)** + perfect 5th (4 more). A minor = A C E · D minor = D F A · E minor = E G B.", "On an open chord, lowering the 3rd by one fret turns major into minor: A → Am, E → Em.", "**Diminished:** root + minor 3rd + minor 3rd (3 + 3 frets). B diminished = B D F.", "Majors sound bright, minors sad, diminished tense, wanting to move on."], "summary": "Lower the 3rd for minor; lower the 5th too for diminished.", "title": "Minor and diminished chords"}, "minor-pent": {"cards": [{"a": "1 ♭3 4 5 ♭7", "id": "c1", "q": "Minor pentatonic formula?"}, {"a": "A C D E G", "id": "c2", "q": "Notes of A minor pentatonic?"}, {"a": "E G A B D", "id": "c3", "q": "Notes of E minor pentatonic?"}], "exercises": [{"hi": 8, "how": "The box most solos start from.", "lo": 5, "root": "A", "scale": "minpent", "title": "A minor pentatonic, position 1"}, {"hi": 3, "lo": 0, "root": "E", "scale": "minpent", "title": "E minor pentatonic, open"}], "fix": "Your 2021 note says minor pentatonic is the same as major pentatonic minus the 4th and 7th. For minor, drop the 2nd and 6th from the natural minor scale. Your later page gets it right.", "level": 7, "levelName": "Pentatonics and blues", "order": 702, "steps": ["Formula: **root, minor 3rd, perfect 4th, perfect 5th, minor 7th**.", "A minor pentatonic = **A C D E G**. E minor pentatonic = E G A B D (all in the first 4 frets, starting on open strings).", "Movable shape (root on 6th string, fret 5): 6S5F 6S8F · 5S5F 5S7F · 4S5F 4S7F · 3S5F 3S7F · 2S5F 2S8F · 1S5F 1S8F. Use your ring finger to reach the 7th frets.", "Exercise: 3 bars of A minor pentatonic, then 1 bar of E minor chord notes, over an A minor backing track."], "summary": "Root, ♭3, 4, 5, ♭7.", "title": "Minor pentatonic"}, "minor-scale": {"cards": [{"a": "W H W W H W W", "id": "c1", "q": "Natural minor formula?"}, {"a": "A B C D E F G", "id": "c2", "q": "Notes of A minor?"}, {"a": "3rd, 6th and 7th", "id": "c3", "q": "Which three notes are lowered compared with major?"}], "exercises": [{"hi": 3, "how": "Listen for the darker sound.", "lo": 0, "root": "A", "scale": "minor", "title": "A minor, open position"}], "level": 4, "levelName": "Scales and keys", "order": 402, "steps": ["Natural minor: **W H W W H W W**.", "As intervals: root, major 2nd, **minor 3rd**, perfect 4th, perfect 5th, **minor 6th**, **minor 7th**.", "A minor uses the same notes as C major: **A B C D E F G A**. It sounds darker because it centres on A.", "Play it in open position, starting and ending on the open A string."], "summary": "W H W W H W W, starting on A.", "title": "The natural minor scale"}, "movable-scales": {"cards": [{"a": "A major", "id": "c1", "q": "Major shape from the 6th string, fret 5, is which key?"}, {"a": "G major", "id": "c2", "q": "Move the major shape to fret 3: which key?"}], "exercises": [{"hi": 9, "root": "A", "scale": "major", "seq": [{"f": 5, "s": 6}, {"f": 7, "s": 6}, {"f": 4, "s": 5}, {"f": 5, "s": 5}, {"f": 7, "s": 5}, {"f": 4, "s": 4}, {"f": 6, "s": 4}, {"f": 7, "s": 4}, {"f": 4, "s": 3}, {"f": 6, "s": 3}, {"f": 7, "s": 3}, {"f": 5, "s": 2}, {"f": 7, "s": 2}, {"f": 4, "s": 1}, {"f": 5, "s": 1}], "title": "Movable major, A at the 5th fret"}, {"hi": 9, "root": "A", "scale": "minor", "seq": [{"f": 5, "s": 6}, {"f": 7, "s": 6}, {"f": 8, "s": 6}, {"f": 5, "s": 5}, {"f": 7, "s": 5}, {"f": 8, "s": 5}, {"f": 5, "s": 4}, {"f": 7, "s": 4}, {"f": 4, "s": 3}, {"f": 5, "s": 3}, {"f": 7, "s": 3}, {"f": 5, "s": 2}, {"f": 6, "s": 2}, {"f": 8, "s": 2}, {"f": 5, "s": 1}, {"f": 7, "s": 1}, {"f": 8, "s": 1}], "title": "Movable minor, A at the 5th fret"}], "level": 6, "levelName": "Movable shapes", "order": 603, "steps": ["**Thumb behind the neck, claw-shaped fingers**, middle finger on the root.", "**Major (root on 6th string, going right):** 6S5F 6S7F · 5S4F 5S5F 5S7F · 4S4F 4S6F 4S7F · 3S4F 3S6F 3S7F · 2S5F 2S7F · 1S4F 1S5F. From fret 5 that's A major.", "**Minor (root on 6th string):** 6S5F 6S7F 6S8F · 5S5F 5S7F 5S8F · 4S5F 4S7F · 3S4F 3S5F 3S7F · 2S5F 2S6F 2S8F · 1S5F 1S7F 1S8F. From fret 5 that's A minor.", "Slide the whole shape to change key: start at fret 8 and the major shape is C major."], "summary": "6th-string root shapes you can slide anywhere.", "title": "Movable major and minor scales"}, "natural-notes": {"cards": [{"a": "A", "id": "c1", "q": "6th string, 5th fret?"}, {"a": "C", "id": "c2", "q": "5th string, 3rd fret?"}, {"a": "C", "id": "c3", "q": "6th string, 8th fret?"}, {"a": "E", "id": "c4", "q": "5th string, 7th fret?"}], "exercises": [{"hi": 12, "how": "Say each note name out loud.", "root": "C", "scale": "major", "seq": [{"f": 0, "s": 6}, {"f": 1, "s": 6}, {"f": 3, "s": 6}, {"f": 5, "s": 6}, {"f": 7, "s": 6}, {"f": 8, "s": 6}, {"f": 10, "s": 6}, {"f": 12, "s": 6}, {"f": 10, "s": 6}, {"f": 8, "s": 6}, {"f": 7, "s": 6}, {"f": 5, "s": 6}, {"f": 3, "s": 6}, {"f": 1, "s": 6}, {"f": 0, "s": 6}], "title": "Natural notes on the 6th string"}], "level": 1, "levelName": "The fretboard", "order": 103, "steps": ["On the **6th string**: open E, 1 F, 3 G, 5 A, 7 B, 8 C, 10 D, 12 E.", "On the **5th string**: open A, 2 B, 3 C, 5 D, 7 E, 8 F, 10 G, 12 A.", "The 12th fret is the same note as the open string, one octave up. The fret markers (3, 5, 7, 9, 12) help you find your place.", "Test yourself: name a random fret on either string in under two seconds."], "summary": "Learn these by heart: every barre chord and scale shape starts here.", "title": "Note names on the 6th and 5th strings"}, "pent-positions": {"cards": [{"a": "5–8", "id": "c1", "q": "Fret range of position 1?"}, {"a": "2–5", "id": "c2", "q": "Position 5 is the same as which frets an octave down?"}], "exercises": [{"hi": 8, "lo": 5, "root": "A", "scale": "minpent", "title": "Position 1"}, {"hi": 10, "lo": 7, "root": "A", "scale": "minpent", "title": "Position 2"}, {"hi": 13, "lo": 9, "root": "A", "scale": "minpent", "title": "Position 3"}, {"hi": 15, "lo": 12, "root": "A", "scale": "minpent", "title": "Position 4"}, {"hi": 17, "lo": 14, "root": "A", "scale": "minpent", "title": "Position 5"}], "level": 7, "levelName": "Pentatonics and blues", "order": 703, "steps": ["Position 1: frets 5–8. Position 2: 7–10. Position 3: 9–13. Position 4: 12–15. Position 5: 14–17 (same as 2–5, an octave down).", "Each position shares notes with the next, so you can slide between them.", "Your worksheet marks the root A in each box. Find it first, then play the box up and down.", "Practise one position per day at a tempo you can play cleanly 3 times."], "summary": "Connect the boxes across the whole neck.", "title": "A minor pentatonic: all 5 positions"}, "phrase-variation": {"cards": [{"a": "The same phrase with a small change", "id": "c1", "q": "What's a variation?"}], "exercises": [], "level": 8, "levelName": "Improvising", "order": 802, "steps": ["Create a **phrase**, then 3–4 **variations**: the same idea with a small change.", "Go back to the start of the backing track and repeat with a new phrase.", "Try the same phrase with different rhythms.", "Keep a phrase the same every time you play it. That's what makes it sound intentional.", "Over C major, land on G major chord notes in the last bar. Over A minor, land on E minor."], "summary": "Make a phrase, then change it a little.", "title": "Phrase and variation"}, "phrasing": {"cards": [{"a": "16", "id": "c1", "q": "How many beats in a 4-bar phrase?"}, {"a": "F A C", "id": "c2", "q": "Notes of an F major chord?"}, {"a": "G B D", "id": "c3", "q": "Notes of a G major chord?"}], "exercises": [], "level": 3, "levelName": "Rhythm", "order": 302, "steps": ["**4 bars = 1 phrase** (16 beats). Most songs are built from phrases.", "Exercise: one chord per bar, play its notes across the strings in that bar.\nBar 1 C (C E G) · Bar 2 Am (A C E) · Bar 3 F (F A C) · Bar 4 G (G B D)", "Second version: C (C E G) · Dm (D F A) · Em (E G B) · G (G B D).", "On beat 1 play the root, on beats 2–4 play the other chord notes."], "summary": "4 bars = 1 phrase of 16 beats.", "title": "Phrasing: four bars"}, "power-chords": {"cards": [{"a": "Root and 5th (plus octave)", "id": "c1", "q": "Notes in a power chord?"}, {"a": "Neither: it has no 3rd", "id": "c2", "q": "Is a power chord major or minor?"}], "exercises": [], "level": 6, "levelName": "Movable shapes", "order": 601, "steps": ["A power chord is just **root + 5th** (often + octave). No 3rd, so it's neither major nor minor.", "Shape: root on the 6th or 5th string, 5th two frets up on the next string (and octave on the string after).", "Livin' on a Prayer moves one shape around: from an A♯ power chord, **+2 frets = C5, +4 = D5, +6 = E5**. Move the same shape.", "Mute the other strings with the side of your fretting fingers."], "summary": "Root + 5th: one shape, anywhere on the neck.", "title": "Power chords"}, "progressions": {"cards": [{"a": "V → I", "id": "c1", "q": "Strongest resolution?"}, {"a": "Am F G C", "id": "c2", "q": "vi IV V I in C?"}, {"a": "No, it loops until you land on I", "id": "c3", "q": "Does I IV I V resolve?"}], "exercises": [], "level": 5, "levelName": "Chords and harmony", "order": 504, "steps": ["**I** is the most important chord, **V** the second. Playing **V → I** at the end sounds resolved.", "**IV → I** also resolves, but more gently.", "**vi IV V I** (in C: Am F G C) is used in many songs. It moves a lot before it lands.", "**I IV I V** doesn't resolve unless it ends on I. It loops and wants to keep going.", "In minor keys, i iv v i and VI iv v i do the same job."], "summary": "Why V → I sounds like coming home.", "title": "Chord function and progressions"}, "relative-minor": {"cards": [{"a": "A minor", "id": "c1", "q": "Relative minor of C major?"}, {"a": "E minor", "id": "c2", "q": "Relative minor of G major?"}, {"a": "F major", "id": "c3", "q": "Relative major of D minor?"}], "exercises": [], "level": 4, "levelName": "Scales and keys", "order": 404, "steps": ["The **6th note** of a major scale is the root of its **relative minor**: C major → A minor, G major → E minor.", "Same 7 notes, same 7 chords. The difference is which chord feels like home.", "If a progression ends on the I chord it sounds major; if it ends on the vi it sounds minor.", "Shortcut on the fretboard: from the major root, go down 3 frets."], "summary": "Every major key shares its notes with a minor key.", "title": "Relative minor"}, "song-keys": {"cards": [{"a": "C major", "id": "c1", "q": "Key of Let It Be?"}, {"a": "G major", "id": "c2", "q": "Key of Wonderful Tonight?"}, {"a": "E major", "id": "c3", "q": "Key of Love Yourself?"}], "exercises": [], "level": 5, "levelName": "Chords and harmony", "order": 505, "steps": ["Write out the song's chords. Find the chord that feels like home (often the first or last).", "Check that most chords fit that key's 7 chords, and look for V → I.", "Some examples: Zombie → E minor · Perfect → A♭ major · Summer of 69 → D · There She Goes → D · I Love Rock N Roll → A · Zephyr → D · Wonderful Tonight → G · Love Yourself → E · Let It Be → C · Highway to Hell → A.", "Californication: its chords (Am F C G Dm) fit both C major and its relative minor, A minor. The song keeps coming home to Am, so it feels like A minor."], "summary": "List its chords, find the home chord and the V.", "title": "Finding the key of a song"}, "spell-keys": {"cards": [{"a": "A B C♯ D E F♯ G♯", "id": "c1", "q": "Notes of A major?"}, {"a": "A♭ B♭ C D♭ E♭ F G", "id": "c2", "q": "Notes of A♭ major?"}, {"a": "Each letter is used once, and C is already used", "id": "c3", "q": "Why is A♭ major spelled with D♭, not C♯?"}], "exercises": [{"hi": 7, "lo": 4, "root": "A", "scale": "major", "title": "A major, 5th position"}], "level": 4, "levelName": "Scales and keys", "order": 403, "steps": ["Write the 7 letters from your root, each letter once: e.g. A B C D E F G.", "Walk the formula W W H W W W H and add ♯ or ♭ so each step is the right size.", "**A major:** A B C♯ D E F♯ G♯ A (3 sharps).", "**A♭ major:** A♭ B♭ C D♭ E♭ F G A♭ (4 flats). Use flats here, not sharps, so each letter appears once.", "Check with the scale builder below once you've done it on paper."], "summary": "Use W W H W W W H from any root, one letter each.", "title": "Spelling any major key"}, "strings-tuning": {"cards": [{"a": "E A D G B E", "id": "c1", "q": "What are the string names from 6th to 1st?"}, {"a": "The 3rd (G) string: its 4th fret matches the open B", "id": "c2", "q": "Which string is tuned at the 4th fret instead of the 5th?"}, {"a": "Ring finger", "id": "c3", "q": "In first position, which finger plays the 3rd fret?"}], "exercises": [{"hi": 4, "how": "One note per click. Keep each finger over its own fret.", "lo": 0, "root": "E", "scale": "chromatic", "title": "First position, frets 0–4"}], "level": 1, "levelName": "The fretboard", "order": 101, "steps": ["The six strings, from the thickest (**6th**) to the thinnest (**1st**): **E A D G B E**. The 6th string is the one closest to your face.", "**Tune by the 5th fret.** Each string, pressed at the 5th fret, sounds the same as the next open string:\n6th string 5th fret = 5th string open\n5th string 5th fret = 4th string open\n4th string 5th fret = 3rd string open\n**3rd string 4th fret** = 2nd string open (the one exception)\n2nd string 5th fret = 1st string open", "**First position** means your hand covers frets 1–4, one finger per fret: index on 1, middle on 2, ring on 3, little finger on 4.", "Play every fret from open to 4 on each string, low E to high e, then back. Say the note names as you go."], "summary": "String names, tuning by the 5th fret, one finger per fret.", "title": "Strings, tuning and first position"}}, "skills": {"barre": {"group": "Fretting hand", "level": "Core", "name": "Barre chords", "order": 11, "steps": ["For F: lay the index barre first, then add the other fingers one at a time.", "Roll the index slightly onto its bony side; that's where it presses best.", "Strum, then pick each string to find the one that buzzes."], "summary": "Place one finger at a time, starting with the corner.", "tips": []}, "bends": {"group": "Bends and vibrato", "level": "Core", "name": "Bends", "order": 20, "steps": ["Use three fingers on the string for support. Thumb over the top of the neck.", "Rotate your wrist (clockwise for the 2nd/3rd string) and push with your thumb against the neck. The fingers mostly hold.", "Bend to pitch: play the target (e.g. 2 frets up) first, then bend until you match it.", "Variations you will meet in songs: quick bend, slow bend, bend & release, pre-bend (bend before picking), and bend-and-hold while picking another string."], "summary": "Push the string to raise the pitch to a target note.", "tab": "\"bend\" 3:7b9 . 3:9 . \"bend+release\" 3:7b9r . \"pre-bend\" 3:7pb9r . \"hold+pick\" [2:8 3:7b9] .", "tips": ["The bent note matches the target exactly", "Release slowly and in control"]}, "curl": {"group": "Bends and vibrato", "level": "Core", "name": "Curls (quarter bends)", "order": 21, "steps": ["Bend just a little, about a quarter tone, then let it fall back.", "Tabs often mark these as “curl”, sometimes “curl downward”. Used everywhere from Highway to Hell to Sultans of Swing."], "summary": "A tiny bend for a bluesy, slightly sharp note.", "tab": "3:7c . 2:5c . [3:7c 2:8c]", "tips": []}, "double-stops": {"group": "Legato and slides", "level": "Core", "name": "Double stops ('together')", "order": 32, "steps": ["Tabs often write these as “together”, e.g. 3S7F and 2S8F together.", "Barre with one finger if they're on the same fret, or use two fingers.", "Add a curl to both at once for the classic rock sound."], "summary": "Two notes at once, often with a curl.", "tab": "[3:7 2:8] . [3:7c 2:8c] . [2:5 1:5]", "tips": []}, "fingerstyle": {"group": "Fingerstyle", "level": "Core", "name": "Fingerstyle basics", "order": 50, "steps": ["Thumb plays the root on the 6th, 5th or 4th string (C=5th, G=6th, D=4th).", "Index, middle, ring play strings 3, 2, 1.", "A common pattern: 6-3-2-1-2-3, and 6-3-2-1-2-3 repeated per chord (Nothing Else Matters, Hallelujah).", "Keep the thumb ahead of the fingers so they don't collide."], "summary": "Thumb on the bass, fingers 1-2-3 on the top strings.", "tab": "{C} 5:3 3:0 2:1 1:0 2:1 3:0 . {G} 6:3 3:0 2:0 1:3 2:0 3:0", "tips": []}, "fretting": {"group": "Fretting hand", "level": "Core", "name": "Clean fretting", "order": 10, "steps": ["Press just behind the fret wire, on the fingertip edge.", "Thumb behind the neck, roughly behind your middle finger.", "One finger per fret in a position: 1st finger on the 1st fret of the position, 2nd on the 2nd and so on."], "summary": "Close to the fret, on the fingertips, thumb behind the neck.", "tips": ["No buzz", "Fingers don't touch neighbouring strings"]}, "harmonics": {"group": "Colour and effects", "level": "Core", "name": "Harmonics", "order": 40, "steps": ["Lightly touch the string directly over the 12th (or 7th/5th) fret wire, pick, then lift off.", "Matilda: touch slightly over the fret line. Nothing Else Matters: 12th-fret harmonics on the open strings."], "summary": "Touch, don't press, right over the fret wire.", "tab": "3:<12> 2:<12> 1:<12> . 4:<7> 3:<7>", "tips": []}, "hybrid-picking": {"group": "Picking hand", "level": "Next", "name": "Hybrid picking", "order": 6, "steps": ["Hold the pick normally and pluck higher strings with your middle and ring fingers.", "Lets you play two non-adjacent strings at once, as in the double stops in Mary Had a Little Lamb's solo."], "summary": "Pick plus middle/ring fingers together.", "tips": []}, "legato": {"group": "Legato and slides", "level": "Core", "name": "Hammer-ons and pull-offs", "order": 30, "steps": ["Hammer-on (h): pick, then bring a finger down firmly on a higher fret.", "Pull-off (p): pick the higher note and pull the finger off sideways so it plucks the lower note.", "2-finger and 3-finger patterns; keep the lower finger planted."], "summary": "Notes from the fretting hand alone.", "tab": "1:5h7 . 1:7p5 . 1:5h7p5 . 3:5h7h8", "tips": ["Both notes equally loud"]}, "muted-strum": {"group": "Picking hand", "level": "Core", "name": "Muted strums", "order": 3, "steps": ["Keep your fretting fingers on the strings but release the pressure. Then strum: you get a muted 'chk'.", "Use it between chords: D (mute) U (mute), as in Another Brick in the Wall and Sultans of Swing.", "For a quick mute right after a chord, release the pressure the instant you strum."], "summary": "Loosen the fretting hand to get the percussive 'chk'.", "tips": ["No notes ringing through the mute"]}, "muting": {"group": "Picking hand", "level": "Core", "name": "Muting unused strings", "order": 5, "steps": ["Picking hand: playing from string 6 to 1, let your palm gradually mute each string you've passed, so only the current string rings.", "Fretting hand: going from low strings to high, your index finger naturally mutes the strings below as you move up.", "During bends (e.g. 4th string 5th fret to 6th), keep the 5th and 6th strings palm-muted so they don't ring."], "summary": "Stop strings ringing that you aren't playing.", "tips": ["Silence between notes in solos"]}, "palm-mute": {"group": "Picking hand", "level": "Core", "name": "Palm muting", "order": 4, "steps": ["Rest the side of your picking palm lightly where the strings meet the bridge.", "Too far forward and the note dies; too far back and it rings fully. Find the chug in between.", "Sweet Home Alabama is a great song for practising palm muting; Livin' on a Prayer's intro riff is palm muted too."], "summary": "Side of the picking hand on the strings by the bridge.", "tips": ["Notes still have pitch, just short and thick"]}, "pick-grip": {"group": "Picking hand", "level": "Core", "name": "Pick grip and alternate picking", "order": 1, "steps": ["Hold the pick between thumb and index finger with three fingers touching; keep your forearm in a straight line with the pick.", "Alternate: down on the beat, up on the &. Never two downs in a row on single notes.", "Exercise: pick across from the D string to the G string and back, keeping the down-up order."], "summary": "Relaxed grip, forearm in line, down-up picking.", "tips": ["Each note equally loud", "Small motions: the pick barely leaves the strings"]}, "power-chord": {"group": "Fretting hand", "level": "Core", "name": "Power chords", "order": 12, "steps": ["Root with the index, 5th with the ring finger (and octave with the little finger).", "Keep your thumb up over the neck for stability.", "Mute the strings you aren't playing with the underside of the index."], "summary": "Two or three notes, the rest muted.", "tips": []}, "practice-deep": {"group": "Practice", "level": "Core", "name": "Practice Deep", "order": 60, "steps": ["Practise slowly, in small batches.", "When you make a mistake, restart from the top of the section.", "Stop before you're tired and continue tomorrow.", "Spend 25% on new material and 75% on review (your 2022 note says 80/20)."], "summary": "Your own method.", "tips": ["Speed comes from clean repetitions, not from playing fast"]}, "rake": {"group": "Colour and effects", "level": "Next", "name": "Rakes", "order": 41, "steps": ["Mute the 2–3 strings above your target, then drag the pick across them in one motion so they click before the note.", "In Comfortably Numb it's almost like a muted strum but you can hear each note."], "summary": "Drag the pick across muted strings into the note.", "tips": []}, "slides": {"group": "Legato and slides", "level": "Core", "name": "Slides", "order": 31, "steps": ["Pick, then slide to the target keeping the same pressure.", "Slide from nowhere: start a few frets away without picking a clear note and slide into the target.", "Slide to nowhere: after the note, slide away and let it fade (“left” or “right” says which direction)."], "summary": "Glide without lifting; including from and to 'nowhere'.", "tab": "3:7/9 . 3:9\\7 . 3:/7 . 3:7\\", "tips": []}, "strumming": {"group": "Picking hand", "level": "Core", "name": "Strumming patterns", "order": 2, "steps": ["Strum from the wrist, not the elbow. Keep it loose.", "Common patterns: D U D U D U · D D · D U D – U D.", "Four strums per chord across four chords to start, then mix patterns."], "summary": "Loose wrist; DUDUDU, DD, DUD-UD.", "tips": ["Steady hand motion even when you skip a strum", "Downstrums on the beat"]}, "trill": {"group": "Legato and slides", "level": "Next", "name": "Trills", "order": 33, "steps": ["Pick once, then hammer and pull repeatedly and quickly, as fast as stays even.", "Cocaine uses one from an open string."], "summary": "Rapid hammer-on/pull-off between two notes.", "tips": []}, "vibrato": {"group": "Bends and vibrato", "level": "Core", "name": "Vibrato", "order": 22, "steps": ["1st: index finger only.", "2nd: index and middle together.", "3rd: all three fingers for support, in bend position.", "Go up, go down, and then both. Keep the speed even.", "Then: bend and add vibrato at the top. Hold the pressure while you shake it."], "summary": "Your exercise page: three finger levels, up and down.", "tab": "3:7~ . 3:7b8~ . 3:7b9~ . 6:7b8~ . 5:7b8~", "tips": ["Even speed", "Pitch returns to the note each time"]}, "whammy": {"group": "Colour and effects", "level": "Next", "name": "Whammy (tremolo) bar", "order": 42, "steps": ["Press the bar down slightly after picking, then release. Small, controlled moves.", "Bad Name's solo and Sweet Home Alabama both use it."], "summary": "Press and release for dives and wobbles.", "tips": []}}, "drills": {"a-minor-pent": {"active": true, "category": "scale", "ex": {"dir": "both", "hi": 8, "lo": 5, "root": "A", "scale": "minpent"}, "how": "Position 1, frets 5–8: A C D E G. Low E to high e and back. Same notes as C major pentatonic, different home. Say each note name.", "linkId": "minor-pent", "linkType": "theory", "minutes": 4, "name": "A minor pentatonic, up and down", "order": 3, "startBpm": 60}, "c-major-pent": {"active": true, "category": "scale", "ex": {"dir": "both", "hi": 8, "lo": 5, "root": "C", "rootToRoot": true, "scale": "majpent"}, "how": "Same box as A minor pentatonic (frets 5–8), but start and end on C: begin on the low E string, 8th fret, climb to the C on the high e, 8th fret, and come back down to where you started. Say each note: C D E G A C D E G A C.", "linkId": "major-pent", "linkType": "theory", "minutes": 4, "name": "C major pentatonic, up and down", "order": 2, "startBpm": 60}, "chromatic": {"active": true, "category": "warmup", "ex": {"last": 9, "type": "spider"}, "how": "One finger per fret. Start on the thick low E string at frets 1–4: index → middle → ring → pinky, alternate picking, then move down string by string to the thin high e. Shift up one fret (2–5) and come back the other way, starting with the pinky: on the high e play A, G♯, G, F♯ (frets 5→2), then the B string E, D♯, D, C♯, and so on up to the low E. Shift up again and repeat. Say each note as you play it.", "minutes": 6, "name": "Spider crawl, 1-2-3-4", "order": 1, "startBpm": 60}, "rot-major": {"active": true, "category": "scale", "ex": {"rotate": "major"}, "how": "The key changes every day. Root on the 6th string; play every note once through. Say each note name.", "minutes": 4, "name": "Major pentatonic of the day", "order": 4, "rotateFrom": "A", "rotateStart": "2026-10-04", "startBpm": 60}, "rot-minor": {"active": true, "category": "scale", "ex": {"rotate": "minor"}, "how": "The relative minor of today's major key: same five notes, starting from the 6th note of the major scale. Say each note name.", "minutes": 4, "name": "Its relative minor pentatonic", "order": 5, "rotateFrom": "A", "rotateStart": "2026-10-04", "startBpm": 60}}, "songs": {"example-12-bar-blues": {"title": "12-bar blues shuffle in A", "artist": "Example song", "styles": ["lead", "chords"], "key": "A", "timeSig": "4/4", "status": "learning", "transcribed": true, "order": 1, "difficulty": "easy", "chords": ["A7", "D7", "E7"], "techniques": ["shuffle", "bends"], "intro": "A starter song to show how songs work in Do Not Fret. Learn the shuffle riff first: it's the whole song, moved to three strings. The chord chart shows the 12-bar order, and the lick is a first taste of the A minor pentatonic box.", "tips": ["Keep the riff to two strings and mute the rest with your fretting hand.", "Count the 12 bars out loud the first few times.", "Play the lick only over the last two bars at first."], "sections": [{"name": "Shuffle riff on A", "tab": "\"A\" [5:0 4:2] [5:0 4:2] [5:0 4:4] [5:0 4:4] | [5:0 4:2] [5:0 4:2] [5:0 4:4] [5:0 4:4]", "difficulty": "easy", "learnOrder": 1, "uses": 6, "teach": "Rest your 1st finger on fret 2 of the D string and reach to fret 4 with your 3rd finger. Pick both strings together, slowly, then swing it."}, {"name": "Same riff on D", "tab": "\"D\" [4:0 3:2] [4:0 3:2] [4:0 3:4] [4:0 3:4] | [4:0 3:2] [4:0 3:2] [4:0 3:4] [4:0 3:4]", "difficulty": "easy", "learnOrder": 2, "uses": 3, "sameAs": "Shuffle riff on A", "teach": "The same shape, one string higher."}, {"name": "Same riff on E", "tab": "\"E\" [6:0 5:2] [6:0 5:2] [6:0 5:4] [6:0 5:4]", "difficulty": "easy", "learnOrder": 3, "uses": 2, "sameAs": "Shuffle riff on A", "teach": "The same shape, one string lower."}, {"name": "The 12 bars", "bars": "\"1\" A7 | A7 | A7 | A7 | \"5\" D7 | D7 | A7 | A7 | \"9\" E7 | D7 | A7 | E7", "difficulty": "easy", "learnOrder": 4, "uses": 1, "teach": "Play the riff that matches each chord. Bars 9–12 are the turnaround that leads back to the start."}, {"name": "Ending lick", "tab": "1:8 1:5 2:8b10r 2:5 . 3:7 3:5 4:7 4:5 . 5:7 5:5 \"end\" [5:0 4:2]", "difficulty": "medium", "learnOrder": 5, "uses": 1, "teach": "A minor pentatonic at the 5th fret, coming down. Learn it without the bend first."}], "map": [{"sec": 3, "label": "12 bars", "times": 2}, {"sec": 4, "label": "Ending"}]}, "example-ode-to-joy": {"title": "Ode to Joy (melody)", "artist": "Beethoven, public domain", "styles": ["lead"], "key": "C", "timeSig": "4/4", "status": "learning", "transcribed": true, "order": 2, "difficulty": "easy", "chords": ["C", "G"], "techniques": [], "intro": "A first melody, all in open position. Two lines that only differ at the end, so you really only learn one and a half.", "sections": [{"name": "Line 1", "tab": "4:2 4:2 4:3 3:0 | 3:0 4:3 4:2 4:0 | 5:3 5:3 4:0 4:2 | 4:2 . 4:0 4:0", "difficulty": "easy", "learnOrder": 1, "uses": 1, "teach": "Fingers 2 and 3 for frets 2 and 3. Say the notes: E E F G, G F E D, C C D E, E D D."}, {"name": "Line 2", "tab": "4:2 4:2 4:3 3:0 | 3:0 4:3 4:2 4:0 | 5:3 5:3 4:0 4:2 | 4:0 . 5:3 5:3", "difficulty": "easy", "learnOrder": 2, "uses": 1, "sameAs": "Line 1", "teach": "Identical to line 1 until the last bar, which ends on C instead of D."}], "map": [{"sec": 0, "label": "Line 1"}, {"sec": 1, "label": "Line 2"}]}}, "meta": {}}</script>
+
+
+<nav class="tabs" aria-label="Sections">
+  <button data-tab="today"><span class="g">◐</span>Today</button>
+  <button data-tab="theory"><span class="g">♮</span>Theory</button>
+  <button data-tab="skills"><span class="g">⤴</span>Skills</button>
+  <button data-tab="songs"><span class="g">♫</span>Songs</button>
+  <button data-tab="classes"><span class="g">✎</span>Classes</button>
+  <button data-tab="progress"><span class="g">★</span>Progress</button>
+</nav>
+
+<div class="wrap">
+  <header class="top">
+    <span class="brand">Do Not <b>Fret</b></span>
+    <span class="small soft" id="status">Opening your notebook…</span>
+  </header>
+  <main id="view"></main>
+</div>
+
+<div class="ptimer" id="ptimer" hidden><span class="dot"></span><span id="ptimer-t">0:00</span><button id="ptimer-pause" aria-label="Pause practice">Pause</button><button id="ptimer-stop" aria-label="Stop and save practice">Stop</button></div>
+<div class="pwarn" id="pwarn" role="alertdialog" aria-live="assertive" hidden><b>25 minutes.</b> Time to stop? <span class="small soft">If you do nothing, this closes in 25 seconds and the timer keeps going.</span><div class="btns"><button class="btn primary" id="pwarn-stop">Stop now</button><button class="btn" id="pwarn-go">Keep going</button></div><div class="pwarn-bar"><i></i></div></div>
+<div class="dock" role="region" aria-label="Metronome">
+  <button class="play" id="m-play" aria-label="Start metronome">▶</button>
+  <div class="mid">
+    <div class="tempo">
+      <button id="m-down" aria-label="Slower">−</button>
+      <span class="bpm" id="m-bpm">72<small> bpm</small></span>
+      <button id="m-up" aria-label="Faster">+</button>
+      <div class="beats" id="m-beats"><i></i><i></i><i></i><i></i></div>
+    </div>
+    <div class="ctx" id="m-ctx">Metronome</div>
+  </div>
+  <div class="side">
+    <button id="m-tap">Tap</button>
+    <button id="m-sig" aria-label="Beats per bar">4/4</button>
+  </div>
+</div>
+
+<script>
+/* ================= music engine ================= */
+const LETTERS = ["C", "D", "E", "F", "G", "A", "B"];
+const NAT = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+const MAJOR_SEMIS = [0, 2, 4, 5, 7, 9, 11];
+const SCALES = {
+  major: { label: "Major", semis: [0, 2, 4, 5, 7, 9, 11], deg: [1, 2, 3, 4, 5, 6, 7], steps: "WWHWWWH" },
+  minor: { label: "Natural minor", semis: [0, 2, 3, 5, 7, 8, 10], deg: [1, 2, 3, 4, 5, 6, 7], steps: "WHWWHWW" },
+  majpent: { label: "Major pentatonic", semis: [0, 2, 4, 7, 9], deg: [1, 2, 3, 5, 6] },
+  minpent: { label: "Minor pentatonic", semis: [0, 3, 5, 7, 10], deg: [1, 3, 4, 5, 7] },
+  blues: { label: "Blues", semis: [0, 3, 5, 6, 7, 10], deg: [1, 3, 4, 5, 5, 7] },
+  chromatic: { label: "Chromatic", semis: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], deg: [1, 1, 2, 2, 3, 4, 4, 5, 5, 6, 6, 7] },
+};
+const ROOTS = ["C", "G", "D", "A", "E", "B", "F#", "C#", "F", "Bb", "Eb", "Ab", "Db", "Gb", "Cb"];
+const SHARP_ORDER = "FCGDAEB", FLAT_ORDER = "BEADGCF";
+const OPEN = [64, 59, 55, 50, 45, 40]; // string 1..6 (high e .. low E)
+
+function parseNote(n) {
+  const letter = n[0].toUpperCase();
+  let acc = 0;
+  for (const c of n.slice(1)) acc += c === "#" ? 1 : c === "b" ? -1 : c === "x" ? 2 : 0;
+  return { letter, acc, pc: (NAT[letter] + acc + 12) % 12 };
+}
+const ACC = { "-2": "bb", "-1": "b", "0": "", "1": "#", "2": "x" };
+function pretty(n) {
+  return String(n).replace(/([A-G])bb/g, "$1𝄫").replace(/([A-G])b/g, "$1♭").replace(/([A-G])#/g, "$1♯").replace(/([A-G])x/g, "$1𝄪");
+}
+const SHARP_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+function spellScale(root, key) {
+  const sc = SCALES[key], r = parseNote(root), ri = LETTERS.indexOf(r.letter);
+  if (key === "chromatic" || key === "blues") {
+    return sc.semis.map((semi, i) => {
+      const pc = (r.pc + semi) % 12;
+      const iv = ["R", "♭2", "2", "♭3", "3", "4", "♭5", "5", "♭6", "6", "♭7", "7"][semi];
+      return { name: SHARP_NAMES[pc], pc, interval: iv, root: i === 0 };
+    });
+  }
+  return sc.semis.map((semi, i) => {
+    const deg = sc.deg[i];
+    const letter = LETTERS[(ri + deg - 1) % 7];
+    const pc = (r.pc + semi) % 12;
+    const acc = ((pc - NAT[letter] + 18) % 12) - 6;
+    const diff = semi - MAJOR_SEMIS[deg - 1];
+    const interval = deg === 1 ? "R" : (diff < 0 ? "♭".repeat(-diff) : "♯".repeat(diff)) + deg;
+    return { name: letter + (ACC[acc] ?? "?"), pc, interval, root: i === 0 };
+  });
+}
+function keySignature(notes) {
+  const sharps = notes.filter((n) => n.name.includes("#")).map((n) => n.name[0]);
+  const flats = notes.filter((n) => /^[A-G]b/.test(n.name)).map((n) => n.name[0]);
+  if (sharps.length) return `${sharps.length} sharp${sharps.length > 1 ? "s" : ""}: ` + [...SHARP_ORDER].filter((l) => sharps.includes(l)).map((l) => l + "♯").join(" ");
+  if (flats.length) return `${flats.length} flat${flats.length > 1 ? "s" : ""}: ` + [...FLAT_ORDER].filter((l) => flats.includes(l)).map((l) => l + "♭").join(" ");
+  return "No sharps or flats";
+}
+function keyChords(root, mode) {
+  const notes = spellScale(root, mode);
+  const qual = mode === "major" ? ["", "m", "m", "", "", "m", "°"] : ["m", "°", "", "m", "m", "", ""];
+  const rn = mode === "major" ? ["I", "ii", "iii", "IV", "V", "vi", "vii°"] : ["i", "ii°", "III", "iv", "v", "VI", "VII"];
+  return notes.map((n, i) => ({ rn: rn[i], name: n.name + qual[i], tones: [0, 2, 4].map((k) => notes[(i + k) % 7].name) }));
+}
+// Notes of a scale inside a fret window, low E string up to high e (one pass up, then back down).
+function scaleRun(root, scale, lo, hi, updown = true) {
+  const pcs = new Set(spellScale(root, scale).map((n) => n.pc));
+  const up = [];
+  for (let s = 6; s >= 1; s--) for (let f = lo; f <= hi; f++) if (pcs.has((OPEN[s - 1] + f) % 12)) up.push({ s, f });
+  return updown ? up.concat(up.slice(0, -1).reverse()) : up;
+}
+
+/* ================= audio ================= */
+let actx = null;
+const audio = () => (actx ||= new (window.AudioContext || window.webkitAudioContext)());
+function pluck(midi, when = 0, vol = 0.35) {
+  const ctx = audio();
+  const f = 440 * 2 ** ((midi - 69) / 12), sr = ctx.sampleRate, N = Math.max(2, Math.round(sr / f)), len = Math.floor(sr * 1.2);
+  const buf = ctx.createBuffer(1, len, sr), d = buf.getChannelData(0), ring = new Float32Array(N);
+  for (let i = 0; i < N; i++) ring[i] = Math.random() * 2 - 1;
+  for (let t = 0, i = 0; t < len; t++) { const v = ring[i]; ring[i] = 0.996 * 0.5 * (v + ring[(i + 1) % N]); d[t] = v; i = (i + 1) % N; }
+  const src = ctx.createBufferSource(), g = ctx.createGain();
+  g.gain.value = vol; src.buffer = buf; src.connect(g).connect(ctx.destination); src.start(when || ctx.currentTime);
+}
+
+/* Metronome with beat listeners: the play-along subscribes to beats. */
+const M = { bpm: 72, beats: 4, running: false, next: 0, beat: 0, timer: null, taps: [], ctx: "Metronome", listeners: new Set(), sound: true };
+function mClick(t, accent) {
+  if (!M.sound) return;
+  const ctx = audio(), o = ctx.createOscillator(), g = ctx.createGain();
+  o.frequency.value = accent ? 1560 : 1040;
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(accent ? 0.7 : 0.45, t + 0.002);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.045);
+  o.connect(g).connect(ctx.destination); o.start(t); o.stop(t + 0.06);
+}
+function mSchedule() {
+  const ctx = audio();
+  while (M.next < ctx.currentTime + 0.12) {
+    const b = M.beat % M.beats, n = M.beat, at = M.next;
+    mClick(at, b === 0);
+    setTimeout(() => { mPulse(b); M.listeners.forEach((fn) => fn(n, b, at)); }, Math.max(0, (at - ctx.currentTime) * 1000));
+    M.next += 60 / M.bpm; M.beat++;
+  }
+}
+function mPulse(b) { document.querySelectorAll("#m-beats i").forEach((el, i) => el.classList.toggle("on", i === b)); }
+function mStart() { const ctx = audio(); ctx.resume(); M.running = true; M.beat = 0; M.next = ctx.currentTime + 0.08; clearInterval(M.timer); M.timer = setInterval(mSchedule, 25); mUI(); }
+function mStop() { M.running = false; clearInterval(M.timer); mPulse(-1); mUI(); M.listeners.forEach((fn) => fn(-1)); }
+function mSet(bpm, ctxLabel) { M.bpm = Math.max(30, Math.min(240, Math.round(bpm))); if (ctxLabel) M.ctx = ctxLabel; mUI(); }
+function mUI() {
+  document.getElementById("m-bpm").innerHTML = M.bpm + "<small> bpm</small>";
+  document.getElementById("m-ctx").textContent = M.ctx;
+  const p = document.getElementById("m-play");
+  p.textContent = M.running ? "❚❚" : "▶";
+  p.setAttribute("aria-label", M.running ? "Stop metronome" : "Start metronome");
+  document.getElementById("m-sig").textContent = M.beats + "/4";
+  const bx = document.getElementById("m-beats");
+  if (bx.children.length !== M.beats) bx.innerHTML = "<i></i>".repeat(M.beats);
+  document.querySelectorAll("[data-live-bpm]").forEach((el) => (el.textContent = M.bpm));
+}
+document.getElementById("m-play").onclick = () => (M.running ? (stopPlay(), mStop()) : mStart());
+document.getElementById("m-up").onclick = () => mSet(M.bpm + 2);
+document.getElementById("m-down").onclick = () => mSet(M.bpm - 2);
+document.getElementById("m-sig").onclick = () => { M.beats = M.beats === 4 ? 3 : M.beats === 3 ? 6 : 4; mUI(); };
+document.getElementById("m-tap").onclick = () => {
+  const now = performance.now();
+  M.taps = M.taps.filter((t) => now - t < 2500); M.taps.push(now);
+  if (M.taps.length >= 3) { const g = M.taps.slice(1).map((t, i) => t - M.taps[i]); mSet(60000 / (g.reduce((a, b) => a + b) / g.length), "Tapped tempo"); }
+};
+
+/* ================= tab notation =================
+   Tokens separated by spaces:
+   3:7  string:fret      3:7b9  bend to fret 9      3:7b9r  bend & release      3:7pb9 pre-bend
+   1:10h12 hammer-on     1:12p10 pull-off           3:7/9 slide up   3:9\7 slide down
+   3:/7 slide in from nowhere   3:7\ slide out to nowhere   ~ vibrato   c curl   m muted   <12> harmonic
+   [3:7 2:8] notes together     .  pause     |  bar line     (...)x2  repeat
+   {Am} chord strum      "cue text" small label above the next column
+*/
+function parseTab(src) {
+  const toks = src.replace(/\(/g, " ( ").replace(/\)\s*x(\d+)/g, " )x$1 ").replace(/\[/g, " [ ").replace(/\]/g, " ] ").match(/"[^"]*"|\S+/g) || [];
+  let i = 0;
+  function seq(stopper) {
+    const out = [];
+    let cue = null;
+    while (i < toks.length) {
+      const t = toks[i];
+      if (stopper && t.startsWith(")")) return out;
+      i++;
+      if (t === "(") {
+        const inner = seq(true);
+        const end = toks[i++] || ")x1";
+        const n = parseInt(end.slice(2)) || 1;
+        for (let k = 0; k < n; k++) inner.forEach((c, j) => {
+          const cueText = j === 0 ? (k === 0 ? [c.cue, n > 1 ? `×${n}` : ""].filter(Boolean).join(" ") : `${k + 1}/${n}`) : (k === 0 ? c.cue : null);
+          out.push({ ...c, cue: cueText || null });
+        });
+        continue;
+      }
+      if (t.startsWith('"')) { cue = t.slice(1, -1); continue; }
+      if (t === "|") { out.push({ bar: true }); continue; }
+      if (t === ".") { out.push({ rest: true, notes: [], cue }); cue = null; continue; }
+      if (t.startsWith("{")) { out.push({ chord: t.slice(1, -1), notes: [], cue }); cue = null; continue; }
+      if (t === "[") {
+        const notes = [];
+        while (i < toks.length && toks[i] !== "]") { const n = parseNoteTok(toks[i++]); if (n) notes.push(n); }
+        i++;
+        out.push({ notes, cue }); cue = null; continue;
+      }
+      const n = parseNoteTok(t);
+      if (n) { out.push({ notes: [n], cue }); cue = null; }
+    }
+    return out;
+  }
+  return seq(false);
+}
+function parseNoteTok(t) {
+  const m = t.match(/^([1-6]):(.+)$/);
+  if (!m) return null;
+  const s = +m[1], body = m[2];
+  const first = body.match(/\d+/);
+  return { s, text: body.replace(/b(\d+)r/, "b$1r").replace(/~/g, "~"), f: first ? +first[0] : null };
+}
+function tabHTML(cols, sectionId, perLine = 28) {
+  const lines = [];
+  let cur = [], n = 0;
+  cols.forEach((c, idx) => {
+    if (c.bar) { cur.push(`<div class="col bar" aria-hidden="true"></div>`); return; }
+    const rows = [1, 2, 3, 4, 5, 6].map((s) => {
+      if (c.chord) return s === 3 ? `<span class="has">${esc(c.chord)}</span>` : "<span></span>";
+      if (c.rest) return s === 5 ? "<span>·</span>" : "<span></span>";
+      const hit = c.notes.find((x) => x.s === s);
+      return hit ? `<span class="has">${esc(hit.text)}</span>` : "<span></span>";
+    }).join("");
+    cur.push(`<div class="col${c.rest ? " rest" : ""}" data-sec="${esc(sectionId)}" data-i="${idx}"><span class="cue">${esc(c.cue || "")}</span>${rows}</div>`);
+    if (++n % perLine === 0) { lines.push(cur); cur = []; }
+  });
+  if (cur.length) lines.push(cur);
+  const lab = `<div class="lab"><span></span>${["e", "B", "G", "D", "A", "E"].map((x) => `<span>${x}</span>`).join("")}</div>`;
+  return `<div class="tabwrap">${lines.map((l) => `<div class="tabline">${lab}<div class="strings">${l.join("")}</div></div>`).join("")}</div>`;
+}
+const TAB_LEGEND = `<div class="tab-legend"><span><code>b</code> bend to</span><span><code>r</code> release</span><span><code>pb</code> pre-bend</span><span><code>h</code>/<code>p</code> hammer/pull</span><span><code>/</code> <code>\\</code> slide</span><span><code>~</code> vibrato</span><span><code>c</code> curl</span><span><code>m</code> muted</span><span><code>&lt;12&gt;</code> harmonic</span><span><code>·</code> pause</span></div>`;
+
+/* chord charts: "| C . G . | Am . F . |" → bars */
+function parseBars(src) {
+  return src.split("|").map((b) => b.trim()).filter(Boolean).map((b) => {
+    const m = b.match(/^"([^"]*)"\s*(.*)$/);
+    return m ? { cue: m[1], body: m[2] } : { body: b };
+  });
+}
+
+/* ================= state + storage ================= */
+const S = {
+  db: null, dbState: "loading", tab: "today",
+  theory: [], skills: [], drills: [], songs: [], classes: [], pages: [], logs: {}, sessions: [], achievements: [], diary: [], quiz: { cards: {} }, progress: { done: {} },
+  assets: null, upStatus: "", upErr: false, exSound: (() => { try { return localStorage.getItem("dnf-exsound") !== "0"; } catch { return true; } })(),
+  loaded: new Set(), open: {}, runs: {}, lesson: null, song: null,
+  sb: { root: "C", scale: "major", labels: "notes" },
+  q: "", fStyle: "all", fStatus: "all",
+  play: null, // {kind:'tab'|'bars'|'ex', id, sec, i, loop}
+};
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const pad = (n) => String(n).padStart(2, "0");
+const dayKey = (d = new Date()) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const fromKey = (k) => { const [y, m, d] = String(k).split("-").map(Number); return new Date(y, (m || 1) - 1, d || 1); };
+const fmtLearned = (k) => !k ? "" : String(k).length === 4 ? String(k) : fmtDate(fromKey(k), { month: "short", year: "numeric" });
+const byOrder = (a, b) => (a.order ?? 99) - (b.order ?? 99) || String(a.id).localeCompare(String(b.id));
+const fmtDate = (d, o) => d.toLocaleDateString(undefined, o);
+// The original notebook's class schedule; anyone else sets theirs on the Classes page.
+const DEFAULT_CLASSES = { classDay: 5, classTime: "14:30", firstClass: "2026-10-02" };
+const settings = () => ({ ...(S.local ? {} : DEFAULT_CLASSES), ...(S.settings || {}) });
+const hasClasses = () => settings().classDay != null && settings().classDay !== "";
+const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+function fmtTime(t) { const [h, m] = String(t || "").split(":").map(Number); if (isNaN(h)) return ""; const d = new Date(); d.setHours(h, m || 0, 0, 0); return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }); }
+
+const queues = {};
+function save(path, op) {
+  if (!S.db) { toast("Open this on claude.ai to save."); return Promise.resolve(); }
+  const run = () => op(S.db.doc(path)).catch((e) => toast(e?.code === "invalid_argument" ? "You can view this notebook but not change it." : "Couldn't save. Check your connection and try again."));
+  return (queues[path] = (queues[path] || Promise.resolve()).then(run));
+}
+let toastTimer;
+function toast(msg) {
+  document.querySelector(".toast")?.remove();
+  const t = document.createElement("div"); t.className = "toast"; t.role = "status"; t.textContent = msg;
+  document.body.append(t); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.remove(), 2600);
+}
+
+/* Browser-only storage, used when the app is opened outside Claude (e.g. GitHub Pages).
+   Same tiny API as the Claude db: collection(c).onSnapshot, doc("c/id").onSnapshot/set/update/delete. */
+const LOCAL_KEY = "dnf-db-v1";
+function localDB(seed) {
+  let data = null;
+  try { data = JSON.parse(localStorage.getItem(LOCAL_KEY) || "null"); } catch {}
+  const fresh = !data;
+  if (fresh) data = structuredClone(seed || {});
+  const subs = new Map(); // collection -> Set of callbacks
+  const persist = () => { try { localStorage.setItem(LOCAL_KEY, JSON.stringify(data)); } catch { toast("Your browser wouldn't save. Export a backup from Progress."); } };
+  const notify = (c) => (subs.get(c) || []).forEach((f) => f());
+  const sub = (c, f) => { if (!subs.has(c)) subs.set(c, new Set()); subs.get(c).add(f); setTimeout(f, 0); return () => subs.get(c).delete(f); };
+  const merge = (a, b) => { const o = { ...a }; for (const [k, v] of Object.entries(b)) o[k] = v && typeof v === "object" && !Array.isArray(v) && a?.[k] && typeof a[k] === "object" ? merge(a[k], v) : v; return o; };
+  if (fresh) persist();
+  return {
+    collection: (c) => ({ onSnapshot: (fn) => sub(c, () => fn({ docs: Object.entries(data[c] || {}).map(([id, v]) => ({ id, data: () => structuredClone(v) })) })) }),
+    doc: (path) => { const [c, id] = path.split("/"); return {
+      onSnapshot: (fn) => sub(c, () => { const v = data[c]?.[id]; fn({ exists: v != null, data: () => structuredClone(v) }); }),
+      set: async (v) => { (data[c] ||= {})[id] = structuredClone(v); persist(); notify(c); },
+      update: async (v) => { (data[c] ||= {})[id] = merge(data[c][id] || {}, structuredClone(v)); persist(); notify(c); },
+      delete: async () => { if (data[c]) delete data[c][id]; persist(); notify(c); },
+    }; },
+    dump: () => structuredClone(data),
+    replace: (d) => { data = structuredClone(d); persist(); [...subs.keys()].forEach(notify); },
+  };
+}
+const SEED = (() => { try { return JSON.parse(document.getElementById("seed")?.textContent || "null"); } catch { return null; } })();
+const COLLS = ["theory", "skills", "drills", "songs", "classes", "pages", "logs", "sessions", "achievements", "diary"];
+async function connect() {
+  let db = null;
+  try { db = await window.claude?.use?.("db"); } catch {}
+  if (!db) { db = localDB(SEED); S.local = true; S.localDB = db; }
+  S.db = db; S.dbState = "on";
+  if (!S.local) window.claude.use("assets").then((a) => { S.assets = a; render(); }).catch(() => {});
+  for (const c of COLLS) {
+    db.collection(c).onSnapshot((snap) => {
+      if (c === "logs") S.logs = Object.fromEntries(snap.docs.map((d) => [d.id, d.data()]));
+      else S[c] = snap.docs.map((d) => ({ id: d.id, ...d.data() })).sort(byOrder);
+      S.loaded.add(c); status(); render();
+    }, () => { S.dbState = "error"; status(); });
+  }
+  db.doc("quiz/progress").onSnapshot((d) => { S.quiz = d.exists ? d.data() : { cards: {} }; render(); });
+  db.doc("progress/theory").onSnapshot((d) => { S.progress = d.exists ? d.data() : { done: {} }; render(); });
+  db.doc("meta/pages").onSnapshot((d) => { S.pagesMeta = d.exists ? d.data() : {}; render(); });
+  db.doc("meta/settings").onSnapshot((d) => { S.settings = d.exists ? d.data() : {}; if (S.local && !S.settings.startedOn) save("meta/settings", (r) => r.update({ startedOn: dayKey() })); render(); });
+}
+function status() {
+  const el = document.getElementById("status");
+  el.textContent = S.dbState === "on" ? (S.loaded.size >= COLLS.length ? "" : "Opening your notebook…")
+    : S.dbState === "loading" ? "Opening your notebook…"
+    : S.dbState === "error" ? "Notebook offline. Changes won't save." : "Preview: open on claude.ai to load your notebook";
+}
+const loading = (c) => S.dbState === "on" && !S.loaded.has(c);
+
+/* ================= derived ================= */
+const todayLog = () => S.logs[dayKey()] || { date: dayKey(), items: {}, note: "" };
+const series = (id) => Object.keys(S.logs).sort().map((k) => ({ k, bpm: S.logs[k].items?.[id]?.bpm })).filter((p) => p.bpm);
+const practicedOn = (k) => { const l = S.logs[k]; return !!l && (Object.keys(l.items || {}).length > 0 || !!l.note || (l.minutes || 0) > 0); };
+function streak() { let d = new Date(), n = 0; if (!practicedOn(dayKey(d))) d.setDate(d.getDate() - 1); while (practicedOn(dayKey(d))) { n++; d.setDate(d.getDate() - 1); } return n; }
+function weekNo(d = new Date()) { const st = settings(), s = fromKey(st.firstClass || st.startedOn || dayKey()); s.setHours(0, 0, 0, 0); return Math.max(1, Math.floor((d - s) / 864e5 / 7) + 1); }
+function nextClass() { if (!hasClasses()) return null; const st = settings(), [hh, mm] = String(st.classTime || "00:00").split(":").map(Number), cd = +st.classDay; const d = new Date(), n = new Date(d); n.setHours(hh || 0, mm || 0, 0, 0); n.setDate(d.getDate() + ((cd - d.getDay() + 7) % 7)); if (n.getTime() + 2 * 36e5 < d.getTime()) n.setDate(n.getDate() + 7); return n; }
+const latestClass = () => [...S.classes].sort((a, b) => (b.date || "").localeCompare(a.date || ""))[0];
+const allCards = () => S.theory.flatMap((t) => (t.cards || []).map((c, i) => ({ ...c, key: `${t.id}:${c.id ?? i}`, topic: t.title })));
+const dueCards = () => { const t = dayKey(); return allCards().filter((c) => { const p = S.quiz.cards?.[c.key]; return !p || (p.due || "") <= t; }); };
+
+/* ================= components ================= */
+function staff(title, eyebrow, right = "") {
+  return `<div class="staff"><div class="row"><div>${eyebrow ? `<div class="eyebrow">${eyebrow}</div>` : ""}<h2>${title}</h2></div>${right}</div></div>`;
+}
+function fretboard(root, scaleKey, labels = "notes", opts = {}) {
+  const start = opts.start ?? 0, frets = opts.frets ?? 15, seq = opts.seq || null, nowIdx = opts.now ?? -1, id = opts.id || "";
+  const end = start + frets;
+  const notes = spellScale(root, scaleKey), byPc = new Map(notes.map((n) => [n.pc, n]));
+  const inSeq = seq ? new Map(seq.map((p, i) => [`${p.s}:${p.f}`, i])) : null;
+  const cur = seq && nowIdx >= 0 ? seq[nowIdx] : null;
+  const W = 54, nutX = 46, top = 20, gap = 24, names = ["e", "B", "G", "D", "A", "E"];
+  const fx = (f) => nutX + (f - start - 0.5) * W; // centre of fret f
+  const width = nutX + W * frets + 14, bottom = top + gap * 5, height = bottom + 30;
+  let s = `<svg class="fb" viewBox="0 0 ${width} ${height}" role="img" aria-label="${esc(pretty(root))} ${esc(SCALES[scaleKey].label)} on the fretboard"${frets <= 8 ? ' style="min-width:0"' : ""}>`;
+  s += `<rect class="board" x="${nutX}" y="${top - 10}" width="${W * frets + 6}" height="${gap * 5 + 20}" rx="3"/>`;
+  [3, 5, 7, 9, 15, 17, 19, 21].filter((f) => f > start && f <= end).forEach((f) => (s += `<circle class="inlay" cx="${fx(f)}" cy="${top + gap * 2.5}" r="5"/>`));
+  if (12 > start && 12 <= end) s += `<circle class="inlay" cx="${fx(12)}" cy="${top + gap * 1.5}" r="5"/><circle class="inlay" cx="${fx(12)}" cy="${top + gap * 3.5}" r="5"/>`;
+  for (let k = 1; k <= frets; k++) s += `<line class="fretl" x1="${nutX + k * W}" x2="${nutX + k * W}" y1="${top - 10}" y2="${bottom + 10}"/>`;
+  s += start === 0 ? `<rect class="nut" x="${nutX - 4}" y="${top - 10}" width="6" height="${gap * 5 + 20}"/>` : `<line class="fretl" x1="${nutX}" x2="${nutX}" y1="${top - 10}" y2="${bottom + 10}"/>`;
+  OPEN.forEach((m, i) => (s += `<line class="str" x1="${nutX}" x2="${nutX + W * frets + 6}" y1="${top + i * gap}" y2="${top + i * gap}" stroke-width="${0.8 + i * 0.35}"/>`));
+  if (start === 0) s += `<text class="num" x="${nutX - 20}" y="${bottom + 26}">open</text>`;
+  for (let f = start + 1; f <= end; f++) if (frets <= 12 || [1, 3, 5, 7, 9, 12, 15, 17].includes(f)) s += `<text class="num" x="${fx(f)}" y="${bottom + 26}">${f}</text>`;
+  OPEN.forEach((m, i) => {
+    const y = top + i * gap, str = i + 1;
+    s += `<text class="sname" x="10" y="${y + 4}">${names[i]}</text>`;
+    for (let f = start === 0 ? 0 : start + 1; f <= end; f++) {
+      const n = byPc.get((m + f) % 12); if (!n) continue;
+      const k = `${str}:${f}`;
+      const dim = inSeq && !inSeq.has(k), now = cur && cur.s === str && cur.f === f;
+      const x = f === 0 ? nutX - 20 : fx(f);
+      s += `<g class="note${n.root ? " root" : ""}${dim ? " dim" : ""}${now ? " now" : ""}" data-midi="${m + f}" data-fb="${esc(id)}" data-k="${k}"><circle cx="${x}" cy="${y}" r="10.5"/><text x="${x}" y="${y}">${esc(labels === "notes" ? pretty(n.name) : n.interval)}</text></g>`;
+    }
+  });
+  return `<div class="fb-scroll">${s}</svg></div>`;
+}
+/* BPM over time for one drill: every logged day is a point; "no clean run" days (and no data yet) sit at 0. */
+const BPM_CHARTS = [["chromatic", "Spider crawl"], ["c-major-pent", "C major pentatonic"], ["a-minor-pent", "A minor pentatonic"]];
+const seriesWithZero = (id) => Object.keys(S.logs).sort().filter((k) => S.logs[k].items?.[id]).map((k) => { const it = S.logs[k].items[id]; return { k, bpm: it.bpm || 0, noClean: !it.bpm, tried: it.tried }; });
+function bpmChart(id, name) {
+  let pts = seriesWithZero(id);
+  const empty = !pts.length;
+  if (empty) pts = [{ k: dayKey(), bpm: 0, noClean: true, none: true }];
+  const W = 360, H = 170, L = 30, R = 10, T = 10, B = 26, iw = W - L - R, ih = H - T - B;
+  const top = Math.max(60, Math.ceil((Math.max(...pts.map((p) => p.bpm)) + 5) / 20) * 20), step = top <= 100 ? 20 : top <= 200 ? 40 : 60;
+  const t0 = fromKey(pts[0].k).getTime(), t1 = fromKey(pts.at(-1).k).getTime(), span = t1 - t0;
+  const x = (p) => L + (span ? ((fromKey(p.k).getTime() - t0) / span) * iw : iw / 2), y = (v) => T + ih - (v / top) * ih;
+  const short = (k) => fmtDate(fromKey(k), { day: "numeric", month: "short" });
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(name)}: clean BPM by day">`;
+  for (let v = 0; v <= top; v += step) s += `<line class="bc-grid${v ? "" : " base"}" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text class="bc-ytick" x="${L - 8}" y="${y(v) + 4}">${v}</text>`;
+  const ticks = pts.length <= 6 ? pts : [pts[0], pts[Math.floor(pts.length / 2)], pts.at(-1)];
+  ticks.forEach((p, i) => s += `<text class="bc-xtick" x="${x(p)}" y="${H - 8}" text-anchor="${pts.length > 1 && p === pts[0] ? "start" : pts.length > 1 && p === pts.at(-1) ? "end" : "middle"}">${short(p.k)}</text>`);
+  if (pts.length > 1) { const d = pts.map((p, i) => `${i ? "L" : "M"}${x(p).toFixed(1)},${y(p.bpm).toFixed(1)}`).join(""); s += `<path class="bc-line" d="${d}"/>`; }
+  pts.forEach((p, i) => {
+    const tip = p.none ? `${short(p.k)}: nothing logged yet (0)` : p.noClean ? `${short(p.k)}: no clean run (0)${p.tried ? `, tried at ♩=${p.tried}` : ""}` : `${short(p.k)}: ♩=${p.bpm} clean`;
+    const hw = pts.length > 1 ? Math.max(8, iw / (pts.length - 1) / 2) : 30;
+    s += `<g class="bc-pt${p.noClean ? " zero" : ""}" data-tip="${esc(tip)}"><rect class="bc-hit" x="${x(p) - hw}" y="${T}" width="${hw * 2}" height="${ih}"/><line class="bc-x" x1="${x(p)}" x2="${x(p)}" y1="${T}" y2="${T + ih}"/><circle cx="${x(p)}" cy="${y(p.bpm)}" r="5"/></g>`;
+  });
+  s += `</svg>`;
+  const clean = pts.filter((p) => !p.noClean), best = clean.length ? Math.max(...clean.map((p) => p.bpm)) : 0, last = pts.at(-1);
+  const table = empty ? "" : `<details class="bc-table"><summary class="small soft">Show as table</summary><table><thead><tr><th>Day</th><th>Clean BPM</th></tr></thead><tbody>${pts.map((p) => `<tr><td>${short(p.k)}</td><td class="mono">${p.noClean ? `0 <span class="soft">(no clean run)</span>` : p.bpm}</td></tr>`).join("")}</tbody></table></details>`;
+  return `<div class="bchart"><div class="bc-head"><span style="font-weight:600">${esc(name)}</span><span class="mono small">${empty ? `<span class="soft">no runs yet</span>` : `♩${last.bpm} · best ${best}`}</span></div><div class="bc-plot">${s}<div class="bc-tip" hidden></div></div>${table}</div>`;
+}
+function sparkline(points) {
+  const w = 300, h = 44, vals = points.map((p) => p.bpm), lo = Math.min(...vals) - 4, hi = Math.max(...vals) + 4;
+  const x = (i) => 4 + (i * (w - 8)) / Math.max(1, points.length - 1), y = (v) => h - 4 - ((v - lo) * (h - 8)) / (hi - lo || 1);
+  const line = points.map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(p.bpm).toFixed(1)}`).join(""), last = points.length - 1;
+  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><line class="s-grid" x1="0" x2="${w}" y1="${h - 1}" y2="${h - 1}"/><path class="s-area" d="${line}L${x(last)},${h}L${x(0)},${h}Z"/><path class="s-line" d="${line}" vector-effect="non-scaling-stroke"/><circle class="s-dot" cx="${x(last)}" cy="${y(points[last].bpm)}" r="3.5"/></svg>`;
+}
+
+/* ================= play-along engine =================
+   Steps through a list (tab columns, chord bars, or scale notes) on the metronome's beats. */
+const P = { list: null, i: -1, count: 0, beatsPer: 1, countIn: 4, loop: true, label: "" };
+function startPlay(kind, key, list, opts = {}) {
+  stopPlay();
+  S.play = { kind, key };
+  P.list = list; P.i = -1; P.count = 0; P.beatsPer = opts.beatsPer || 1; P.countIn = opts.countIn ?? M.beats; P.loop = opts.loop ?? true; P.label = opts.label || "";
+  if (opts.bpm) mSet(opts.bpm, opts.label);
+  else M.ctx = opts.label || M.ctx;
+  M.listeners.add(onBeat);
+  if (!M.running) mStart(); else { M.beat = 0; }
+  markNow();
+}
+function stopPlay() { M.listeners.delete(onBeat); P.list = null; P.i = -1; if (S.play) { S.play = null; markNow(); } }
+function onBeat(n) {
+  if (n < 0) { stopPlay(); return; }
+  if (!P.list) return;
+  if (P.count < P.countIn) { P.count++; flashCount(P.countIn - P.count + 1); return; }
+  const k = P.count - P.countIn; P.count++;
+  if (k % P.beatsPer !== 0) return;
+  let i = P.i + 1;
+  if (i >= P.list.length) { if (!P.loop) { stopPlay(); mStop(); return; } i = 0; }
+  P.i = i;
+  const item = P.list[i];
+  if (item && item.midi && S.play?.kind === "ex" && S.exSound) item.midi.forEach((m) => pluck(m, 0, 0.25));
+  markNow();
+}
+function followNote(n) {
+  const box = n.closest(".fb-scroll"); if (!box) return;
+  const r = n.getBoundingClientRect(), br = box.getBoundingClientRect();
+  const target = box.scrollLeft + (r.left + r.width / 2) - (br.left + br.width / 2);
+  if (Math.abs(r.left + r.width / 2 - (br.left + br.width / 2)) > br.width * 0.15) box.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+  if (br.top < 60 || br.bottom > window.innerHeight - 150) box.scrollIntoView({ block: "center", behavior: "smooth" });
+}
+function flashCount(n) { const el = document.querySelector("[data-countin]"); if (el) el.textContent = n > 0 ? `Count-in: ${n}` : ""; }
+function markNow() {
+  document.querySelectorAll(".col.now, .cbar.now, .note.now").forEach((el) => el.classList.remove("now"));
+  const el = document.querySelector("[data-countin]"); if (el) el.textContent = S.play && P.i < 0 ? "Count-in…" : "";
+  if (!S.play || P.i < 0 || !P.list) return;
+  const it = P.list[P.i];
+  if (S.play.kind === "tab") {
+    const c = document.querySelector(`.col[data-sec="${CSS.escape(S.play.key)}"][data-i="${it.idx}"]`);
+    if (c) { c.classList.add("now"); c.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" }); }
+  } else if (S.play.kind === "bars") {
+    document.querySelector(`.cbar[data-sec="${CSS.escape(S.play.key)}"][data-i="${it.idx}"]`)?.classList.add("now");
+  } else if (S.play.kind === "ex") {
+    const n = document.querySelector(`.note[data-fb="${CSS.escape(S.play.key)}"][data-k="${it.s}:${it.f}"]`);
+    if (n) { n.classList.add("now"); followNote(n); }
+  }
+  const lab = document.querySelector("[data-nowlabel]"); if (lab) lab.textContent = it.label || "";
+}
+
+/* ================= views ================= */
+function viewToday() {
+  const now = new Date(), log = todayLog(), drills = S.drills.filter((d) => d.active !== false);
+  const total = drills.reduce((a, d) => a + (d.minutes || 0), 0), doneMin = Math.max(log.minutes || 0, drills.filter((d) => log.items?.[d.id]).reduce((a, d) => a + (d.minutes || 0), 0));
+  const monday = new Date(now); monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+  const week = [...Array(7)].map((_, i) => { const d = new Date(monday); d.setDate(monday.getDate() + i); return d; });
+  const cls = latestClass();
+  let h = `<div class="startbar">${PT.running ? `<div><b>${PT.paused ? "Paused" : "Practising"}</b><span class="soft small"> · started ${new Date(PT.first || PT.start).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span></div><div class="btns"><button class="btn${PT.paused ? " primary" : ""}" data-ptpause>${PT.paused ? "▶ Resume" : "Pause"}</button><button class="btn" data-ptstop>Stop and save</button></div>`
+    : `<button class="btn primary big" data-ptstart>▶ Start today's practice</button><span class="small soft">${log.minutes ? `${log.minutes} min logged today` : "A 25-minute timer; you'll get a nudge at 25."}</span>`}</div>`;
+  h += `<section class="hero"><div class="eyebrow">Week ${weekNo()} · ${fmtDate(now, { weekday: "long" })}</div><h1>${fmtDate(now, { day: "numeric", month: "long" })}</h1>
+    <div class="stats"><div class="stat"><b>${streak()}</b><span>day streak</span></div>
+    <div class="stat"><b>${doneMin}<span class="soft small"> / ${total} min</span></b><span>practised today</span></div>
+    <div class="stat"><div class="week" aria-label="This week">${week.map((d) => `<i class="${practicedOn(dayKey(d)) ? "on" : ""} ${dayKey(d) === dayKey() ? "today" : ""}" title="${fmtDate(d, { weekday: "long" })}${practicedOn(dayKey(d)) ? `: practised${S.logs[dayKey(d)]?.minutes ? ` ${S.logs[dayKey(d)].minutes} min` : ""}` : ""}">${practicedOn(dayKey(d)) ? "✓" : fmtDate(d, { weekday: "narrow" })}</i>`).join("")}</div><span>this week</span></div></div></section>`;
+  h += staff("Today's routine", `${total} minutes · 75% review, 25% new`);
+  h += `<div class="cleanrule"><b>What counts as a clean run</b><span>Alternate picking (down-up) the whole way · every note named out loud · not a single mistake. One clean run is enough: save the tempo as soon as you get one.</span></div>`;
+  if (loading("drills")) h += `<div class="sheet empty">Loading your routine…</div>`;
+  else if (!drills.length) h += `<div class="sheet empty"><b>No routine yet.</b>It'll be built from your songs, scales and skills.</div>`;
+  else {
+    h += `<div class="sheet list">${drills.map((d) => {
+      const done = log.items?.[d.id], pts = series(d.id), last = pts.at(-1), best = pts.length ? Math.max(...pts.map((p) => p.bpm)) : null;
+      const open = S.open[d.id], runs = S.runs[d.id] || 0, start = last ? last.bpm : d.startBpm || 60;
+      const link = d.linkType && d.linkId ? `<button class="link" data-go="${d.linkType}" data-id="${esc(d.linkId)}">Open the ${d.linkType === "theory" ? "lesson" : d.linkType} →</button>` : "";
+      return `<div class="item"><button class="item-head" data-toggle="${esc(d.id)}" aria-expanded="${!!open}">
+        <span class="check ${done ? (done.noClean ? "part" : "on") : ""}" aria-label="${done ? "Logged today" : "Not logged yet"}">✓</span>
+        <span class="t">${esc(drillName(d))}<br><span class="meta">${done?.noClean ? `Practised today, no clean run${done.note ? ` · “${esc(done.note)}”` : ""}` : done ? `Clean at ♩=${done.bpm} today` : last ? `Last clean ♩=${last.bpm}${best > last.bpm ? ` · best ${best}` : ""}` : `Start around ♩=${d.startBpm || 60}`}</span></span>
+        <span class="pill cat-${esc(d.category || "scale")}">${d.minutes || 0} min</span></button>
+        ${open ? `<div class="item-body">${d.how ? `<p class="howto">${esc(d.how)}</p>` : ""}
+          ${(() => { const ex = drillEx(d); return ex ? exerciseBlock("drill-" + d.id, ex, `data-playdrill="${esc(d.id)}"`) : ""; })()}
+          <div class="btns"><button class="btn" data-settempo="${esc(d.id)}" data-bpm="${start}">Metronome to ♩=${start}</button></div>
+          <div class="btns"><button class="btn primary" data-logbpm="${esc(d.id)}">Got a clean run: save ♩=<span data-live-bpm>${M.bpm}</span></button>
+            <button class="btn" data-noclean="${esc(d.id)}">No clean run today</button>
+          <span class="small soft">Save only after a run with alternate picking, every note named and no mistakes. It saves the metronome's current tempo.</span></div>${link}</div>` : ""}</div>`;
+    }).join("")}</div>`;
+  }
+  h += staff("How did it go?", "Practice note");
+  h += `<textarea id="day-note" placeholder="What felt good, what was sloppy, anything to ask in class…">${esc(log.note || "")}</textarea>`;
+  const todayMem = S.diary.find((x) => x.id === "day-" + dayKey())?.memorable || "";
+  h += `<label class="eyebrow" for="day-mem" style="display:block;margin-top:12px">Something memorable today?</label><input type="text" id="day-mem" value="${esc(todayMem)}" placeholder="e.g. first clean run of the spider crawl at ♩=80" style="width:100%">
+    <p class="small soft" style="margin-top:6px">Both go into your <button class="link small" data-go="progress" data-id="diary">diary</button>.</p>`;
+  if (cls?.homework?.length) {
+    h += staff("Homework", `From class on ${fmtDate(fromKey(cls.date), { weekday: "short", day: "numeric", month: "short" })}`);
+    h += `<div class="sheet cls"><div class="hw">${cls.homework.map((t, i) => `<label><input type="checkbox" data-hw="${esc(cls.id)}" data-i="${i}" ${t.done ? "checked" : ""}><span class="${t.done ? "done" : ""}">${esc(t.text)}</span></label>`).join("")}</div></div>`;
+  }
+  h += `<div class="btns" style="margin-top:22px"><button class="btn" data-tab="progress">See your progress and achievements →</button></div>`;
+  return h;
+}
+
+
+/* ===== daily drills: spider crawl + rotating key of the day ===== */
+const ROT_KEYS = ["A", "E", "D", "G", "C", "F", "Bb", "Eb", "Ab", "Db", "B", "F#"];
+function keyOfDay(d, date = new Date()) {
+  const start = fromKey(d.rotateStart || dayKey()), today = new Date(date); today.setHours(0, 0, 0, 0);
+  const n = Math.max(0, Math.round((today - start) / 864e5));
+  const major = ROT_KEYS[((ROT_KEYS.indexOf(d.rotateFrom || "A")) + n) % ROT_KEYS.length];
+  const minor = spellScale(major, "major")[5].name;
+  return { major, minor };
+}
+function spiderSeq(lastPos = 9) {
+  const out = [];
+  for (let p = 1; p <= lastPos; p++) {
+    const strings = p % 2 ? [6, 5, 4, 3, 2, 1] : [1, 2, 3, 4, 5, 6];
+    // odd positions: low E → high e, frets low → high; even positions: high e → low E, frets high → low (pinky to index)
+    strings.forEach((s) => { const fr = [p, p + 1, p + 2, p + 3]; (p % 2 ? fr : fr.reverse()).forEach((f) => out.push({ s, f })); });
+  }
+  return out;
+}
+function rootFret6(note) { const pc = parseNote(note).pc; return (pc - 4 + 12) % 12; }
+function drillEx(d) {
+  const ex = d.ex; if (!ex) return null;
+  if (ex.type === "spider") return { title: "Spider crawl, positions 1–" + (ex.last || 9), root: "C", scale: "chromatic", seq: spiderSeq(ex.last || 9) };
+  let root = ex.root, scale = ex.scale, lo = ex.lo, hi = ex.hi;
+  if (ex.rotate) {
+    const k = keyOfDay(d);
+    if (ex.rotate === "major") { root = k.major; scale = "majpent"; let r = rootFret6(root); if (r < 1) r += 12; lo = r - 1; hi = r + 2; }
+    else { root = k.minor; scale = "minpent"; const m = rootFret6(root); lo = m; hi = m + 3; }
+  }
+  let seq = scaleRun(root, scale, lo, hi, false);
+  if (ex.rootToRoot) { const rpc = parseNote(root).pc, isRoot = (p) => (OPEN[p.s - 1] + p.f) % 12 === rpc;
+    const i0 = seq.findIndex(isRoot), i1 = seq.length - 1 - [...seq].reverse().findIndex(isRoot); if (i0 >= 0 && i1 > i0) seq = seq.slice(i0, i1 + 1); }
+  if (ex.dir === "down") seq = seq.slice().reverse();
+  if (ex.dir === "both") seq = seq.concat(seq.slice().reverse()); // top note repeats at the turn
+  return { title: `${pretty(root)} ${SCALES[scale].label.toLowerCase()}`, root, scale, seq };
+}
+const drillName = (d) => { const e = d.ex?.rotate ? drillEx(d) : null; return e ? `${d.name}: ${e.title}` : d.name; };
+function exerciseBlock(id, ex, playAttrs, how) {
+  const seq = ex.seq, playing = S.play?.kind === "ex" && S.play.key === id;
+  const fs = seq.map((p) => p.f), lo = Math.min(...fs), hi = Math.max(...fs), st = lo > 1 ? lo - 1 : 0;
+  return `<div class="callout" style="display:grid;gap:10px">
+    <div class="sec-head"><b>${esc(ex.title || "Play along")}</b><span class="small soft">${seq.length} notes · one per click</span></div>
+    ${how ? `<p class="small">${esc(how)}</p>` : ""}
+    ${fretboard(ex.root, ex.scale, "notes", { start: st, frets: Math.max(4, hi - st + 1), seq, now: playing ? P.i : -1, id })}
+    <div class="btns">${playing ? `<button class="btn" data-stopplay>Stop</button>` : `<button class="btn primary" ${playAttrs}>Play along at ♩=<span data-live-bpm>${M.bpm}</span></button>`}
+      <label class="small soft"><input type="checkbox" id="ex-sound" ${S.exSound ? "checked" : ""}> Play each note</label><span class="small soft" data-countin></span></div>
+    <p class="small soft" data-nowlabel></p></div>`;
+}
+
+function lessonExercise(t, ex, idx) {
+  const id = `${t.id}-ex${idx}`;
+  const seq = ex.seq || scaleRun(ex.root, ex.scale, ex.lo ?? 0, ex.hi ?? 4, ex.updown !== false);
+  const playing = S.play?.kind === "ex" && S.play.key === id;
+  return `<div class="callout" style="display:grid;gap:10px">
+    <div class="sec-head"><b>${esc(ex.title || "Play along")}</b><span class="small soft">${seq.length} notes · one per click</span></div>
+    ${ex.how ? `<p class="small">${esc(ex.how)}</p>` : ""}
+    ${(() => { const fs = seq.map((p) => p.f), lo = Math.min(...fs), hi = Math.max(...fs), st = lo > 1 ? lo - 1 : 0;
+      return fretboard(ex.root, ex.scale, S.sb.labels, { start: st, frets: Math.max(4, hi - st + 1), seq, now: playing ? P.i : -1, id }); })()}
+    <div class="btns">${playing ? `<button class="btn" data-stopplay>Stop</button>` : `<button class="btn primary" data-playex="${esc(t.id)}" data-ex="${idx}">Play along at ♩=<span data-live-bpm>${M.bpm}</span></button>`}
+      <label class="small soft"><input type="checkbox" id="ex-sound" ${S.exSound ? "checked" : ""}> Play each note</label><span class="small soft" data-countin></span></div></div>`;
+}
+
+function viewTheory() {
+  const due = dueCards(), total = allCards().length, sb = S.sb, notes = spellScale(sb.root, sb.scale), sc = SCALES[sb.scale];
+  let h = `<section class="hero"><div class="eyebrow">Theory</div><h1>From notes to improvising</h1><p class="soft">${S.local ? "Step by step, from the names of the notes to improvising. Every lesson has a fretboard and a play-along." : `Your notebook, in order, step by step. Lessons marked <span class="tag-claude" style="color:var(--hero-ink);border-color:var(--hero-soft)">added by Claude</span> fill gaps between your notes.`}</p></section>`;
+  h += `<div class="sheet review" style="margin-top:18px"><div><div class="eyebrow">Flashcards</div><p>${total ? `${due.length} of ${total} cards due today` : "Cards appear as lessons are added."}</p></div>
+    <div style="text-align:right"><b>${due.length}</b><br><button class="btn primary" data-quiz ${due.length ? "" : "disabled"}>Start</button></div></div>`;
+
+  const levels = [...new Set(S.theory.map((t) => t.level || 1))].sort((a, b) => a - b);
+  if (loading("theory")) h += `<div class="sheet empty" style="margin-top:20px">Loading lessons…</div>`;
+  for (const lv of levels) {
+    const ls = S.theory.filter((t) => (t.level || 1) === lv), done = ls.filter((t) => S.progress.done?.[t.id]).length;
+    const name = ls[0]?.levelName || `Level ${lv}`;
+    h += staff(name, `Level ${lv}`, `<div class="bar" title="${done} of ${ls.length} done"><i style="width:${(done / ls.length) * 100}%"></i></div>`);
+    h += `<div class="sheet level">${ls.map((t) => {
+      const open = S.lesson === t.id, isDone = !!S.progress.done?.[t.id];
+      return `<div class="lesson" id="lesson-${esc(t.id)}"><button class="lesson-head" data-lesson="${esc(t.id)}" aria-expanded="${open}">
+        <span class="check ${isDone ? "on" : ""}">✓</span>
+        <span class="t" style="min-width:0"><b style="font-weight:600">${esc(t.title)}</b> ${t.source === "claude" ? `<span class="tag-claude">added by Claude</span>` : ""}${t.classDate ? ` <span class="pill brass">Class ${fmtDate(fromKey(t.classDate), { day: "numeric", month: "short" })}</span>` : ""}<br><span class="meta small soft">${esc(t.summary || "")}</span></span>
+        <span class="soft">${open ? "−" : "+"}</span></button>
+        ${open ? `<div class="lesson-body">
+          ${t.from ? `<p class="orig">From your notes: ${esc(t.from)}</p>` : ""}
+          <ol class="steps-list">${(t.steps || []).map((s) => `<li><p>${s.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\n/g, "<br>")}</p></li>`).join("")}</ol>
+          ${t.fix ? `<div class="callout"><b>Correction:</b> ${esc(t.fix)}</div>` : ""}
+          ${(t.exercises || []).map((ex, i) => lessonExercise(t, ex, i)).join("")}
+          ${(t.cards || []).length ? `<p class="small soft">${t.cards.length} flashcards from this lesson are in your review deck.</p>` : ""}
+          <div class="btns"><button class="btn ${isDone ? "" : "primary"}" data-done="${esc(t.id)}">${isDone ? "Mark as not done" : "Mark lesson done"}</button></div>
+        </div>` : ""}</div>`;
+    }).join("")}</div>`;
+  }
+
+  h += staff("Scale builder", "Work out any key");
+  const steps = sc.steps ? [...sc.steps] : null;
+  const rel = sb.scale === "major" ? `Relative minor: <b>${pretty(notes[5].name)} minor</b>` : sb.scale === "minor" ? `Relative major: <b>${pretty(notes[2].name)} major</b>` : "";
+  const kc = sb.scale === "major" || sb.scale === "minor" ? keyChords(sb.root, sb.scale) : null;
+  h += `<div class="sheet builder">
+    <div class="controls">
+      <select id="sb-root" aria-label="Root note">${ROOTS.map((r) => `<option value="${r}" ${r === sb.root ? "selected" : ""}>${pretty(r)}</option>`).join("")}</select>
+      <select id="sb-scale" aria-label="Scale">${Object.entries(SCALES).map(([k, v]) => `<option value="${k}" ${k === sb.scale ? "selected" : ""}>${v.label}</option>`).join("")}</select>
+      <span class="seg" role="group" aria-label="Fretboard labels"><button data-labels="notes" aria-pressed="${sb.labels === "notes"}">Notes</button><button data-labels="intervals" aria-pressed="${sb.labels === "intervals"}">Intervals</button></span>
+    </div>
+    <div class="steps" aria-label="Scale notes">${notes.map((n, i) => `<span class="n ${i === 0 ? "root" : ""}">${pretty(n.name)}</span>${steps ? `<span class="w ${steps[i] === "H" ? "h" : ""}">${steps[i]}</span>` : `<span class="w">·</span>`}`).join("")}<span class="n root">${pretty(notes[0].name)}</span></div>
+    <div class="facts">${sc.steps ? `<span>Formula: <b class="mono">${sc.steps.split("").join(" ")}</b></span>` : ""}${kc ? `<span>Key signature: <b>${keySignature(notes)}</b></span>` : ""}${rel ? `<span>${rel}</span>` : ""}</div>
+    ${kc ? `<div class="chips">${kc.map((c) => `<span class="chip" title="${c.tones.map(pretty).join(" ")}"><span class="soft">${c.rn}</span> ${pretty(c.name)}</span>`).join("")}</div>` : ""}
+    ${fretboard(sb.root, sb.scale, sb.labels)}
+    <p class="small soft">Tap a note to hear it. Roots are gold.</p></div>`;
+  return h;
+}
+
+function viewSkills() {
+  let h = `<section class="hero"><div class="eyebrow">Skills</div><h1>Technique</h1><p class="soft">Each technique, how your teacher described it, what to listen for, and the songs where you used it.</p></section>`;
+  if (loading("skills")) return h + `<div class="sheet empty">Loading skills…</div>`;
+  const groups = [...new Set(S.skills.map((s) => s.group || "Technique"))];
+  for (const g of groups) {
+    const list = S.skills.filter((s) => (s.group || "Technique") === g);
+    h += staff(g, `${list.length} skills`);
+    h += `<div class="sheet list">${list.map((s) => {
+      const open = S.open["skill:" + s.id], drills = S.drills.filter((d) => d.linkType === "skill" && d.linkId === s.id);
+      const songs = (s.songs || []).map((id) => S.songs.find((x) => x.id === id)).filter(Boolean);
+      return `<div class="item" id="skill-${esc(s.id)}"><button class="item-head" data-toggle="skill:${esc(s.id)}" aria-expanded="${!!open}">
+        <span class="pill">${esc(s.level || "Core")}</span><span class="t">${esc(s.name)} ${s.source === "claude" ? `<span class="tag-claude">added by Claude</span>` : ""}<br><span class="meta">${esc(s.summary || "")}</span></span><span class="soft">${open ? "−" : "+"}</span></button>
+        ${open ? `<div class="item-body">
+          ${s.steps?.length ? `<div><div class="eyebrow">How</div><ol style="margin:6px 0 0;padding-left:1.2em;display:grid;gap:6px">${s.steps.map((x) => `<li>${esc(x)}</li>`).join("")}</ol></div>` : ""}
+          ${s.tips?.length ? `<div><div class="eyebrow">Listen for</div><ul style="margin:6px 0 0;padding-left:1.2em;display:grid;gap:4px">${s.tips.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}
+          ${s.tab ? `<div><div class="eyebrow">Exercise</div>${tabHTML(parseTab(s.tab), "skill-" + s.id)}</div>` : ""}
+          ${songs.length ? `<div><div class="eyebrow">In your songs</div><div class="btns">${songs.map((x) => `<button class="btn" data-go="song" data-id="${esc(x.id)}">${esc(x.title)}</button>`).join("")}</div></div>` : ""}
+          ${drills.length ? `<div class="btns">${drills.map((d) => `<button class="btn primary" data-go="drill" data-id="${esc(d.id)}">Practise: ${esc(d.name)}</button>`).join("")}</div>` : ""}
+        </div>` : ""}</div>`;
+    }).join("")}</div>`;
+  }
+  return h;
+}
+
+const STYLES = [["all", "All"], ["lead", "Leads & solos"], ["fingerstyle", "Fingerstyle"], ["chords", "Chords & strumming"], ["power", "Power chords"], ["indian", "Hindi & Tamil"]];
+const STATUSES = [["learning", "Learning"], ["playable", "Can play"], ["polished", "Polished"]];
+function songMatches(s) {
+  if (S.fStyle !== "all" && !(s.styles || []).includes(S.fStyle)) return false;
+  if (S.fStatus !== "all" && (s.status || "learning") !== S.fStatus) return false;
+  if (!S.q) return true;
+  const hay = [s.title, s.artist, s.key, (s.chords || []).join(" "), (s.styles || []).join(" "), (s.techniques || []).join(" ")].join(" ").toLowerCase();
+  return S.q.toLowerCase().split(/\s+/).every((w) => hay.includes(w));
+}
+function addSongForm() {
+  const rows = S.newSecs || (S.newSecs = [{ name: "Intro riff", kind: "tab", body: "" }]);
+  return `<details class="sheet setform" id="addsong" style="margin-top:14px" ${S.addSongOpen ? "open" : ""}><summary><b>+ Add a song</b></summary>
+    <div class="btns"><input type="text" id="ns-title" placeholder="Title" style="flex:2;min-width:160px"><input type="text" id="ns-artist" placeholder="Artist" style="flex:2;min-width:140px"><input type="text" id="ns-key" placeholder="Key, e.g. Am" style="flex:1;min-width:90px"></div>
+    ${rows.map((r, i) => `<div class="ns-sec"><div class="btns"><input type="text" data-ns="${i}" data-f="name" value="${esc(r.name)}" placeholder="Part name, e.g. Verse" style="flex:1;min-width:140px">
+      <select data-ns="${i}" data-f="kind"><option value="tab" ${r.kind === "tab" ? "selected" : ""}>Tab (single notes)</option><option value="bars" ${r.kind === "bars" ? "selected" : ""}>Chords (bars)</option></select>
+      <select data-ns="${i}" data-f="difficulty"><option value="">Difficulty</option>${["easy", "medium", "hard"].map((d) => `<option ${r.difficulty === d ? "selected" : ""}>${d}</option>`).join("")}</select>
+      ${rows.length > 1 ? `<button class="link small" data-nsdel="${i}">remove part</button>` : ""}</div>
+      <textarea data-ns="${i}" data-f="body" placeholder="${r.kind === "bars" ? "Am | F | C | G" : "5:0 4:2 3:2 . 3:2 3:0 | (4:3 5:3)x2"}">${esc(r.body)}</textarea></div>`).join("")}
+    <div class="btns"><button class="btn" data-nsadd>+ Add another part</button><button class="btn primary" data-savesong>Save song</button></div>
+    <p class="small soft">Tab: <code>string:fret</code>, string 6 = low E. <code>3:7b9r</code> bend and release, <code>4:0h2</code> hammer-on, <code>4:2p0</code> pull-off, <code>3:7/9</code> slide, <code>[3:7 2:8]</code> together, <code>.</code> pause, <code>|</code> bar line, <code>(…)x2</code> repeat, <code>"cue"</code> a label. Chords: bars separated by <code>|</code>.</p></details>`;
+}
+function viewSongs() {
+  if (S.song) return viewSong(S.songs.find((x) => x.id === S.song));
+  let h = `<section class="hero"><div class="eyebrow">Songs</div><h1>Play along</h1><p class="soft">${S.songs.length} songs${S.local ? "" : " from your notebooks"}. Pick one, press play, and the current bar or note lights up with the metronome.</p></section>`;
+  h += `<div class="search"><input type="text" id="song-q" placeholder="Search title, artist, key, chord or technique" value="${esc(S.q)}" aria-label="Search songs"></div>`;
+  h += `<div class="chiprow" role="group" aria-label="Style">${STYLES.map(([k, l]) => `<button class="fchip" data-fstyle="${k}" aria-pressed="${S.fStyle === k}">${l}</button>`).join("")}</div>`;
+  h += `<div class="chiprow" role="group" aria-label="Status"><button class="fchip" data-fstatus="all" aria-pressed="${S.fStatus === "all"}">Any status</button>${STATUSES.map(([k, l]) => `<button class="fchip" data-fstatus="${k}" aria-pressed="${S.fStatus === k}">${l}</button>`).join("")}</div>`;
+  if (loading("songs")) return h + `<div class="sheet empty" style="margin-top:14px">Loading songs…</div>`;
+  const list = S.songs.filter(songMatches);
+  h += `<p class="count">${list.length} of ${S.songs.length} songs</p>`;
+  if (!list.length) return h + `<div class="sheet empty"><b>No songs match.</b>Try a different word or clear the filters.</div>` + addSongForm();
+  h += `<div class="sheet list">${list.map((s) => `<div class="item"><button class="item-head" data-song="${esc(s.id)}">
+      <span class="pill">${esc(s.key ? pretty(s.key) : "—")}</span>
+      <span class="t">${esc(s.title)} ${s.milestone ? `<span class="milestone">★ ${esc(s.milestone)}</span>` : ""}<br><span class="meta">${esc([s.artist, fmtLearned(s.learned), s.transcribed ? "Full tab" : "Outline"].filter(Boolean).join(" · "))}</span></span>
+      <span class="pill ${s.status === "polished" ? "cat-scale" : s.status === "playable" ? "cat-skill" : ""}">${esc((STATUSES.find(([k]) => k === (s.status || "learning")) || [])[1])}</span></button></div>`).join("")}</div>`;
+  h += addSongForm();
+  const ms = S.songs.filter((s) => s.milestone).sort((a, b) => (a.learned || "").localeCompare(b.learned || ""));
+  if (ms.length) h += staff("Your milestones", S.local ? "As you marked them" : "As marked in your notebooks") + `<div class="sheet timeline-mini">${ms.map((s) => `<div class="tm"><span>${fmtLearned(s.learned)}</span><span><b>${esc(s.milestone)}</b> · ${esc(s.title)}</span></div>`).join("")}</div>`;
+  return h;
+}
+function sectionItems(sec, sid) {
+  if (sec.tab) return parseTab(sec.tab).map((c, idx) => ({ ...c, idx })).filter((c) => !c.bar).map((c) => ({ idx: c.idx, label: c.cue || "" }));
+  if (sec.bars) return parseBars(sec.bars).map((b, idx) => ({ idx, label: b.cue || "" }));
+  return [];
+}
+const DIFF = { easy: ["Easy", "d-easy"], medium: ["Medium", "d-med"], hard: ["Hard", "d-hard"] };
+const diffPill = (d) => d && DIFF[d] ? `<span class="dpill ${DIFF[d][1]}">${DIFF[d][0]}</span>` : "";
+function secHistory(songId, i) {
+  return S.sessions.filter((x) => x.songId === songId && x.items?.[i]?.bpm).sort((a, b) => (a.date || "").localeCompare(b.date || ""))
+    .map((x) => ({ k: x.date, bpm: x.items[i].bpm, note: x.items[i].note || "" }));
+}
+function viewSong(s) {
+  if (!s) { S.song = null; return viewSongs(); }
+  const delBtn = s.source === "user" ? `<button class="link small" data-delsong="${esc(s.id)}">Delete this song</button>` : "";
+  const playingSec = S.play && (S.play.kind === "tab" || S.play.kind === "bars") && S.play.key.startsWith(s.id + "::") ? S.play.key : null;
+  const secs = s.sections || [];
+  let h = `<div class="btns" style="margin-top:14px"><button class="btn" data-backsongs>← All songs</button></div>`;
+  h += `<section class="hero"><div class="eyebrow">${esc(s.artist || "")}</div><h1>${esc(s.title)}</h1>
+    <div class="stats">${s.key ? `<div class="stat"><b>${esc(pretty(s.key))}</b><span>key</span></div>` : ""}${s.capo ? `<div class="stat"><b>${esc(s.capo)}</b><span>capo</span></div>` : ""}${s.timeSig ? `<div class="stat"><b>${esc(s.timeSig)}</b><span>time</span></div>` : ""}${s.difficulty ? `<div class="stat"><b>${esc(DIFF[s.difficulty]?.[0] || "")}</b><span>overall</span></div>` : ""}${s.learned ? `<div class="stat"><b>${fmtLearned(s.learned)}</b><span>learned</span></div>` : ""}</div>
+    ${s.milestone ? `<p style="margin-top:10px"><span class="milestone">★ ${esc(s.milestone)}</span></p>` : ""}</section>`;
+  h += `<div class="btns" style="margin-top:14px"><span class="statuspick" role="group" aria-label="Status">${STATUSES.map(([k, l]) => `<button data-setstatus="${k}" aria-pressed="${(s.status || "learning") === k}">${l}</button>`).join("")}</span>${delBtn}</div>`;
+
+  // Overview: intro, structure map, learning order
+  if (s.intro || s.about || s.map?.length) {
+    h += staff("About this song", "Overview");
+    h += `<div class="sheet" style="padding:16px;display:grid;gap:14px">${s.intro || s.about ? `<p>${esc(s.intro || s.about)}</p>` : ""}
+      ${s.chords?.length ? `<div><div class="eyebrow">Chords</div><div class="chips" style="margin-top:6px">${s.chords.map((c) => `<span class="chip">${esc(pretty(c))}</span>`).join("")}</div></div>` : ""}
+      ${s.map?.length ? `<div><div class="eyebrow">How the song goes</div><div class="songmap">${s.map.map((m, k) => { const sec = secs[m.sec]; return `<button class="mapchip ${sec ? DIFF[sec.difficulty]?.[1] || "" : ""}" data-jump="${m.sec}">${esc(m.label || sec?.name || "")}${m.times > 1 ? ` <small>×${m.times}</small>` : ""}</button>${k < s.map.length - 1 ? `<span class="maparrow">→</span>` : ""}`; }).join("")}</div>
+        <p class="small soft" style="margin-top:6px">Colour shows difficulty: <span class="dpill d-easy">Easy</span> <span class="dpill d-med">Medium</span> <span class="dpill d-hard">Hard</span></p></div>` : ""}
+    </div>`;
+    const order = secs.map((x, i) => ({ ...x, i })).filter((x) => x.learnOrder).sort((a, b) => a.learnOrder - b.learnOrder);
+    if (order.length) {
+      h += staff("Learn it in this order", "Easiest and most repeated first");
+      h += `<div class="sheet list">${order.map((x) => { const hist = secHistory(s.id, x.i), last = hist.at(-1);
+        return `<div class="item"><button class="item-head" data-jump="${x.i}"><span class="level-num" style="width:28px;height:28px;font-size:.9rem">${x.learnOrder}</span>
+        <span class="t">${esc(x.name)} ${diffPill(x.difficulty)}<br><span class="meta">${esc([x.uses > 1 ? `Plays ${x.uses}× in the song` : "", x.sameAs ? `Builds on ${x.sameAs}` : "", last ? `Last clean ♩=${last.bpm}` : ""].filter(Boolean).join(" · "))}</span></span><span class="soft">↓</span></button></div>`; }).join("")}</div>`;
+    }
+  }
+  h += `<div class="player" style="margin-top:16px"><div class="row"><span class="now-label" data-nowlabel>${playingSec ? "" : "Pick a part and press Play"}</span><span class="small soft" data-countin></span></div>
+    <div class="row"><label>Speed <input type="range" id="pl-speed" min="40" max="160" step="2" value="${M.bpm}"> <span class="mono" data-live-bpm>${M.bpm}</span> bpm</label>
+    <label><input type="checkbox" id="pl-loop" ${S.loopSec !== false ? "checked" : ""}> Loop part</label>
+    ${playingSec ? `<button class="btn" data-stopplay>Stop</button>` : ""}</div></div>`;
+  if (!secs.length) h += `<div class="sheet empty" style="margin-top:14px"><b>Tab not transcribed yet.</b>This song is queued. The outline above comes from your notes.</div>`;
+  else {
+    h += staff("The parts", `${secs.length} parts`);
+    if (secs.some((x) => x.tab)) h += `<div>${TAB_LEGEND}</div>`;
+    secs.forEach((sec, i) => {
+      const sid = `${s.id}::${i}`, playing = playingSec === sid, hist = secHistory(s.id, i), last = hist.at(-1), best = hist.length ? Math.max(...hist.map((p) => p.bpm)) : null;
+      const runs = S.runs[sid] || 0;
+      h += `<div class="sheet" id="sec-${i}" style="margin-top:14px;padding:14px;display:grid;gap:10px">
+        <div class="sec-head"><h4>${sec.learnOrder ? `<span class="soft" style="font-size:.85rem">${sec.learnOrder}.</span> ` : ""}${esc(sec.name)}</h4>${sec.tab || sec.bars ? `<button class="btn ${playing ? "" : "primary"}" data-playsec="${esc(s.id)}" data-i="${i}">${playing ? "Restart" : "▶ Play"}</button>` : ""}</div>
+        ${sec.difficulty || sec.uses > 1 || sec.sameAs ? `<div class="btns">${diffPill(sec.difficulty)}${sec.uses > 1 ? `<span class="pill">Plays ${sec.uses}×</span>` : ""}${sec.sameAs ? `<span class="pill">Builds on ${esc(sec.sameAs)}</span>` : ""}</div>` : ""}
+        ${sec.teach ? `<div class="callout"><b>How to learn it:</b> ${esc(sec.teach)}</div>` : ""}
+        ${sec.note ? `<p class="small">${esc(sec.note)}</p>` : ""}
+        ${sec.tab ? tabHTML(parseTab(sec.tab), sid) : ""}
+        ${sec.bars ? `<div class="chordbars">${parseBars(sec.bars).map((bb, j) => `<div class="cbar" data-sec="${esc(sid)}" data-i="${j}"><small>${esc(bb.cue || "")}</small>${esc(pretty(bb.body))}</div>`).join("")}</div>` : ""}
+        ${sec.chart ? `<pre class="chart">${esc(sec.chart)}</pre>` : ""}
+        ${sec.orig ? `<p class="orig">Your notes: ${esc(sec.orig)}</p>` : ""}
+        ${sec.tab || sec.bars ? `<div class="logbox">
+          <div class="small">${last ? `Last clean <b>♩=${last.bpm}</b> (${fmtDate(fromKey(last.k), { day: "numeric", month: "short" })})${best > last.bpm ? ` · best ${best}` : ""}${last.note ? ` · “${esc(last.note)}”` : ""}` : `<span class="soft">No tempo logged yet for this part.</span>`}</div>
+          ${hist.length > 1 ? `<div class="spark" style="padding:0;border:0">${sparkline(hist)}</div>` : ""}
+          <div class="btns">          <input type="text" id="secnote-${i}" placeholder="Optional note (e.g. bend still flat)" style="flex:1;min-width:160px">
+          <button class="btn primary" data-seclog="${esc(s.id)}" data-i="${i}">Log ♩=<span data-live-bpm>${M.bpm}</span></button></div></div>` : ""}
+      </div>`;
+    });
+  }
+  if (s.tips?.length) h += staff("Tips from your notes", "") + `<div class="sheet" style="padding:14px 16px"><ul style="margin:0;padding-left:1.1em;display:grid;gap:6px">${s.tips.map((t) => `<li>${esc(t)}</li>`).join("")}</ul></div>`;
+  return h;
+}
+
+function diaryDays() {
+  const by = new Map(), add = (date, e) => { if (!date) return; if (!by.has(date)) by.set(date, []); by.get(date).push(e); };
+  S.diary.forEach((d) => add(d.date, { id: d.id, memorable: d.memorable || "", note: d.note || "", from: d.from || "app" }));
+  Object.entries(S.logs).forEach(([k, l]) => { if (l.note?.trim()) add(k, { note: l.note.trim(), from: "practice note" }); });
+  return [...by.entries()].sort((a, b) => b[0].localeCompare(a[0]));
+}
+function viewDiary() {
+  const days = diaryDays(), FROM = { chat: "told Claude", claude: "added by Claude", class: "class", "practice note": "practice note", today: "Today page", app: "" };
+  let h = staff("Diary", "Dates and memorable moments, newest first");
+  h += `<div class="sheet diary-form" id="diary"><div class="btns"><input type="date" id="dy-date" value="${dayKey()}" max="${dayKey()}" aria-label="Date"><input type="text" id="dy-mem" placeholder="Something memorable, e.g. played the Smooth intro with the record" style="flex:1;min-width:200px"></div>
+    <textarea id="dy-note" placeholder="Notes for the day (optional)"></textarea><div class="btns"><button class="btn primary" data-adddiary>Add to diary</button>${S.local ? "" : `<span class="small soft">Or just tell Claude, and it gets added here.</span>`}</div></div>`;
+  if (!days.length) return h + `<div class="sheet empty" style="margin-top:10px">Nothing here yet. Your first entry can be today.</div>`;
+  h += `<div class="sheet diary" style="margin-top:10px">${days.map(([date, es]) => {
+    const mems = es.filter((e) => e.memorable), notes = es.filter((e) => e.note);
+    return `<article class="dy"><div class="dy-date"><b>${fmtDate(fromKey(date), { day: "numeric" })}</b><span>${fmtDate(fromKey(date), { month: "short", year: "numeric" })}</span><span>${fmtDate(fromKey(date), { weekday: "short" })}</span></div><div class="dy-body">
+      ${mems.map((e) => `<p class="dy-mem"><span aria-hidden="true">★</span> ${esc(e.memorable)}</p>`).join("")}
+      ${notes.map((e) => `<p class="dy-note">${esc(e.note)}</p>`).join("")}
+      <div class="dy-meta">${[...new Set(es.map((e) => FROM[e.from] ?? e.from).filter(Boolean))].map((f) => `<span class="pill">${esc(f)}</span>`).join("")}${es.filter((e) => e.id).map((e) => `<button class="link small" data-deldiary="${esc(e.id)}">remove${es.filter((x) => x.id).length > 1 ? " “" + esc((e.memorable || e.note).slice(0, 20)) + "…”" : ""}</button>`).join("")}</div></div></article>`; }).join("")}</div>`;
+  return h;
+}
+function achievementsList() {
+  const out = [];
+  S.songs.filter((s) => s.milestone).forEach((s) => out.push({ date: s.learned || "", text: `${s.milestone}: ${s.title}`, kind: "Notebook" }));
+  const levels = [...new Set(S.theory.map((t) => t.level || 1))];
+  levels.forEach((lv) => { const ls = S.theory.filter((t) => (t.level || 1) === lv); const dates = ls.map((t) => S.progress.done?.[t.id]).filter(Boolean);
+    if (ls.length && dates.length === ls.length) out.push({ date: dates.sort().at(-1), text: `Finished Level ${lv}: ${ls[0].levelName}`, kind: "Theory" }); });
+  S.songs.filter((s) => s.status === "polished").forEach((s) => out.push({ date: s.polishedOn || "", text: `Polished ${s.title}`, kind: "Songs" }));
+  // tempo gains per song part
+  const parts = {};
+  S.sessions.forEach((x) => Object.entries(x.items || {}).forEach(([i, it]) => { if (!it.bpm) return; const k = x.songId + "::" + i; (parts[k] ||= []).push({ d: x.date, bpm: it.bpm }); }));
+  Object.entries(parts).forEach(([k, arr]) => { arr.sort((a, b) => a.d.localeCompare(b.d)); const gain = arr.at(-1).bpm - arr[0].bpm;
+    const [sid, i] = k.split("::"), s = S.songs.find((x) => x.id === sid);
+    if (gain >= 10 && s) out.push({ date: arr.at(-1).d, text: `+${gain} bpm on ${s.title} · ${s.sections?.[+i]?.name || ""}`, kind: "Tempo" }); });
+  if (S.sessions.length) { const first = [...S.sessions].sort((a, b) => a.date.localeCompare(b.date))[0]; out.push({ date: first.date, text: "Logged your first song session", kind: "Practice" }); }
+  const st = streak(); if (st >= 7) out.push({ date: dayKey(), text: `${st}-day practice streak`, kind: "Practice" });
+  S.achievements.forEach((a) => out.push({ date: a.date || "", text: a.text, kind: "Yours", id: a.id }));
+  return out.sort((a, b) => String(b.date).localeCompare(String(a.date)));
+}
+function viewProgress() {
+  const days = new Set([...Object.keys(S.logs).filter(practicedOn), ...S.sessions.map((x) => x.date)]);
+  const logged = S.sessions.reduce((a, x) => a + Object.keys(x.items || {}).length, 0) + Object.values(S.logs).reduce((a, l) => a + Object.keys(l.items || {}).length, 0);
+  const lessonsDone = Object.keys(S.progress.done || {}).length;
+  let h = `<section class="hero"><div class="eyebrow">Progress</div><h1>How far you've come</h1>
+    <div class="stats"><div class="stat"><b>${streak()}</b><span>day streak</span></div><div class="stat"><b>${days.size}</b><span>practice days</span></div>
+    <div class="stat"><b>${logged}</b><span>clean tempos logged</span></div><div class="stat"><b>${lessonsDone}<span class="soft small"> / ${S.theory.length}</span></b><span>lessons done</span></div></div></section>`;
+  h += viewDiary();
+  h += staff("Achievements", "Newest first");
+  h += `<div class="sheet" style="padding:12px 16px;display:grid;gap:10px"><div class="btns"><input type="text" id="ach-text" placeholder="Add an achievement, e.g. played the Californication solo start to finish" style="flex:1;min-width:200px"><button class="btn primary" data-addach>Add</button></div></div>`;
+  const ach = achievementsList();
+  h += ach.length ? `<div class="sheet timeline-mini" style="margin-top:10px">${ach.map((a) => `<div class="tm"><span>${a.date ? (String(a.date).length === 4 ? a.date : fmtDate(fromKey(a.date), { day: String(a.date).length > 7 ? "numeric" : undefined, month: "short", year: "numeric" })) : ""}</span><span><span class="pill" style="margin-right:6px">${esc(a.kind)}</span>${esc(a.text)}${a.id ? ` <button class="link small" data-delach="${esc(a.id)}">remove</button>` : ""}</span></div>`).join("")}</div>`
+    : `<div class="sheet empty" style="margin-top:10px">Achievements appear as you log tempos, finish lessons and polish songs.</div>`;
+
+  // song tempo progress
+  const parts = [];
+  S.songs.forEach((s) => (s.sections || []).forEach((sec, i) => { const hist = secHistory(s.id, i); if (hist.length) parts.push({ s, sec, hist }); }));
+  h += staff("Song parts", "Clean tempo over time");
+  h += parts.length ? `<div class="sheet">${parts.map(({ s, sec, hist }) => { const last = hist.at(-1), first = hist[0];
+    return `<div class="spark"><button class="link small" style="text-align:left" data-go="song" data-id="${esc(s.id)}">${esc(s.title)} · ${esc(sec.name)}</button><span class="mono small">♩=${last.bpm}${hist.length > 1 ? ` <span class="soft">(${last.bpm - first.bpm >= 0 ? "+" : ""}${last.bpm - first.bpm})</span>` : ""}</span>${hist.length > 1 ? sparkline(hist) : `<span class="small soft" style="grid-column:1/-1">${hist.length} session · ${esc(last.note || "")}</span>`}</div>`; }).join("")}</div>`
+    : `<div class="sheet empty"><b>No song tempos yet.</b>On any song part, play it cleanly once and press Log.</div>`;
+  h += staff("Clean BPM by day", "Spider crawl and pentatonics. 0 = no clean run");
+  h += `<div class="sheet">${BPM_CHARTS.map(([id, n]) => bpmChart(id, n)).join("")}</div>`;
+  const charted = S.drills.filter((d) => series(d.id).length && !BPM_CHARTS.some(([id]) => id === d.id));
+  h += charted.length ? staff("Other exercises", "Clean tempo over time") : "";
+  h += charted.length ? `<div class="sheet">${charted.map((d) => { const pts = series(d.id), last = pts.at(-1), first = pts[0];
+    return `<div class="spark"><span class="small" style="font-weight:600">${esc(d.name)}</span><span class="mono small">♩=${last.bpm}${pts.length > 1 ? ` <span class="soft">(${last.bpm - first.bpm >= 0 ? "+" : ""}${last.bpm - first.bpm})</span>` : ""}</span>${pts.length > 1 ? sparkline(pts) : ""}</div>`; }).join("")}</div>`
+    : "";
+  // theory + songs
+  const levels = [...new Set(S.theory.map((t) => t.level || 1))].sort((a, b) => a - b);
+  h += staff("Theory", "Lessons completed");
+  h += `<div class="sheet" style="padding:12px 16px;display:grid;gap:10px">${levels.map((lv) => { const ls = S.theory.filter((t) => (t.level || 1) === lv), dn = ls.filter((t) => S.progress.done?.[t.id]).length;
+    return `<div style="display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center"><span class="small">${lv}. ${esc(ls[0].levelName)}</span><div class="bar"><i style="width:${(dn / ls.length) * 100}%"></i></div><span class="mono small">${dn}/${ls.length}</span></div>`; }).join("")}</div>`;
+  const cnt = (k) => S.songs.filter((s) => (s.status || "learning") === k).length;
+  if (S.local) h += staff("Your data", "Saved in this browser") + `<div class="sheet" style="padding:14px 16px;display:grid;gap:10px"><p class="small">Everything you log is stored only in this browser on this device. Export a backup now and then, and import it to move to another device.</p>
+    <div class="btns"><button class="btn primary" data-export>Export backup</button><label class="btn" for="imp-file">Import backup</label><input id="imp-file" type="file" accept="application/json,.json" hidden><button class="btn" data-reset>Reset everything</button></div></div>`;
+  h += staff("Songs", "By status") + `<div class="sheet" style="padding:14px 16px"><div class="stats" style="padding:0">${STATUSES.map(([k, l]) => `<div class="stat"><b>${cnt(k)}</b><span>${l}</span></div>`).join("")}</div></div>`;
+  return h;
+}
+
+function classSettingsForm(st, open) {
+  return `<details class="sheet setform" ${open ? "open" : ""} style="margin-top:14px"><summary><b>${open ? "Set your class schedule" : "Change class schedule"}</b></summary>
+    <div class="btns"><label class="small">Day <select id="st-day"><option value="">No regular class</option>${DAYS.map((d, i) => `<option value="${i}" ${String(st.classDay) === String(i) ? "selected" : ""}>${d}</option>`).join("")}</select></label>
+    <label class="small">Time <input type="time" id="st-time" value="${esc(st.classTime || "17:00")}"></label>
+    <label class="small">First class <input type="date" id="st-first" value="${esc(st.firstClass || "")}"></label>
+    <button class="btn primary" data-savesettings>Save</button></div></details>`;
+}
+function addClassForm() {
+  return `<details class="sheet setform" style="margin-bottom:12px"><summary><b>+ Log a class</b></summary>
+    <label class="small">Date <input type="date" id="cl-date" value="${dayKey()}"></label>
+    <label class="small" for="cl-learned">What you learned (one per line)</label><textarea id="cl-learned" placeholder="C major scale&#10;Working out major scales with W W H W W W H"></textarea>
+    <label class="small" for="cl-hw">Homework (one per line)</label><textarea id="cl-hw" placeholder="Write out the G major scale"></textarea>
+    <div class="btns"><button class="btn primary" data-addclass>Add class</button></div></details>`;
+}
+function viewClasses() {
+  const st = settings(), nc = nextClass(), days = nc ? Math.ceil((new Date(nc).setHours(0, 0, 0, 0) - new Date().setHours(0, 0, 0, 0)) / 864e5) : 0;
+  let h = `<section class="hero"><div class="eyebrow">Classes</div><h1>${nc ? `${DAYS[+st.classDay]}s, ${fmtTime(st.classTime)}` : "Your lessons"}</h1>${nc ? "" : `<p class="soft">Taking guitar lessons? Add your schedule to get a countdown, a class log and homework on your Today page.</p>`}</section>`;
+  h += classSettingsForm(st, !nc);
+  if (nc) h += `<div class="sheet next-class" style="margin-top:18px"><div><div class="eyebrow">Next class</div><p>${fmtDate(nc, { weekday: "long", day: "numeric", month: "long" })} · ${fmtTime(st.classTime)}</p><p class="small soft">${S.local ? "After class, add what you covered and your homework below." : "After class, jot what you covered below or tell Claude. Theory, gaps and practice get added."}</p></div><b>${days === 0 ? "Today" : days === 1 ? "1 day" : days + " days"}</b></div>`;
+  if (!S.local) { h += staff("Notebook pages", `${S.pages.length} uploaded`);
+  const upTo = S.pagesMeta?.readUpTo || "";
+  const fresh = S.pages.filter((p) => p.status !== "read" && !(upTo && (p.uploadedAt || "") <= upTo)).length;
+  h += `<div class="sheet uploader"><p>Add photos of your notes or PDFs here. Claude reads them and sorts them into Songs, Theory and Skills.</p>
+    ${S.assets ? `<div class="btns"><label class="btn primary" for="page-input">Add photos or PDFs</label><input id="page-input" type="file" accept="image/*,application/pdf" multiple></div>` : `<p class="notice">${S.dbState === "on" ? "Uploading is only available to you, as the owner, on claude.ai." : "Open this on claude.ai to upload pages."}</p>`}
+    ${S.upStatus ? `<p class="up-status ${S.upErr ? "err" : ""}" role="status">${esc(S.upStatus)}</p>` : ""}
+    <p class="small soft">${S.pages.length} pages · ${fresh ? `${fresh} waiting for Claude` : "all read by Claude"}</p></div>`; }
+  h += staff("Class log", "Newest first");
+  h += addClassForm();
+  if (loading("classes")) return h + `<div class="sheet empty">Loading classes…</div>`;
+  const list = [...S.classes].sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  if (!list.length) return h + `<div class="sheet empty"><b>No classes logged yet.</b>${st.firstClass ? `Your first ${fromKey(st.firstClass) > new Date() ? "is" : "was"} on ${fmtDate(fromKey(st.firstClass), { weekday: "long", day: "numeric", month: "long" })}.` : "Add one after your next lesson."}</div>`;
+  h += `<div class="timeline">${list.map((c) => {
+    const topics = S.theory.filter((t) => t.classDate === c.date);
+    return `<article class="sheet cls"><div class="cls-date"><h3>${fmtDate(fromKey(c.date), { weekday: "long", day: "numeric", month: "long" })}</h3><span class="pill">Class ${c.number || ""} · ${esc(c.time || "14:30")}</span></div>
+      <div><div class="eyebrow">What you learned</div>${c.learned?.length ? `<ul>${c.learned.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : `<p class="soft small">Waiting for your notes from this class.</p>`}</div>
+      ${c.homework?.length ? `<div><div class="eyebrow">Homework</div><div class="hw">${c.homework.map((t, i) => `<label><input type="checkbox" data-hw="${esc(c.id)}" data-i="${i}" ${t.done ? "checked" : ""}><span class="${t.done ? "done" : ""}">${esc(t.text)}</span></label>`).join("")}</div></div>` : ""}
+      ${c.gaps?.length ? `<div><div class="eyebrow">Gaps and next steps</div><ul>${c.gaps.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}
+      ${topics.length ? `<div class="btns">${topics.map((t) => `<button class="btn" data-go="theory" data-id="${esc(t.id)}">${esc(t.title)}</button>`).join("")}</div>` : ""}
+      <div><label class="eyebrow" for="cn-${esc(c.id)}">Your notes</label><textarea id="cn-${esc(c.id)}" data-classnote="${esc(c.id)}" placeholder="What did you cover? What homework did you get?">${esc(c.notes || "")}</textarea></div></article>`;
+  }).join("")}</div>`;
+  return h;
+}
+
+const VIEWS = { today: viewToday, theory: viewTheory, skills: viewSkills, songs: viewSongs, classes: viewClasses, progress: viewProgress };
+let pending = false;
+function render() {
+  const a = document.activeElement;
+  if (a && (a.tagName === "TEXTAREA" || (a.tagName === "INPUT" && a.type === "text")) && document.getElementById("view").contains(a)) { pending = true; return; }
+  pending = false;
+  document.getElementById("view").innerHTML = VIEWS[S.tab]();
+  document.querySelectorAll(".tabs button").forEach((b) => b.setAttribute("aria-current", b.dataset.tab === S.tab ? "page" : "false"));
+  markNow(); mUI();
+}
+document.addEventListener("focusout", () => setTimeout(() => pending && render(), 0));
+function go(tab, after) {
+  S.tab = tab; try { history.replaceState(null, "", "#" + tab); } catch {}
+  render(); if (after) setTimeout(after, 0); else window.scrollTo(0, 0);
+}
+
+/* ================= practice timer ================= */
+const PT = { running: false, paused: false, start: 0, first: 0, acc: 0, warned: false, tick: null, warnTimer: null };
+const PT_LIMIT = 25 * 60;
+function ptLoad() { try { const v = JSON.parse(localStorage.getItem("dnf-timer") || "null"); if (v && v.day === dayKey() && v.start) { PT.running = true; PT.start = v.start; PT.first = v.first || v.start; PT.acc = v.acc || 0; PT.paused = !!v.paused; PT.warned = !!v.warned; ptRun(); } } catch {} }
+function ptSaveLocal() { try { PT.running ? localStorage.setItem("dnf-timer", JSON.stringify({ day: dayKey(), start: PT.start, first: PT.first, acc: PT.acc, paused: PT.paused, warned: PT.warned })) : localStorage.removeItem("dnf-timer"); } catch {} }
+const ptSecs = () => Math.floor((PT.acc + (PT.paused ? 0 : Date.now() - PT.start)) / 1000);
+function ptPause() {
+  if (!PT.running) return;
+  if (PT.paused) { PT.paused = false; PT.start = Date.now(); }
+  else { PT.acc += Date.now() - PT.start; PT.paused = true; if (M.running) { stopPlay(); mStop(); } }
+  ptSaveLocal(); ptTick(); render();
+}
+function ptRun() {
+  document.getElementById("ptimer").hidden = false;
+  clearInterval(PT.tick); PT.tick = setInterval(ptTick, 1000); ptTick();
+}
+function ptTick() {
+  const s = ptSecs(); document.getElementById("ptimer-t").textContent = `${Math.floor(s / 60)}:${pad(s % 60)}`;
+  const el = document.getElementById("ptimer"); el.classList.toggle("over", s >= PT_LIMIT); el.classList.toggle("paused", PT.paused);
+  const pb = document.getElementById("ptimer-pause"); pb.textContent = PT.paused ? "Resume" : "Pause"; pb.setAttribute("aria-label", PT.paused ? "Resume practice" : "Pause practice");
+  if (s >= PT_LIMIT && !PT.warned) { PT.warned = true; ptSaveLocal(); ptWarn(); }
+}
+function ptWarn() {
+  const w = document.getElementById("pwarn"); w.hidden = false;
+  w.querySelector(".pwarn-bar i").style.animation = "none"; void w.offsetWidth; w.querySelector(".pwarn-bar i").style.animation = "";
+  clearTimeout(PT.warnTimer); PT.warnTimer = setTimeout(() => { w.hidden = true; }, 25000);
+}
+function ptStart() { PT.running = true; PT.paused = false; PT.acc = 0; PT.start = PT.first = Date.now(); PT.warned = false; ptSaveLocal(); ptRun(); render(); }
+function ptStop() {
+  if (!PT.running) return;
+  const mins = Math.max(1, Math.round(ptSecs() / 60));
+  PT.running = false; PT.paused = false; clearInterval(PT.tick); clearTimeout(PT.warnTimer); ptSaveLocal();
+  document.getElementById("ptimer").hidden = true; document.getElementById("pwarn").hidden = true;
+  const k = dayKey(), cur = structuredClone(todayLog()); cur.date = k; cur.minutes = (cur.minutes || 0) + mins;
+  cur.sessions = (cur.sessions || []).concat({ start: new Date(PT.first || PT.start).toISOString(), minutes: mins });
+  S.logs[k] = cur; save("logs/" + k, (r) => r.set(cur));
+  toast(`Saved ${mins} minute${mins > 1 ? "s" : ""} of practice. Nice work.`); render();
+}
+document.getElementById("ptimer-stop").onclick = ptStop;
+document.getElementById("ptimer-pause").onclick = ptPause;
+document.getElementById("pwarn-stop").onclick = ptStop;
+document.getElementById("pwarn-go").onclick = () => { clearTimeout(PT.warnTimer); document.getElementById("pwarn").hidden = true; };
+
+/* ================= interactions ================= */
+document.addEventListener("pointerover", (e) => {
+  const g = e.target.closest?.(".bc-pt"); const plot = e.target.closest?.(".bc-plot"); if (!plot) return;
+  const tip = plot.querySelector(".bc-tip"); if (!g) { tip.hidden = true; return; }
+  const pr = plot.getBoundingClientRect(), cr = g.querySelector("circle").getBoundingClientRect();
+  tip.textContent = g.dataset.tip; tip.hidden = false;
+  tip.style.left = Math.min(Math.max(cr.left - pr.left + cr.width / 2, 70), pr.width - 70) + "px"; tip.style.top = (cr.top - pr.top) + "px";
+});
+document.addEventListener("pointerout", (e) => { const plot = e.target.closest?.(".bc-plot"); if (plot && !plot.contains(e.relatedTarget)) plot.querySelector(".bc-tip").hidden = true; });
+document.addEventListener("click", (e) => {
+  const t = e.target.closest("button, .note, .col, [data-hw]"); if (!t) return;
+  const ds = t.dataset;
+  if (ds.tab) { if (ds.tab === "songs") S.song = null; return go(ds.tab); }
+  if (t.classList.contains("note")) return pluck(+t.dataset.midi);
+  if (t.classList.contains("col") && ds.sec) { const idx = +ds.i; const sec = colSection(ds.sec); if (sec) { const items = sectionItems(sec.sec, ds.sec); const k = items.findIndex((x) => x.idx === idx); if (k >= 0) { startPlay("tab", ds.sec, items.slice(k), { label: sec.label, loop: false, countIn: M.beats }); } } return; }
+  if (ds.toggle) { S.open[ds.toggle] = !S.open[ds.toggle]; return render(); }
+  if (ds.lesson) { S.lesson = S.lesson === ds.lesson ? null : ds.lesson; stopPlay(); return render(); }
+  if (ds.song) { S.song = ds.song; stopPlay(); window.scrollTo(0, 0); return render(); }
+  if ("backsongs" in ds) { S.song = null; stopPlay(); return render(); }
+  if (ds.labels) { S.sb.labels = ds.labels; return render(); }
+  if (ds.fstyle) { S.fStyle = ds.fstyle; return render(); }
+  if (ds.fstatus) { S.fStatus = ds.fstatus; return render(); }
+  if (ds.setstatus) { const s = S.songs.find((x) => x.id === S.song); if (s) { s.status = ds.setstatus; const upd = { status: ds.setstatus }; if (ds.setstatus === "polished") { upd.polishedOn = dayKey(); s.polishedOn = upd.polishedOn; } save("songs/" + s.id, (r) => r.update(upd)); render(); } return; }
+  if (ds.done) { const d = { ...(S.progress.done || {}) }; d[ds.done] ? delete d[ds.done] : (d[ds.done] = dayKey()); S.progress = { done: d }; save("progress/theory", (r) => r.set({ done: d })); return render(); }
+  if (ds.playdrill) { const d = S.drills.find((x) => x.id === ds.playdrill), ex = drillEx(d);
+    startPlay("ex", "drill-" + d.id, ex.seq.map((p) => ({ ...p, midi: [OPEN[p.s - 1] + p.f], label: pretty(SHARP_NAMES[(OPEN[p.s - 1] + p.f) % 12]) })), { label: drillName(d), loop: true }); return render(); }
+  if (ds.playex) { const l = S.theory.find((x) => x.id === ds.playex), ex = l.exercises[+ds.ex], id = `${l.id}-ex${ds.ex}`;
+    const seq = ex.seq || scaleRun(ex.root, ex.scale, ex.lo ?? 0, ex.hi ?? 4, ex.updown !== false);
+    startPlay("ex", id, seq.map((p) => ({ ...p, midi: [OPEN[p.s - 1] + p.f] })), { label: ex.title || l.title, loop: true }); return render(); }
+  if (ds.playsec) { const s = S.songs.find((x) => x.id === ds.playsec), sec = s.sections[+ds.i], sid = `${s.id}::${ds.i}`;
+    const items = sectionItems(sec, sid);
+    startPlay(sec.tab ? "tab" : "bars", sid, items, { label: `${s.title} · ${sec.name}`, loop: S.loopSec !== false, beatsPer: sec.bars ? (parseInt(s.timeSig) || 4) : (sec.beatsPer || 1) });
+    return render(); }
+  if ("ptstart" in ds) return ptStart();
+  if ("ptstop" in ds) return ptStop();
+  if ("ptpause" in ds) return ptPause();
+  if ("stopplay" in ds) { stopPlay(); mStop(); return render(); }
+  if (ds.jump !== undefined) { document.getElementById("sec-" + ds.jump)?.scrollIntoView({ block: "start", behavior: "smooth" }); return; }
+  if (ds.secrun) { S.runs[ds.secrun] = Math.min(3, (S.runs[ds.secrun] || 0) + 1); return render(); }
+  if (ds.seclog) return logSection(ds.seclog, +ds.i);
+  if ("savesettings" in ds) { const v = { classDay: document.getElementById("st-day").value, classTime: document.getElementById("st-time").value, firstClass: document.getElementById("st-first").value };
+    if (v.classDay === "") v.classDay = null; S.settings = { ...(S.settings || {}), ...v }; save("meta/settings", (r) => r.set(S.settings)); toast("Class schedule saved."); return render(); }
+  if ("addclass" in ds) { const date = document.getElementById("cl-date").value || dayKey(), lines = (id) => document.getElementById(id).value.split("\n").map((x) => x.trim()).filter(Boolean);
+    const learned = lines("cl-learned"), homework = lines("cl-hw").map((text) => ({ text, done: false }));
+    if (!learned.length && !homework.length) { toast("Add what you learned or your homework first."); return; }
+    const doc = { date, learned, homework, number: S.classes.filter((c) => c.date < date).length + 1, time: settings().classTime || "" };
+    S.classes = S.classes.filter((c) => c.id !== date).concat({ id: date, ...doc }); save("classes/" + date, (r) => r.set(doc)); toast("Class added."); return render(); }
+  if ("nsadd" in ds) { S.newSecs.push({ name: "", kind: "tab", body: "" }); S.addSongOpen = true; return render(); }
+  if (ds.nsdel) { S.newSecs.splice(+ds.nsdel, 1); S.addSongOpen = true; return render(); }
+  if ("savesong" in ds) { const title = document.getElementById("ns-title").value.trim(); if (!title) { toast("Give the song a title."); return; }
+    const secs = (S.newSecs || []).filter((r) => r.body.trim()).map((r, i) => ({ name: r.name.trim() || `Part ${i + 1}`, [r.kind]: r.body.trim(), ...(r.difficulty ? { difficulty: r.difficulty } : {}), learnOrder: i + 1 }));
+    const id = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40) + "-" + Date.now().toString(36);
+    const doc = { title, artist: document.getElementById("ns-artist").value.trim(), key: document.getElementById("ns-key").value.trim(), styles: secs.some((x) => x.tab) ? ["lead"] : ["chords"], status: "learning", transcribed: secs.length > 0, sections: secs, map: secs.map((x, i) => ({ sec: i, label: x.name })), order: 1000 + S.songs.length, source: "user", learned: dayKey().slice(0, 7) };
+    S.songs.push({ id, ...doc }); save("songs/" + id, (r) => r.set(doc)); S.newSecs = null; S.addSongOpen = false; S.song = id; toast("Song saved."); return render(); }
+  if (ds.delsong) { if (!confirm("Delete this song and its parts? Your logged tempos for it stay in your history.")) return; S.songs = S.songs.filter((x) => x.id !== ds.delsong); save("songs/" + ds.delsong, (r) => r.delete()); S.song = null; return render(); }
+  if ("export" in ds) { const blob = new Blob([JSON.stringify({ app: "do-not-fret", version: 1, exported: new Date().toISOString(), data: S.localDB.dump() }, null, 1)], { type: "application/json" });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `do-not-fret-backup-${dayKey()}.json`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); return; }
+  if ("reset" in ds) { if (!confirm("Delete everything you've logged in this browser and start fresh? Export a backup first if you want to keep it.")) return; S.localDB.replace(SEED || {}); toast("Started fresh."); return; }
+  if ("adddiary" in ds) { const date = document.getElementById("dy-date")?.value || dayKey(), memorable = document.getElementById("dy-mem")?.value.trim() || "", note = document.getElementById("dy-note")?.value.trim() || "";
+    if (!memorable && !note) { toast("Write something memorable or a note first."); return; }
+    const id = "d" + Date.now(), doc = { date, memorable, note, from: "app", at: new Date().toISOString() }; S.diary.push({ id, ...doc }); save("diary/" + id, (r) => r.set(doc)); toast("Added to your diary."); return render(); }
+  if (ds.deldiary) { S.diary = S.diary.filter((x) => x.id !== ds.deldiary); save("diary/" + ds.deldiary, (r) => r.delete()); return render(); }
+  if ("addach" in ds) { const inp = document.getElementById("ach-text"), text = inp?.value.trim(); if (!text) { toast("Type the achievement first."); return; }
+    const id = "a" + Date.now(); S.achievements.push({ id, text, date: dayKey() }); save("achievements/" + id, (r) => r.set({ text, date: dayKey() })); inp.value = ""; toast("Achievement added."); return render(); }
+  if (ds.delach) { S.achievements = S.achievements.filter((a) => a.id !== ds.delach); save("achievements/" + ds.delach, (r) => r.delete()); return render(); }
+  if (ds.settempo) { const d = S.drills.find((x) => x.id === ds.settempo); mSet(+ds.bpm, d?.name); if (!M.running) mStart(); return; }
+  if (ds.run) { S.runs[ds.run] = Math.min(3, (S.runs[ds.run] || 0) + 1); return render(); }
+  if (ds.logbpm) return logTempo(ds.logbpm);
+  if (ds.noclean) { const d = S.drills.find((x) => x.id === ds.noclean), k = dayKey(), cur = structuredClone(todayLog());
+    cur.date = k; cur.items = cur.items || {}; cur.items[d.id] = { bpm: null, noClean: true, tried: M.bpm, at: new Date().toISOString(), label: drillName(d) };
+    S.logs[k] = cur; S.runs[d.id] = 0; S.open[d.id] = false; save("logs/" + k, (r) => r.set(cur)); if (M.running) { stopPlay(); mStop(); }
+    toast(`Noted: practised ${drillName(d)}, no clean run yet. Tomorrow try a slower tempo.`); return render(); }
+  if (ds.go === "theory") { S.lesson = ds.id; return go("theory", () => document.getElementById("lesson-" + ds.id)?.scrollIntoView({ block: "start" })); }
+  if (ds.go === "skill") { S.open["skill:" + ds.id] = true; return go("skills", () => document.getElementById("skill-" + ds.id)?.scrollIntoView({ block: "center" })); }
+  if (ds.go === "progress") return go("progress", () => document.getElementById(ds.id || "")?.scrollIntoView({ block: "start" }));
+  if (ds.go === "song") { S.song = ds.id; return go("songs"); }
+  if (ds.go === "drill") { S.open[ds.id] = true; return go("today", () => document.querySelector(`[data-toggle="${CSS.escape(ds.id)}"]`)?.scrollIntoView({ block: "center" })); }
+  if ("quiz" in ds) return startQuiz();
+});
+function colSection(sid) {
+  const [songId, i] = sid.split("::"); const s = S.songs.find((x) => x.id === songId);
+  return s && s.sections?.[+i] ? { sec: s.sections[+i], label: `${s.title} · ${s.sections[+i].name}` } : null;
+}
+document.addEventListener("change", (e) => {
+  const t = e.target;
+  if (t.id === "page-input" && t.files?.length) { uploadPages([...t.files]); t.value = ""; }
+  if (t.id === "imp-file" && t.files?.[0]) { t.files[0].text().then((txt) => { const j = JSON.parse(txt); const d = j?.data || j; if (!d || typeof d !== "object" || !d.drills) throw new Error("bad");
+      if (!confirm("Replace everything in this browser with this backup?")) return; S.localDB.replace(d); toast("Backup imported."); }).catch(() => toast("That file isn't a Do Not Fret backup.")); t.value = ""; }
+  if (t.id === "sb-root") { S.sb.root = t.value; render(); }
+  if (t.id === "sb-scale") { S.sb.scale = t.value; render(); }
+  if (t.id === "ex-sound") { S.exSound = t.checked; try { localStorage.setItem("dnf-exsound", t.checked ? "1" : "0"); } catch {} }
+  if (t.id === "pl-loop") { S.loopSec = t.checked; P.loop = t.checked; }
+  if (t.dataset.hw) { const c = S.classes.find((x) => x.id === t.dataset.hw); if (!c) return;
+    const hw = c.homework.map((x, i) => (i === +t.dataset.i ? { ...x, done: t.checked } : { ...x })); save("classes/" + c.id, (r) => r.update({ homework: hw })); }
+});
+const timers = {};
+document.addEventListener("input", (e) => {
+  const t = e.target;
+  if (t.id === "pl-speed") { mSet(+t.value); return; }
+  if (t.id === "song-q") { S.q = t.value; clearTimeout(timers.q); timers.q = setTimeout(() => { const pos = t.selectionStart; pending = false; document.getElementById("view").innerHTML = viewSongs(); const n = document.getElementById("song-q"); n.focus(); n.setSelectionRange(pos, pos); }, 180); return; }
+  if (t.dataset.ns != null) { S.newSecs[+t.dataset.ns][t.dataset.f] = t.value; if (t.dataset.f === "kind") { S.addSongOpen = true; render(); } return; }
+  if (t.id === "day-mem") { clearTimeout(timers.mem); timers.mem = setTimeout(() => { const k = dayKey(), id = "day-" + k, v = t.value.trim();
+      const rest = S.diary.filter((x) => x.id !== id); S.diary = v ? rest.concat({ id, date: k, memorable: v, from: "today" }) : rest;
+      save("diary/" + id, (r) => v ? r.set({ date: k, memorable: v, from: "today" }) : r.delete()); }, 900); return; }
+  if (t.id === "day-note") { clearTimeout(timers.note); timers.note = setTimeout(() => { const k = dayKey(), cur = structuredClone(todayLog()); cur.note = t.value; cur.date = k; S.logs[k] = cur; save("logs/" + k, (r) => r.set(cur)); }, 900); }
+  if (t.dataset.classnote) { const id = t.dataset.classnote; clearTimeout(timers[id]); timers[id] = setTimeout(() => save("classes/" + id, (r) => r.update({ notes: t.value })), 900); }
+});
+function logSection(songId, i) {
+  const s = S.songs.find((x) => x.id === songId), sid = `${songId}::${i}`;
+  const note = document.getElementById("secnote-" + i)?.value.trim() || "";
+  const k = dayKey(), docId = `${k}_${songId}`;
+  const cur = structuredClone(S.sessions.find((x) => x.id === docId) || { id: docId, date: k, songId, items: {} });
+  cur.items[i] = { bpm: M.bpm, note, at: new Date().toISOString() };
+  S.sessions = S.sessions.filter((x) => x.id !== docId).concat(cur);
+  const { id, ...data } = cur; save("sessions/" + docId, (r) => r.set(data));
+  S.runs[sid] = 0; if (M.running) { stopPlay(); mStop(); }
+  toast(`Logged ♩=${M.bpm} for ${s?.sections?.[i]?.name || "this part"}. Next time try ♩=${M.bpm + 4}.`); render();
+}
+function logTempo(id) {
+  const d = S.drills.find((x) => x.id === id), k = dayKey(), cur = structuredClone(todayLog());
+  cur.date = k; cur.items = cur.items || {}; cur.items[id] = { bpm: M.bpm, runs: 1, at: new Date().toISOString(), label: drillName(d) };
+  S.logs[k] = cur; S.runs[id] = 0; S.open[id] = false; save("logs/" + k, (r) => r.set(cur));
+  if (M.running) mStop();
+  toast(`Saved ♩=${M.bpm} for ${d ? drillName(d) : "exercise"}. Next time try ♩=${M.bpm + 4}.`); render();
+}
+
+/* ================= uploads ================= */
+async function decodeImage(file) {
+  try { return await createImageBitmap(file); } catch {}
+  const url = URL.createObjectURL(file);
+  try { const img = new Image(); img.src = url; await img.decode(); return img; } finally { setTimeout(() => URL.revokeObjectURL(url), 1000); }
+}
+async function preparePage(file) {
+  if (file.type === "application/pdf" || /\.pdf$/i.test(file.name)) {
+    if (file.size > 20 * 1024 * 1024) throw new Error("This PDF is over 20 MB. Split it into smaller files and try again.");
+    return { blob: file, type: "application/pdf", kind: "pdf" };
+  }
+  let img; try { img = await decodeImage(file); } catch { throw new Error("This photo couldn't be opened. If it's an iPhone HEIC photo, take a screenshot of it and upload that."); }
+  const max = 2400, k = Math.min(1, max / Math.max(img.width, img.height));
+  const c = document.createElement("canvas"); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+  c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+  const blob = await new Promise((r) => c.toBlob(r, "image/jpeg", 0.86));
+  if (!blob) throw new Error("This photo couldn't be converted. Try a screenshot of it instead.");
+  return { blob, type: "image/jpeg", kind: "image" };
+}
+async function uploadPages(files) {
+  if (!S.assets || !S.db) return;
+  let ok = 0; const failed = [];
+  for (let i = 0; i < files.length; i++) {
+    const f = files[i]; S.upStatus = `Uploading ${i + 1} of ${files.length}…`; S.upErr = false; render();
+    try {
+      const p = await preparePage(f), res = await S.assets.upload(p.blob, { type: p.type }), id = "p" + Date.now() + "-" + i;
+      await S.db.doc("pages/" + id).set({ asset: res.id, name: f.name || "Page", kind: p.kind, size: res.sizeBytes, uploadedAt: new Date().toISOString(), order: Date.now(), status: "new" }); ok++;
+    } catch (e) {
+      failed.push(`${f.name}: ${e?.code === "too_large" ? "too large (max 20 MB)" : e?.code === "unsupported_type" ? "not a supported file type" : e?.code === "quota_or_state" ? "storage is full" : e?.message || "upload failed"}`);
+    }
+  }
+  S.upErr = failed.length > 0;
+  S.upStatus = (ok ? `Uploaded ${ok} page${ok > 1 ? "s" : ""}. Tell Claude they're ready.` : "") + (failed.length ? ` Couldn't upload ${failed.length}: ${failed.join("; ")}` : "");
+  render();
+}
+
+/* ================= quiz ================= */
+const BOX_DAYS = [0, 1, 3, 7, 14, 30];
+function startQuiz() {
+  const cards = dueCards().sort(() => Math.random() - 0.5).slice(0, 12); if (!cards.length) return;
+  let i = 0, shown = false, right = 0;
+  const ov = document.createElement("div"); ov.className = "overlay"; ov.setAttribute("role", "dialog"); ov.setAttribute("aria-modal", "true"); document.body.append(ov);
+  const draw = () => {
+    if (i >= cards.length) { ov.innerHTML = `<div class="card-q"><div class="eyebrow">Done</div><div class="q">${right} of ${cards.length} right</div><p class="soft">Missed cards come back tomorrow. The ones you got move further out.</p><div class="btns"><button class="btn primary" data-close>Close</button></div></div>`; return; }
+    const c = cards[i];
+    ov.innerHTML = `<div class="card-q"><div class="eyebrow">${esc(c.topic)} · ${i + 1} of ${cards.length}</div><div class="q">${esc(c.q)}</div>
+      ${shown ? `<div class="a">${esc(c.a)}</div><div class="btns"><button class="btn" data-ans="0">Missed it</button><button class="btn primary" data-ans="1">Got it</button></div>` : `<div class="btns"><button class="btn primary" data-show>Show answer</button><button class="btn" data-close>Stop</button></div>`}</div>`;
+    ov.querySelector("[data-show],[data-ans]")?.focus();
+  };
+  ov.addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if (!b) return;
+    if ("close" in b.dataset) { ov.remove(); render(); return; }
+    if ("show" in b.dataset) { shown = true; return draw(); }
+    if ("ans" in b.dataset) {
+      const c = cards[i], ok = b.dataset.ans === "1", prev = S.quiz.cards?.[c.key]?.box || 0;
+      const box = ok ? Math.min(BOX_DAYS.length - 1, prev + 1) : 0, due = new Date(); due.setDate(due.getDate() + (ok ? BOX_DAYS[box] : 1));
+      const next = { cards: { ...(S.quiz.cards || {}), [c.key]: { box, due: dayKey(due) } } };
+      S.quiz = next; save("quiz/progress", (r) => r.set(next)); right += ok; i++; shown = false; draw();
+    }
+  });
+  draw();
+}
+
+/* ================= boot ================= */
+const h0 = (location.hash || "").slice(1);
+if (VIEWS[h0]) S.tab = h0;
+mUI(); ptLoad(); render(); connect();
+</script>

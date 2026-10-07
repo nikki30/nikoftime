@@ -10,6 +10,7 @@ styles.css      styling (light + dark)
 main.js         renders projects from projects.json
 projects.json   ← the only file you need to edit to add or change projects
 favicon.svg
+do-not-fret/    the Do Not Fret guitar practice app (see its own README)
 .github/workflows/pages.yml   publishes the site on every push to main
 ```
 
