@@ -24,7 +24,7 @@ code { font: 500 .85em var(--mono); }
 .engine { font: 500 .78rem var(--mono); color: var(--v4); }
 
 .hero { text-align: center; padding: 18px 0 26px; }
-.scene { width: min(360px, 92%); margin: 0 auto 6px; }
+.scene { width: min(400px, 100%); margin: 0 auto 6px; }
 .scene svg { width: 100%; overflow: visible; }
 .scene .shadow { fill: color-mix(in srgb, var(--ink) 10%, transparent); }
 .scene .cover { fill: var(--v1); }
@@ -40,8 +40,8 @@ code { font: 500 .85em var(--mono); }
 .scene .arm { fill: none; stroke: var(--v2); stroke-width: 7; stroke-linecap: round; }
 .scene .hand { fill: var(--v2); }
 .scene .bubble path { fill: var(--card); stroke: var(--ink); stroke-width: 1.6; }
-.scene .bubble text { font: 700 17px var(--hand); fill: var(--ink); }
-.scene .bubble { transform-origin: 300px 60px; animation: pop 3.2s ease-in-out infinite; }
+.scene .bubble text { font: 700 16px var(--hand); fill: var(--ink); }
+.scene .bubble { transform-origin: 300px 70px; animation: pop 3.2s ease-in-out infinite; }
 @keyframes sway { 50% { transform: rotate(3deg); } }
 @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(.1); } }
 @keyframes pop { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06) rotate(-2deg); } }
