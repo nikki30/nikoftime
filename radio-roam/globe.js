@@ -9,7 +9,7 @@ export function createGlobe(canvas) {
   const grat = geoGraticule10();
   const G = { land: null, dots: [], here: null, trail: [], rider: null, rot: [-10, -20, 0], zoom: 1, oy: 0, oyTarget: 0, dragging: false, idle: true, w: 0, h: 0, dpr: 1 };
 
-  fetch(new URL("../vendor/countries-110m.json", import.meta.url)).then((r) => r.json()).then((topo) => { G.land = feature(topo, topo.objects.countries); draw(); });
+  (window.__WORLD ? Promise.resolve(window.__WORLD) : fetch(new URL("../vendor/countries-110m.json", import.meta.url)).then((r) => r.json())).then((topo) => { G.land = feature(topo, topo.objects.countries); draw(); });
 
   function size() {
     const r = canvas.getBoundingClientRect();
