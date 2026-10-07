@@ -45,17 +45,17 @@
   </section>
 
   <form class="card ask" id="ask" autocomplete="off">
+    <div class="row two">
+      <label class="field"><span>Book</span><input id="f-title" required placeholder="e.g. Lessons in Chemistry"></label>
+      <label class="field"><span>Author</span><input id="f-author" required placeholder="e.g. Bonnie Garmus"></label>
+    </div>
     <label class="field main"><span>What just happened?</span>
       <textarea id="f-context" required rows="3" placeholder="e.g. Elizabeth just got fired from the lab"></textarea>
-      <small>One line about the last thing you read. Mention the book if you skip the details below.</small>
+      <small>One line about the last thing you read.</small>
     </label>
     <details class="more" id="more">
-      <summary>Add details <span class="soft">(optional): book, format, page</span></summary>
+      <summary>Add details <span class="soft">(optional): format and page</span></summary>
       <div class="more-body">
-        <div class="row two">
-          <label class="field"><span>Book</span><input id="f-title" placeholder="e.g. Lessons in Chemistry"></label>
-          <label class="field"><span>Author</span><input id="f-author" placeholder="e.g. Bonnie Garmus"></label>
-        </div>
         <div class="field">
           <span>How are you reading it?</span>
           <div class="seg" role="group" aria-label="Format">

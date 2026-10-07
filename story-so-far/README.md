@@ -2,7 +2,7 @@
 
 **Everything that's happened. Nothing that hasn't.**
 
-A spoiler-free "previously on…" for the book you're reading. Tell it what just happened (that's the only thing you have to give). You can add the title, the format and your page, or your percentage for audiobooks. It writes a recap of everything up to that moment and nothing after it, drawn to suit the story:
+A spoiler-free "previously on…" for the book you're reading. Tell it the book, the author and what just happened. You can also add the format and your page, or your percentage for audiobooks. It writes a recap of everything up to that moment and nothing after it, drawn to suit the story:
 
 | Style | Used for | Looks like |
 |---|---|---|

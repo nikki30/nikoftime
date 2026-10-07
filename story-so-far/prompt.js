@@ -37,8 +37,7 @@ export const INSTRUCTIONS = `You write spoiler-free "story so far" recaps for re
 THE ONE RULE: the reader must learn nothing beyond the exact moment they have reached. A recap that leaks even a hint of what comes next has failed, however good the rest of it is. This reader has been spoiled by summaries before; that is why they are here.
 
 Finding their place
-- They always give a note about what just happened. The note is the anchor: their position is the moment right after it. They may also give the title, the format and a page number or percentage; use those only to cross-check, and trust the note if they disagree. Editions differ, so page numbers are approximate.
-- If the title is missing, work out the book from the note. If you can't tell which book it is, set known to false and say in caution that you need the title.
+- They always give the title, the author and a note about what just happened. The note is the anchor: their position is the moment right after it. They may also give the format and a page number or percentage; use those only to cross-check, and trust the note if they disagree. Editions differ, so page numbers are approximate.
 
 What you may include
 - Only events, revelations and character knowledge that the text has shown by that moment.
@@ -78,7 +77,7 @@ export function describeReader(input) {
   const pos = input.format === "audio" && input.percent ? `${input.percent}% of the way through`
     : input.page ? `page ${input.page}${input.total ? ` of ${input.total} (about ${Math.round((input.page / input.total) * 100)}% through)` : ""}` : "";
   return [
-    `Book: ${input.title ? `${input.title}${input.author ? ` by ${input.author}` : ""}` : "(not given: work it out from the note)"}`,
+    `Book: ${input.title}${input.author ? ` by ${input.author}` : ""}`,
     input.format ? `Format: ${FORMAT_LABEL[input.format] || input.format}` : "",
     pos ? `Position: ${pos}` : "",
     `What just happened, in the reader's own words: ${input.context}`,

@@ -125,7 +125,7 @@ function readForm() {
 }
 function fillForm(input) {
   $("f-title").value = input.title || ""; $("f-author").value = input.author || ""; setFmt(input.format || "");
-  if (input.title || input.format || input.page) $("more").open = true;
+  if (input.format || input.page) $("more").open = true;
   $("f-page").value = input.page || ""; $("f-total").value = input.total || "";
   $("f-percent").value = input.percent || 40; $("pct-out").textContent = ($("f-percent").value) + "%";
   $("f-context").value = input.context || "";
@@ -135,6 +135,8 @@ let ctl = null;
 $("ask").addEventListener("submit", async (e) => {
   e.preventDefault();
   const input = readForm();
+  if (!input.title) { $("f-title").focus(); $("go-note").textContent = "Add the book's title."; return; }
+  if (!input.author) { $("f-author").focus(); $("go-note").textContent = "Add the author."; return; }
   if (!input.context) { $("f-context").focus(); $("go-note").textContent = "Tell it what just happened."; return; }
   if (input.total && input.page > input.total) { $("f-page").focus(); $("go-note").textContent = "The page is past the end of the book."; return; }
   if (!engineName()) { $("keybox").open = true; $("f-key").focus(); $("go-note").textContent = "Connect Claude first, or try an example below."; return; }
