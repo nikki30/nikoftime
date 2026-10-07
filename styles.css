@@ -44,6 +44,8 @@ a { color: inherit; text-decoration: none; }
 .me .float { animation: bob 4s ease-in-out infinite; filter: drop-shadow(0 8px 14px rgba(40, 20, 80, .18)); }
 .me .f2 { animation-delay: -1.3s; } .me .f3 { animation-delay: -2.6s; }
 @keyframes bob { 50% { transform: translateY(-9px); } }
+.me .jhumka { fill: #e7b43c; }
+.me .jhumka .st { fill: none; stroke: #a8741c; stroke-width: 1.2; }
 .me .glow { animation: pulse 2.4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
 @keyframes pulse { 50% { transform: scale(1.15); } }
 
