@@ -38,7 +38,7 @@ function paintEngine() {
 
 let SDK = null;
 async function viaKey(input, extra, signal) {
-  SDK ||= (await import("./vendor/anthropic.mjs")).Anthropic;
+  SDK ||= (await import("../vendor/anthropic.mjs")).Anthropic;
   const client = new SDK({ apiKey: E.key, dangerouslyAllowBrowser: true });
   let res;
   try {

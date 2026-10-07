@@ -8,6 +8,7 @@ A shelf of little apps you can use right now, in the spirit of [neal.fun](https:
 |---|---|
 | [**Do Not Fret**](do-not-fret/) | A guitar practice app: a daily routine with a metronome, fretboards that light up each note on the beat, theory lessons, songs with tab play-along, and charts of your clean tempo. [README](do-not-fret/README.md) |
 | [**Story So Far**](story-so-far/) | Spoiler-free recaps of the book you're reading, up to your exact page, drawn as a timeline, journey map, lab notebook, case file or scrapbook. [README](story-so-far/README.md) |
+| [**Radio Roam**](radio-roam/) | Float to a random place on Earth in a hot-air balloon and hear its radio live, with what's playing, a fact about the artist, and a passport of the countries you've visited. [README](radio-roam/README.md) |
 
 More tiles are on the way.
 
@@ -20,6 +21,8 @@ main.js         theme toggle, and the logo that plays a little guitar run when c
 favicon.svg
 do-not-fret/    the Do Not Fret app (one self-contained page, with its own README)
 story-so-far/   the Story So Far app (with its own README)
+radio-roam/     the Radio Roam app (with its own README)
+vendor/         shared libraries: the Anthropic SDK, d3-geo/topojson and world map shapes
 .github/workflows/pages.yml   publishes the site on every push to main
 ```
 

@@ -89,6 +89,23 @@ a { color: inherit; text-decoration: none; }
 .tile:hover .a-book .trail { animation: march 1.2s linear infinite; }
 @keyframes march { to { stroke-dashoffset: -24; } }
 
+/* Radio Roam art */
+.a-radio { background: radial-gradient(80% 70% at 50% 0%, #2a3488, #0b1026 75%); }
+.a-radio .stars circle { fill: #fff; opacity: .8; }
+.a-radio .globe { fill: #24357f; }
+.a-radio .land { fill: #3fae8f; }
+.a-radio .route { stroke: #ffd166; stroke-width: 3; stroke-dasharray: 2 9; stroke-linecap: round; }
+.a-radio .waves circle { fill: none; stroke: #ff7a59; stroke-width: 2.5; }
+.a-radio .waves circle:last-child { opacity: .5; }
+.a-radio .ping { fill: #ff7a59; stroke: #fff; stroke-width: 2.5; }
+.a-radio .env { fill: #ff7a59; }
+.a-radio .seams, .a-radio .ropes { fill: none; stroke: rgba(255, 255, 255, .7); stroke-width: 2; }
+.a-radio .basket { fill: #ffd166; }
+.a-radio .balloon { animation: drift 4s ease-in-out infinite; transform-box: fill-box; }
+@keyframes drift { 50% { translate: 0 -8px; rotate: 3deg; } }
+.tile:hover .a-radio .route { animation: march 1.2s linear infinite; }
+.tile:hover .a-radio .waves { animation: pulse 1.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+
 footer { margin-top: 110px; padding: 26px 0 40px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; font-size: 14px; color: var(--soft); }
 footer a:hover { color: var(--ink); }
 

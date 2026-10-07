@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Radio Roam</title>
+<meta name="description" content="Float to a random place on Earth and hear its radio live, with what's playing and a fun fact about the artist.">
+<meta name="theme-color" content="#0b1026">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230b1026'/%3E%3Cpath d='M32 46c-12-6-14-30 0-30s12 24 0 30z' fill='%23ff7a59'/%3E%3Crect x='28' y='48' width='8' height='6' fill='%23ffd166'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="stars" aria-hidden="true"></div>
+<header class="bar">
+  <a class="home" href="../">← More apps</a>
+  <div class="brand"><span class="mark" aria-hidden="true">🎈</span><b>Radio</b> <em>Roam</em></div>
+  <button class="passport-btn" id="passport-btn" type="button"><span aria-hidden="true">🛂</span> <b id="pp-count">0</b> <span class="lbl">countries</span></button>
+</header>
+
+<main class="stage">
+  <canvas id="globe" aria-label="A globe. Each dot is a radio station."></canvas>
+
+  <section class="intro" id="intro">
+    <h1>Hop in. <em>Land anywhere.</em> Listen.</h1>
+    <p>Float to a random corner of the world and hear its radio, live.</p>
+  </section>
+
+  <section class="card" id="card" hidden aria-live="polite"></section>
+
+  <div class="dock">
+    <div class="modes" role="radiogroup" aria-label="Where to">
+      <button type="button" role="radio" data-mode="any" aria-checked="true">Anywhere</button>
+      <button type="button" role="radio" data-mode="near" aria-checked="false" disabled>Nearby</button>
+      <button type="button" role="radio" data-mode="far" aria-checked="false" disabled>Far away</button>
+    </div>
+    <button class="ride" id="ride" type="button"><span aria-hidden="true">🎈</span> <span id="ride-label">Take a ride</span></button>
+    <p class="status" id="status" role="status"></p>
+  </div>
+</main>
+
+<dialog class="passport" id="passport" aria-labelledby="pp-h">
+  <header><h2 id="pp-h">Your passport</h2><button class="x" type="button" data-close aria-label="Close">×</button></header>
+  <div id="pp-body"></div>
+  <details class="claude" id="claude-box">
+    <summary><b>✨ Fun facts by Claude</b> <span class="soft" id="claude-state">optional</span></summary>
+    <p>Out of the box, facts come straight from Wikipedia. Add an Anthropic API key and Claude turns them into a "Did you know?". It only uses what Wikipedia says, and costs about a cent per fact.</p>
+    <div class="row"><input id="f-key" type="password" placeholder="sk-ant-…" spellcheck="false" autocomplete="off"><button type="button" class="btn" id="key-save">Save</button><button type="button" class="btn ghost" id="key-forget" hidden>Forget</button></div>
+    <p class="soft small">Your key stays in this browser and is only sent to <code>api.anthropic.com</code>.</p>
+  </details>
+</dialog>
+
+<audio id="audio" preload="none"></audio>
+<footer class="credit">Stations from <a href="https://www.radio-browser.info" rel="noopener" target="_blank">radio-browser.info</a> · facts from Wikipedia · made by <a href="../">Nikita</a></footer>
+<script type="module" src="app.js"></script>
+</body>
+</html>

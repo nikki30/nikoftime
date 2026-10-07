@@ -40,7 +40,7 @@ styles.css     layout and the five recap styles
 app.js         form, engines (Claude artifact or API key), spoiler check, rendering, shelf
 prompt.js      the instructions, the JSON schema and the spoiler-phrase check
 demos.js       the three example recaps (public-domain books)
-vendor/        the Anthropic TypeScript SDK bundled for the browser (MIT)
+../vendor/     shared with the other apps: the Anthropic TypeScript SDK bundled for the browser (MIT)
 ```
 
 No build step: it's plain ES modules. To rebundle the SDK: `npm i @anthropic-ai/sdk esbuild`, then bundle `export { default as Anthropic } from "@anthropic-ai/sdk"` with `esbuild --bundle --format=esm --platform=browser --minify`.
