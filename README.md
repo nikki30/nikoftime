@@ -1,23 +1,25 @@
 # nikoftime
 
-A shelf of little apps you can use right now, in the spirit of [neal.fun](https://neal.fun): open the site, click a tile, play. No sign-ups and no installs.
+A shelf of little apps you can use right now, in the spirit of [neal.fun](https://neal.fun): open the site, click a tile, use it. No sign-ups and no installs.
 
 **Live:** https://nikki30.github.io/nikoftime/
 
 | Tile | What it is |
 |---|---|
 | [**Do Not Fret**](do-not-fret/) | A guitar practice app: a daily routine with a metronome, fretboards that light up each note on the beat, theory lessons, songs with tab play-along, and charts of your clean tempo. [README](do-not-fret/README.md) |
+| [**Story So Far**](story-so-far/) | Spoiler-free recaps of the book you're reading, up to your exact page, drawn as a timeline, journey map, lab notebook, case file or scrapbook. [README](story-so-far/README.md) |
 
 More tiles are on the way.
 
 It's a plain static site: HTML, CSS and a little JavaScript. There's no build step and nothing to install.
 
 ```
-index.html      the homepage: wordmark + the grid of tiles
-styles.css      homepage styling (light + dark, dotted paper, tile animations)
-main.js         theme toggle, and the wordmark that plays a little guitar run when clicked
+index.html      the homepage: header, hero with the illustration, the grid of tiles
+styles.css      homepage styling (light + dark, tile art and animations)
+main.js         theme toggle, and the logo that plays a little guitar run when clicked
 favicon.svg
 do-not-fret/    the Do Not Fret app (one self-contained page, with its own README)
+story-so-far/   the Story So Far app (with its own README)
 .github/workflows/pages.yml   publishes the site on every push to main
 ```
 
@@ -44,9 +46,8 @@ python3 -m http.server 8080
 1. Put the app in its own folder, e.g. `metronome/index.html`. It must work by itself in the browser: no server, no login. Store anything it saves in `localStorage`, and give it a "← More apps" link back to `../`.
 2. In `index.html`, copy the `<a class="tile">` block and change:
    - `href` to the folder (`metronome/`)
-   - `--tile` (accent colour) and `--tile-2` (the art's background colour)
-   - the art: any inline SVG in a 400 × 300 box. Give its parts classes if you want them to move on hover, like the Do Not Fret strings and notes in `styles.css`.
+   - the art: any inline SVG in a 400 × 300 box on a gradient background (see `.a-fret` / `.a-book` in `styles.css`). Give its parts classes if you want them to move on hover.
    - the title and the one-line blurb
-3. With one tile the grid centres it. From two tiles on, it becomes a responsive grid automatically.
+3. Keep or remove the dashed "more on the way" slot at the end of the grid.
 
 An app that needs a server (like RAG Lab, which runs Python embedding models) can't be a click-and-play tile until its backend is hosted somewhere. Until then, link its repo from a tile labelled "run it yourself".

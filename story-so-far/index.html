@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Story So Far</title>
+<meta name="description" content="Spoiler-free recaps of the book you're reading. Everything that's happened. Nothing that hasn't.">
+<meta name="theme-color" content="#fbf8f3">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%236c4cf5'/%3E%3Cpath d='M14 18c7-3 13-2 18 2v28c-5-4-11-5-18-2z' fill='%23fff'/%3E%3Cpath d='M50 18c-7-3-13-2-18 2v28c5-4 11-5 18-2z' fill='%23ffd8cc'/%3E%3Cpath d='M40 12v16l4-3 4 3V12z' fill='%23ff7a59'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&family=Caveat:wght@500;700&family=Special+Elite&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="bar">
+    <a class="home" href="../">← More apps</a>
+    <span class="engine" id="engine-badge" hidden></span>
+  </header>
+
+  <section class="hero">
+    <div class="hero-book" aria-hidden="true">
+      <svg viewBox="0 0 120 90"><path class="pg l" d="M60 18c-14-8-30-9-46-3v60c16-6 32-5 46 3z"/><path class="pg r" d="M60 18c14-8 30-9 46-3v60c-16-6-32-5-46 3z"/><path class="ribbon" d="M86 10v34l6-5 6 5V10z"/><path class="flip" d="M60 18c10-6 22-8 34-6v58c-12-2-24 0-34 6z"/></svg>
+    </div>
+    <h1>Story <em>So Far</em></h1>
+    <p class="tag">Everything that's happened. Nothing that hasn't.</p>
+    <p class="lede">Tell it where you are in a book, and get a recap of everything up to that page, drawn to suit the story. Nothing past your page is included.</p>
+  </section>
+
+  <form class="card ask" id="ask" autocomplete="off">
+    <div class="row two">
+      <label class="field"><span>Book</span><input id="f-title" required placeholder="e.g. Lessons in Chemistry"></label>
+      <label class="field"><span>Author <i>optional</i></span><input id="f-author" placeholder="e.g. Bonnie Garmus"></label>
+    </div>
+    <div class="field">
+      <span>How are you reading it?</span>
+      <div class="seg" role="radiogroup" aria-label="Format">
+        <button type="button" role="radio" data-fmt="book" aria-checked="true">📖 Book</button>
+        <button type="button" role="radio" data-fmt="ebook" aria-checked="false">📱 E-book</button>
+        <button type="button" role="radio" data-fmt="audio" aria-checked="false">🎧 Audiobook</button>
+      </div>
+    </div>
+    <div class="field" id="pos-pages">
+      <span>Where are you?</span>
+      <div class="pages"><span>Page</span><input id="f-page" type="number" min="1" inputmode="numeric" placeholder="150"><span>of</span><input id="f-total" aria-label="Total pages (optional)" type="number" min="1" inputmode="numeric" placeholder="416"></div>
+    </div>
+    <div class="field" id="pos-audio" hidden>
+      <span>How far through? <b id="pct-out">40%</b></span>
+      <input id="f-percent" type="range" min="1" max="99" value="40">
+    </div>
+    <label class="field"><span>What just happened?</span>
+      <textarea id="f-context" required rows="2" placeholder="e.g. Elizabeth just got fired from the lab"></textarea>
+      <small>One line about the last thing you read. It's the best way to find your exact page.</small>
+    </label>
+    <div class="go">
+      <button class="btn primary" type="submit" id="go">Catch me up</button>
+      <span class="small soft" id="go-note"></span>
+    </div>
+  </form>
+
+  <div class="demos" id="demos"><span>Or try one:</span></div>
+
+  <details class="card keybox" id="keybox">
+    <summary><b>Connect Claude</b> <span class="small soft" id="key-state">to recap your own books</span></summary>
+    <div class="keybody">
+      <p>The recaps are written by Claude. On this public page that needs your own Anthropic API key. Each recap is one request, roughly 5–15 cents.</p>
+      <div class="row"><input id="f-key" type="password" placeholder="sk-ant-…" spellcheck="false" autocomplete="off"><button type="button" class="btn" id="key-save">Save key</button><button type="button" class="btn ghost" id="key-forget" hidden>Forget key</button></div>
+      <label class="small check"><input type="checkbox" id="key-remember" checked> Remember on this device</label>
+      <p class="small soft">Your key stays in this browser and is only ever sent to <code>api.anthropic.com</code>. Get one at <a href="https://console.anthropic.com/settings/keys" rel="noopener" target="_blank">console.anthropic.com</a>.</p>
+    </div>
+  </details>
+
+  <section id="result" aria-live="polite"></section>
+
+  <section class="shelf" id="shelf"></section>
+
+  <footer>Made by <a href="../">Nikita</a> · Recaps by Claude · Your shelf stays in this browser</footer>
+</div>
+<script type="module" src="app.js"></script>
+</body>
+</html>
