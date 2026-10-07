@@ -1,112 +1,33 @@
-// Renders the site from projects.json. To add or edit a project, edit that file only.
+// Theme toggle, and a little surprise: click the wordmark to hear it.
 
-const esc = (s) =>
-  String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const root = document.documentElement;
+try {
+  const saved = localStorage.getItem("theme");
+  if (saved) root.dataset.theme = saved;
+} catch {}
+document.querySelector(".theme-toggle").addEventListener("click", () => {
+  const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  root.dataset.theme = dark ? "light" : "dark";
+  try { localStorage.setItem("theme", root.dataset.theme); } catch {}
+});
 
-const STATUS_LABEL = { live: "Live", building: "In progress" };
-
-function themeToggle() {
-  const btn = document.querySelector(".theme-toggle");
-  const root = document.documentElement;
-  try {
-    const saved = localStorage.getItem("theme");
-    if (saved) root.dataset.theme = saved;
-  } catch {}
-  btn.addEventListener("click", () => {
-    const dark = root.dataset.theme
-      ? root.dataset.theme === "dark"
-      : matchMedia("(prefers-color-scheme: dark)").matches;
-    root.dataset.theme = dark ? "light" : "dark";
-    try { localStorage.setItem("theme", root.dataset.theme); } catch {}
+// Each letter of the wordmark is a note of A minor pentatonic. Click to play the run.
+let ctx = null;
+function pluck(freq, when) {
+  const sr = ctx.sampleRate, n = Math.round(sr / freq), len = Math.floor(sr * 1.4);
+  const buf = ctx.createBuffer(1, len, sr), out = buf.getChannelData(0), ring = new Float32Array(n);
+  for (let i = 0; i < n; i++) ring[i] = Math.random() * 2 - 1;
+  for (let t = 0, i = 0; t < len; t++) { const v = ring[i]; ring[i] = 0.996 * 0.5 * (v + ring[(i + 1) % n]); out[t] = v; i = (i + 1) % n; }
+  const src = ctx.createBufferSource(), gain = ctx.createGain();
+  src.buffer = buf; gain.gain.value = 0.28; src.connect(gain).connect(ctx.destination); src.start(when);
+}
+const NOTES = [220, 261.63, 293.66, 329.63, 392, 440, 523.25, 587.33, 659.25]; // A C D E G A C D E
+document.querySelector(".word").addEventListener("click", () => {
+  ctx ||= new (window.AudioContext || window.webkitAudioContext)();
+  ctx.resume();
+  const now = ctx.currentTime + 0.03;
+  document.querySelectorAll(".word span").forEach((el, i) => {
+    pluck(NOTES[i], now + i * 0.09);
+    setTimeout(() => { el.classList.remove("hop"); void el.offsetWidth; el.classList.add("hop"); }, i * 90);
   });
-}
-
-function projectCard(p) {
-  const tryBtn = p.demo
-    ? `<a class="btn primary" href="${esc(p.demo)}" rel="noopener">Try it live ↗</a>`
-    : "";
-  const repoBtn = p.repo ? `<a class="btn" href="${esc(p.repo)}" rel="noopener">View code ↗</a>` : "";
-  const docs = p.docs?.length
-    ? `<div class="docs">Guides: ${p.docs.map((d) => `<a href="${esc(d.url)}" rel="noopener">${esc(d.label)}</a>`).join("")}</div>`
-    : "";
-  const run = p.run
-    ? `<details class="run">
-         <summary>Run it yourself</summary>
-         <div class="run-body">
-           ${p.run.requirements ? `<div class="req">${esc(p.run.requirements)}</div>` : ""}
-           <pre><button class="copy" type="button">Copy</button><code>${esc(p.run.steps.join("\n"))}</code></pre>
-         </div>
-       </details>`
-    : "";
-  const media = p.image
-    ? `<div class="media"><img src="${esc(p.image)}" alt="${esc(p.imageAlt || p.name)}" loading="lazy"></div>`
-    : "";
-
-  return `
-    <article class="card${p.image ? " has-image" : ""}" data-tags="${esc(p.tags.join("|"))}">
-      ${media}
-      <div class="body">
-        <span class="status ${esc(p.status)}">${esc(STATUS_LABEL[p.status] || p.status)}</span>
-        <h3>${esc(p.name)}</h3>
-        ${p.tagline ? `<p class="tagline">${esc(p.tagline)}</p>` : ""}
-        <p>${esc(p.description)}</p>
-        <div class="tags">${p.tags.map((t) => `<span class="tag">${esc(t)}</span>`).join("")}</div>
-        <div class="cta">${tryBtn}${repoBtn}</div>
-        ${docs}
-        ${run}
-      </div>
-    </article>`;
-}
-
-function renderFilters(projects) {
-  const box = document.querySelector(".filters");
-  if (projects.length < 4) { box.hidden = true; return; }
-  const tags = ["All", ...new Set(projects.flatMap((p) => p.tags))];
-  box.innerHTML = tags
-    .map((t, i) => `<button class="chip" type="button" aria-pressed="${i === 0}">${esc(t)}</button>`)
-    .join("");
-  box.addEventListener("click", (e) => {
-    const chip = e.target.closest(".chip");
-    if (!chip) return;
-    box.querySelectorAll(".chip").forEach((c) => c.setAttribute("aria-pressed", String(c === chip)));
-    const tag = chip.textContent;
-    document.querySelectorAll("#featured .card").forEach((card) => {
-      card.hidden = tag !== "All" && !card.dataset.tags.split("|").includes(tag);
-    });
-  });
-}
-
-
-function wireCopyButtons() {
-  document.addEventListener("click", async (e) => {
-    const btn = e.target.closest(".copy");
-    if (!btn) return;
-    const code = btn.parentElement.querySelector("code").textContent;
-    try {
-      await navigator.clipboard.writeText(code);
-      btn.textContent = "Copied";
-    } catch {
-      btn.textContent = "Select & copy";
-    }
-    setTimeout(() => (btn.textContent = "Copy"), 1500);
-  });
-}
-
-async function init() {
-  themeToggle();
-  wireCopyButtons();
-  document.getElementById("year").textContent = new Date().getFullYear();
-
-  const data = await (await fetch("projects.json")).json();
-
-  document.getElementById("featured").innerHTML = data.featured.map(projectCard).join("");
-  renderFilters(data.featured);
-
-  document.getElementById("upcoming-list").innerHTML = data.upcoming
-    .map((u) => `<li><h3>${esc(u.name)}</h3><p>${esc(u.description)}</p>
-      <div class="tags">${u.tags.map((t) => `<span class="tag">${esc(t)}</span>`).join("")}</div></li>`)
-    .join("");
-  if (!data.upcoming.length) document.getElementById("upcoming").hidden = true;
-}
-
-init();
+});

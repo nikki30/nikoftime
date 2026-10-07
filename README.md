@@ -1,16 +1,23 @@
 # nikoftime
 
-Personal site for Nikita Sivakumar: every project in one place, with a way to use each one.
+A shelf of little apps you can use right now, in the spirit of [neal.fun](https://neal.fun): open the site, click a tile, play. No sign-ups and no installs.
+
+**Live:** https://nikki30.github.io/nikoftime/
+
+| Tile | What it is |
+|---|---|
+| [**Do Not Fret**](do-not-fret/) | A guitar practice app: a daily routine with a metronome, fretboards that light up each note on the beat, theory lessons, songs with tab play-along, and charts of your clean tempo. [README](do-not-fret/README.md) |
+
+More tiles are on the way.
 
 It's a plain static site: HTML, CSS and a little JavaScript. There's no build step and nothing to install.
 
 ```
-index.html      page layout
-styles.css      styling (light + dark)
-main.js         renders projects from projects.json
-projects.json   ← the only file you need to edit to add or change projects
+index.html      the homepage: wordmark + the grid of tiles
+styles.css      homepage styling (light + dark, dotted paper, tile animations)
+main.js         theme toggle, and the wordmark that plays a little guitar run when clicked
 favicon.svg
-do-not-fret/    the Do Not Fret guitar practice app (see its own README)
+do-not-fret/    the Do Not Fret app (one self-contained page, with its own README)
 .github/workflows/pages.yml   publishes the site on every push to main
 ```
 
@@ -20,8 +27,6 @@ do-not-fret/    the Do Not Fret guitar practice app (see its own README)
 python3 -m http.server 8080
 # open http://localhost:8080
 ```
-
-(Opening `index.html` straight from disk won't work, because browsers block `fetch("projects.json")` on `file://` URLs.)
 
 ## Publish it (GitHub Pages, free)
 
@@ -34,35 +39,14 @@ python3 -m http.server 8080
 
 **Shorter URL (optional):** if you rename this repo to `nikki30.github.io`, the site is served at `https://nikki30.github.io/` with no path.
 
-## Adding or editing a project
+## Adding a tile
 
-Edit `projects.json`:
+1. Put the app in its own folder, e.g. `metronome/index.html`. It must work by itself in the browser: no server, no login. Store anything it saves in `localStorage`, and give it a "← More apps" link back to `../`.
+2. In `index.html`, copy the `<a class="tile">` block and change:
+   - `href` to the folder (`metronome/`)
+   - `--tile` (accent colour) and `--tile-2` (the art's background colour)
+   - the art: any inline SVG in a 400 × 300 box. Give its parts classes if you want them to move on hover, like the Do Not Fret strings and notes in `styles.css`.
+   - the title and the one-line blurb
+3. With one tile the grid centres it. From two tiles on, it becomes a responsive grid automatically.
 
-- **`featured`** shows big cards with a description, tags, a screenshot or GIF, and buttons. Fields:
-  - `status`: `"live"` or `"building"`
-  - `repo`: GitHub link
-  - `demo`: public URL where people can use it. When this is set, a **Try it live** button appears.
-  - `run`: requirements plus copy-pasteable commands, shown under **Run it yourself**
-  - `image` / `imageAlt`: screenshot or GIF, plus a text description of it for screen readers
-  - `docs`: optional extra links
-- **`upcoming`** lists projects that are planned but not public yet.
-
-## Making each project usable by the public
-
-Showing a project is easy. Letting a stranger *use* it means hosting it. How depends on the project type:
-
-| Project type | Where to host (free tiers) | Then |
-|---|---|---|
-| Static frontend / plain HTML | GitHub Pages in that repo | put the URL in `demo` |
-| Next.js frontend | Vercel (import the repo) | put the URL in `demo` |
-| Python API (FastAPI etc.) | Hugging Face Spaces (Docker), Render, or Fly.io | point the frontend at it |
-| CLI / library (Rust, Python) | crates.io / PyPI release, or GitHub Releases binaries | keep the `run` steps current |
-| Notebook / ML coursework | link the repo; add a Colab badge if it's runnable | — |
-
-### RAG Lab: what needs to change before it can be public
-
-- The frontend calls `http://localhost:8000` in 7 places in `frontend/app/page.tsx`. Replace these with an env var, such as `process.env.NEXT_PUBLIC_API_URL`, so a hosted frontend can reach a hosted backend.
-- `backend/requirements.txt` is referenced in the README but isn't in the repo yet. Without it, `pip install -r requirements.txt` fails.
-- The backend downloads 90–400 MB embedding models. A Hugging Face Space (CPU basic, 16 GB RAM) handles this. Most free 512 MB hosts can't.
-- Add CORS on the FastAPI app so it allows the Vercel domain.
-- Deploy the frontend to Vercel with `NEXT_PUBLIC_API_URL` set, then put that URL in `demo`.
+An app that needs a server (like RAG Lab, which runs Python embedding models) can't be a click-and-play tile until its backend is hosted somewhere. Until then, link its repo from a tile labelled "run it yourself".

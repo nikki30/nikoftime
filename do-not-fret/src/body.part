@@ -13,10 +13,23 @@
   <header class="top">
     <span class="brand">Do Not <b>Fret</b></span>
     <span class="small soft" id="status">Opening your notebook…</span>
+    <span class="top-links"><a id="home-link" href="../" hidden>← More apps</a><button id="help-btn" type="button" aria-label="How Do Not Fret works" hidden>?</button></span>
   </header>
   <main id="view"></main>
 </div>
 
+<dialog class="welcome" id="welcome" aria-labelledby="wl-h">
+  <div class="wl-art" aria-hidden="true"><span>♪</span><span>♫</span><span>♪</span></div>
+  <h2 id="wl-h">Welcome to Do Not Fret</h2>
+  <p class="wl-lede">A practice buddy for guitar: twenty minutes a day, a metronome, and a fretboard that shows you every note as you play it.</p>
+  <ol class="wl-steps">
+    <li><span><b>Press “Start today's practice”.</b> A 25-minute timer runs while you work through the routine. You can pause it.</span></li>
+    <li><span><b>Open an exercise and press “Play along”.</b> Each note lights up on the fretboard, on the beat. Turn your sound on.</span></li>
+    <li><span><b>Played it clean?</b> That means alternate picking, saying every note out loud, and no mistakes. Save the tempo and watch it climb on the Progress page.</span></li>
+  </ol>
+  <p class="wl-note">No account needed. Everything you log stays in this browser. Export a backup from Progress any time.</p>
+  <div class="btns wl-btns"><button class="btn primary big" data-wl="go">Let's play</button><button class="btn" data-wl="new">I'm brand new to guitar</button></div>
+</dialog>
 <div class="ptimer" id="ptimer" hidden><span class="dot"></span><span id="ptimer-t">0:00</span><button id="ptimer-pause" aria-label="Pause practice">Pause</button><button id="ptimer-stop" aria-label="Stop and save practice">Stop</button></div>
 <div class="pwarn" id="pwarn" role="alertdialog" aria-live="assertive" hidden><b>25 minutes.</b> Time to stop? <span class="small soft">If you do nothing, this closes in 25 seconds and the timer keeps going.</span><div class="btns"><button class="btn primary" id="pwarn-stop">Stop now</button><button class="btn" id="pwarn-go">Keep going</button></div><div class="pwarn-bar"><i></i></div></div>
 <div class="dock" role="region" aria-label="Metronome">
@@ -304,12 +317,25 @@ function localDB(seed) {
     replace: (d) => { data = structuredClone(d); persist(); [...subs.keys()].forEach(notify); },
   };
 }
+function showVisitorBits() {
+  document.getElementById("home-link").hidden = false; document.getElementById("help-btn").hidden = false;
+  let seen = false; try { seen = !!localStorage.getItem("dnf-welcomed"); } catch {}
+  if (!seen) openWelcome();
+}
+function openWelcome() { const d = document.getElementById("welcome"); if (!d.open) d.showModal(); }
+function closeWelcome(choice) {
+  document.getElementById("welcome").close(); try { localStorage.setItem("dnf-welcomed", "1"); } catch {}
+  if (choice === "new") { S.lesson = "strings-tuning"; go("theory", () => document.getElementById("lesson-strings-tuning")?.scrollIntoView({ block: "start" })); }
+}
+document.getElementById("help-btn").addEventListener("click", openWelcome);
+document.getElementById("welcome").addEventListener("click", (e) => { const b = e.target.closest("[data-wl]"); if (b) closeWelcome(b.dataset.wl); else if (e.target.id === "welcome") closeWelcome("go"); });
+document.getElementById("welcome").addEventListener("cancel", () => { try { localStorage.setItem("dnf-welcomed", "1"); } catch {} });
 const SEED = (() => { try { return JSON.parse(document.getElementById("seed")?.textContent || "null"); } catch { return null; } })();
 const COLLS = ["theory", "skills", "drills", "songs", "classes", "pages", "logs", "sessions", "achievements", "diary"];
 async function connect() {
   let db = null;
   try { db = await window.claude?.use?.("db"); } catch {}
-  if (!db) { db = localDB(SEED); S.local = true; S.localDB = db; }
+  if (!db) { db = localDB(SEED); S.local = true; S.localDB = db; showVisitorBits(); }
   S.db = db; S.dbState = "on";
   if (!S.local) window.claude.use("assets").then((a) => { S.assets = a; render(); }).catch(() => {});
   for (const c of COLLS) {

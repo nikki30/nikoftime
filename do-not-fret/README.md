@@ -40,7 +40,8 @@ A tempo only counts if you played the whole exercise with **alternate picking** 
 2. On a phone, add it to your home screen so it opens like an app:
    - **iPhone (Safari):** Share → *Add to Home Screen*
    - **Android (Chrome):** ⋮ → *Add to Home screen*
-3. Turn your volume up: the metronome clicks, and the exercises play each note as it lights up. Untick **Play each note** if you only want the click.
+3. The first time you open it, a short welcome explains how it works. Tap **?** in the top corner to see it again, and **I'm brand new to guitar** takes you to the very first lesson.
+4. Turn your volume up: the metronome clicks, and the exercises play each note as it lights up. Untick **Play each note** if you only want the click.
 
 ### Your data
 
