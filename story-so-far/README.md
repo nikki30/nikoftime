@@ -2,25 +2,25 @@
 
 **Everything that's happened. Nothing that hasn't.**
 
-A spoiler-free "previously on…" for the book you're reading. Tell it the book, where you are (a page number, or a percentage for audiobooks) and one line about what just happened, and it writes a recap of everything up to that moment and nothing after it, drawn to suit the story:
+A spoiler-free "previously on…" for the book you're reading. Tell it what just happened (that's the only thing you have to give). You can add the title, the format and your page, or your percentage for audiobooks. It writes a recap of everything up to that moment and nothing after it, drawn to suit the story:
 
 | Style | Used for | Looks like |
 |---|---|---|
-| **Timeline** | historical fiction, sagas | dated events down a line |
-| **Journey** | quests, travel, adventures | numbered stops along a dotted route |
-| **Lab notebook** | science, clever comedies (think *Lessons in Chemistry*) | numbered experiments on graph paper, a periodic table of characters, relationships as reactions |
-| **Case file** | mysteries, thrillers | pinned evidence cards, mugshot polaroids, a CONFIDENTIAL stamp |
-| **Scrapbook** | romance, family, literary, everything else | taped polaroids with handwritten captions |
+| **Timeline** | historical fiction, sagas | small-caps title, a drop-cap TL;DR, cameo portraits, dated events down a line, footnotes |
+| **Journey** | quests, travel, adventures | a postcard TL;DR, numbered stops along a dotted route, luggage tags |
+| **Lab notebook** | science, clever comedies (think *Lessons in Chemistry*) | graph paper, a periodic table of characters, numbered experiments, reagent labels |
+| **Case file** | mysteries, thrillers | a typed memo, mugshot polaroids, pinned evidence cards, sticky notes |
+| **Scrapbook** | romance, family, literary, everything else | an index card, taped polaroids with handwritten captions, sticky notes |
 
-Every recap also has a *You are here* pin, a who's-who as the characters stand right now, how they relate, and a few facts worth remembering.
+Every recap has the same five parts, each drawn in the book's style: **the title**, a **TL;DR**, the **characters so far** (as they stand right now), the **story** (ending at a *You are here* pin) and what's **worth remembering**.
 
 **Try it:** https://nikki30.github.io/nikoftime/story-so-far/. Three example recaps (*Pride and Prejudice*, *Around the World in Eighty Days*, *Frankenstein*) work without any setup.
 
 ## How it avoids spoilers
 
-1. **Your note anchors the position.** Page counts differ between editions, so "Charlotte just accepted Mr Collins" is the anchor, and the page number is a cross-check.
+1. **Your note anchors the position.** Page counts differ between editions, so "Charlotte just accepted Mr Collins" is the anchor. A page number, if you give one, is only a cross-check.
 2. **Strict instructions:** only events and knowledge the text has shown by that moment; characters described as you currently understand them; never name someone who hasn't appeared; never hint at the future ("yet", "so far", "little does she know", "eventually", "fateful"…); leave out anything uncertain.
-3. **A second check.** The app scans every sentence for phrasing that tends to smuggle in the future. If it finds any, it asks Claude to rewrite the recap without it, and if anything still slips through, cuts the sentence. The badge on each recap says which of these happened.
+3. **A second check.** The app scans every sentence for phrasing that tends to smuggle in the future. If it finds any, it asks Claude to rewrite the recap without it, and if anything still slips through, it cuts the sentence.
 4. **No guessing.** If Claude doesn't know the book well enough, it says so and recaps only what you told it.
 
 ## Running it

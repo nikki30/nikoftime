@@ -7,8 +7,6 @@ export const DEMOS = [
     result: {
       known: true, caution: "",
       title: "Pride and Prejudice", author: "Jane Austen", style: "scrapbook",
-      vibe: "Regency drawing-room comedy",
-      headline: "Five sisters, one entailed house, and a very awkward ball.",
       recap: "The Bennets of Longbourn have five unmarried daughters and a house that can't pass to any of them. When wealthy Mr Bingley rents nearby Netherfield, Mrs Bennet sees a husband for Jane. Elizabeth, meanwhile, has taken a firm dislike to his proud friend Mr Darcy.",
       you_are_here: "Charlotte Lucas, Elizabeth's sensible friend, has just accepted Mr Collins, three days after Elizabeth turned him down.",
       beats: [
@@ -31,13 +29,6 @@ export const DEMOS = [
         { name: "Charlotte Lucas", symbol: "Cl", emoji: "☕", role: "Elizabeth's practical friend, 27, who wants a secure home." },
         { name: "Mrs Bennet", symbol: "Mb", emoji: "🗣️", role: "Mother on a mission to marry off her daughters. Her nerves are famous." },
       ],
-      links: [
-        { a: "Jane", b: "Bingley", relation: "Clearly taken with each other, now separated by his move to London" },
-        { a: "Elizabeth", b: "Darcy", relation: "Sparring partners; she can't stand him" },
-        { a: "Elizabeth", b: "Wickham", relation: "Easy friendship; she trusts his story" },
-        { a: "Wickham", b: "Darcy", relation: "Wickham says Darcy wronged him" },
-        { a: "Charlotte", b: "Collins", relation: "Newly engaged" },
-      ],
       remember: [
         "Longbourn is entailed: it passes to Mr Collins, not to any Bennet daughter.",
         "Lady Catherine de Bourgh, Mr Collins's patroness, is also Darcy's aunt (Wickham mentioned it).",
@@ -51,8 +42,6 @@ export const DEMOS = [
     result: {
       known: true, caution: "",
       title: "Around the World in Eighty Days", author: "Jules Verne", style: "journey",
-      vibe: "Victorian race against the clock",
-      headline: "One bet, one valet, one very persistent detective.",
       recap: "Phileas Fogg, the most precise man in London, bets £20,000 that he can circle the globe in eighty days, and leaves that same evening. Behind him trails Detective Fix, convinced Fogg is a bank robber on the run.",
       you_are_here: "In Hong Kong, Fix has just drugged Passepartout so he can't tell Fogg that the steamer Carnatic is leaving tonight instead of tomorrow morning.",
       beats: [
@@ -71,12 +60,6 @@ export const DEMOS = [
         { name: "Aouda", symbol: "Ao", emoji: "✨", role: "Young widow Fogg rescued in India, now travelling with them." },
         { name: "Sir Francis Cromarty", symbol: "Fc", emoji: "🎖️", role: "Brigadier-general who rode the elephant with them and left them at Allahabad." },
       ],
-      links: [
-        { a: "Fix", b: "Fogg", relation: "Shadowing him, waiting for a warrant" },
-        { a: "Fix", b: "Passepartout", relation: "A fake friendship, now soured" },
-        { a: "Fogg", b: "Aouda", relation: "Rescuer and rescued, travelling together" },
-        { a: "Passepartout", b: "Fogg", relation: "Loyal valet, devoted to the bet" },
-      ],
       remember: [
         "Deadline: back at the Reform Club by 8:45 pm on Saturday 21 December 1872.",
         "The Bank of England robbery was £55,000; Fix is chasing the reward.",
@@ -90,8 +73,6 @@ export const DEMOS = [
     result: {
       known: true, caution: "",
       title: "Frankenstein", author: "Mary Shelley", style: "lab",
-      vibe: "Gothic science gone very wrong",
-      headline: "A brilliant student makes a living being, then runs away from it.",
       recap: "On an Arctic expedition, Captain Walton pulls a half-frozen stranger from the ice: Victor Frankenstein. Victor tells him how a boyhood passion for science led him to build and bring to life a creature, and how he fled the moment it opened its eyes.",
       you_are_here: "Victor, recovered from months of fever, has just read his father's letter: his youngest brother William has been found murdered near Geneva.",
       beats: [
@@ -112,12 +93,6 @@ export const DEMOS = [
         { name: "Alphonse Frankenstein", symbol: "Af", emoji: "🏛️", role: "Victor's kind, respected father in Geneva." },
         { name: "William Frankenstein", symbol: "Wf", emoji: "🧒", role: "Victor's youngest brother, just reported murdered." },
         { name: "Justine Moritz", symbol: "Jm", emoji: "🧺", role: "Beloved family servant, praised in Elizabeth's letter." },
-      ],
-      links: [
-        { a: "Victor", b: "Creature", relation: "Creator flees creation" },
-        { a: "Victor", b: "Elizabeth", relation: "Promised to each other by his mother's wish" },
-        { a: "Clerval", b: "Victor", relation: "Nursed him back to health" },
-        { a: "Walton", b: "Victor", relation: "Rescued him; now hears his story" },
       ],
       remember: [
         "Everything is told by Victor to Walton, who writes it in letters to his sister.",

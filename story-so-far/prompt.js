@@ -5,15 +5,13 @@ export const STYLES = ["timeline", "journey", "lab", "casefile", "scrapbook"];
 export const SCHEMA = {
   type: "object",
   additionalProperties: false,
-  required: ["known", "caution", "title", "author", "style", "vibe", "headline", "recap", "you_are_here", "beats", "cast", "links", "remember"],
+  required: ["known", "caution", "title", "author", "style", "recap", "you_are_here", "beats", "cast", "remember"],
   properties: {
     known: { type: "boolean", description: "true if you know this book well enough to place the reader confidently" },
     caution: { type: "string", description: "empty, or a short plain note to the reader about uncertainty" },
     title: { type: "string" },
     author: { type: "string" },
     style: { type: "string", enum: STYLES },
-    vibe: { type: "string", description: "3-6 words on the book's genre and tone" },
-    headline: { type: "string" },
     recap: { type: "string" },
     you_are_here: { type: "string" },
     beats: {
@@ -30,13 +28,6 @@ export const SCHEMA = {
         properties: { name: { type: "string" }, symbol: { type: "string" }, emoji: { type: "string" }, role: { type: "string" } },
       },
     },
-    links: {
-      type: "array",
-      items: {
-        type: "object", additionalProperties: false, required: ["a", "b", "relation"],
-        properties: { a: { type: "string" }, b: { type: "string" }, relation: { type: "string" } },
-      },
-    },
     remember: { type: "array", items: { type: "string" } },
   },
 };
@@ -46,7 +37,8 @@ export const INSTRUCTIONS = `You write spoiler-free "story so far" recaps for re
 THE ONE RULE: the reader must learn nothing beyond the exact moment they have reached. A recap that leaks even a hint of what comes next has failed, however good the rest of it is. This reader has been spoiled by summaries before; that is why they are here.
 
 Finding their place
-- They give a format, a position (a page number, or a percentage for audiobooks) and a note about what just happened. The note is the most reliable anchor: their position is the moment right after it. Use the page or percentage only to cross-check, and trust the note if the two disagree. Editions differ, so page numbers are approximate.
+- They always give a note about what just happened. The note is the anchor: their position is the moment right after it. They may also give the title, the format and a page number or percentage; use those only to cross-check, and trust the note if they disagree. Editions differ, so page numbers are approximate.
+- If the title is missing, work out the book from the note. If you can't tell which book it is, set known to false and say in caution that you need the title.
 
 What you may include
 - Only events, revelations and character knowledge that the text has shown by that moment.
@@ -72,44 +64,43 @@ Visual style (pick one):
 
 Fields
 - beats: 4-9 key moments in story order, ending exactly at the reader's position. marker is a chapter range, a date or year, a place, or a label like "Exp. 01" or "Exhibit A" to suit the style. One fitting emoji each.
-- cast: up to 8 people who have appeared, each with a 2-letter symbol written like a chemical element (capital then lower case), an emoji, and a one-line role as the reader knows them now.
-- links: up to 6 relationships as they stand right now, with a and b as short names that match the cast.
+- cast: up to 8 people who have appeared, each with a 2-letter symbol written like a chemical element (capital then lower case), an emoji, and a one-line role as the reader knows them now, including how they stand with the others.
 - remember: 2-4 established facts that will help the reader follow what they read next, with no hints about it.
 - you_are_here: one sentence restating precisely where they are.
-- headline: a playful one-line hook for the story so far. recap: 2-3 sentences. vibe: 3-6 words on genre and tone.
+- recap: the TL;DR, 2-3 sentences on the story so far.
+- title and author: the book's real title and author.
 
 Before you answer, reread every sentence and ask: could this tell the reader anything about what happens after their position? If it could, cut it or rewrite it.`;
 
 const FORMAT_LABEL = { book: "printed book", ebook: "e-book", audio: "audiobook" };
 
 export function describeReader(input) {
-  const pos = input.format === "audio"
-    ? `${input.percent}% of the way through`
-    : `page ${input.page}${input.total ? ` of ${input.total} (about ${Math.round((input.page / input.total) * 100)}% through)` : ""}`;
+  const pos = input.format === "audio" && input.percent ? `${input.percent}% of the way through`
+    : input.page ? `page ${input.page}${input.total ? ` of ${input.total} (about ${Math.round((input.page / input.total) * 100)}% through)` : ""}` : "";
   return [
-    `Book: ${input.title}${input.author ? ` by ${input.author}` : ""}`,
-    `Format: ${FORMAT_LABEL[input.format] || input.format}`,
-    `Position: ${pos}`,
-    `What just happened, in the reader's own words: ${input.context || "(not given)"}`,
-  ].join("\n");
+    `Book: ${input.title ? `${input.title}${input.author ? ` by ${input.author}` : ""}` : "(not given: work it out from the note)"}`,
+    input.format ? `Format: ${FORMAT_LABEL[input.format] || input.format}` : "",
+    pos ? `Position: ${pos}` : "",
+    `What just happened, in the reader's own words: ${input.context}`,
+  ].filter(Boolean).join("\n");
 }
 
 // For the Claude-in-the-artifact engine, which takes one prompt and returns JSON.
 export function fullPrompt(input, extra = "") {
   const shape = JSON.stringify({
-    known: true, caution: "", title: "", author: "", style: "scrapbook", vibe: "", headline: "", recap: "", you_are_here: "",
+    known: true, caution: "", title: "", author: "", style: "scrapbook", recap: "", you_are_here: "",
     beats: [{ marker: "", emoji: "", title: "", text: "" }], cast: [{ name: "", symbol: "", emoji: "", role: "" }],
-    links: [{ a: "", b: "", relation: "" }], remember: [""],
+    remember: [""],
   });
   return `${INSTRUCTIONS}\n\nReply with only one JSON object with exactly these fields (style is one of ${STYLES.join(", ")}):\n${shape}\n\n${extra ? extra + "\n\n" : ""}The reader:\n${describeReader(input)}`;
 }
 
 // Phrases that usually smuggle in the future. A hit triggers one careful rewrite.
-const HINTS = /\b(not yet|n['’]t yet|has yet to|have yet to|yet to be|so far|for now|little (?:does|do|did) \w+ know|eventually|will (?:later|soon|eventually|come to|turn out)|would (?:later|soon|eventually|come to|turn out)|later (?:on|in the (?:book|story|novel))|is about to|are about to|doomed|ill-fated|fateful|foreshadow\w*|spoiler\w*|twist)\b/i;
+const HINTS = /\b(not yet|n['’]t yet|has yet to|have yet to|yet to be|(?<!story )so far|for now|little (?:does|do|did) \w+ know|eventually|will (?:later|soon|eventually|come to|turn out)|would (?:later|soon|eventually|come to|turn out)|later (?:on|in the (?:book|story|novel))|is about to|are about to|doomed|ill-fated|fateful|foreshadow\w*|spoiler\w*|twist)\b/i;
 
 export function findHints(result) {
-  const texts = [result.headline, result.recap, result.you_are_here, ...(result.beats || []).flatMap((b) => [b.title, b.text]),
-    ...(result.cast || []).map((c) => c.role), ...(result.links || []).map((l) => l.relation), ...(result.remember || [])];
+  const texts = [result.recap, result.you_are_here, ...(result.beats || []).flatMap((b) => [b.title, b.text]),
+    ...(result.cast || []).map((c) => c.role), ...(result.remember || [])];
   const out = [];
   for (const t of texts) for (const s of String(t || "").split(/(?<=[.!?])\s+/)) if (HINTS.test(s)) out.push(s.trim());
   return [...new Set(out)];
@@ -123,11 +114,9 @@ export function stripHints(result) {
   const clean = (t) => String(t || "").split(/(?<=[.!?])\s+/).filter((s) => !HINTS.test(s)).join(" ");
   return {
     ...result,
-    headline: HINTS.test(result.headline) ? "" : result.headline,
     recap: clean(result.recap), you_are_here: clean(result.you_are_here),
     beats: (result.beats || []).map((b) => ({ ...b, text: clean(b.text) })).filter((b) => b.text),
     cast: (result.cast || []).map((c) => ({ ...c, role: clean(c.role) })),
-    links: (result.links || []).filter((l) => !HINTS.test(l.relation)),
     remember: (result.remember || []).filter((r) => !HINTS.test(r)),
   };
 }

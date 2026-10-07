@@ -19,39 +19,61 @@
   </header>
 
   <section class="hero">
-    <div class="hero-book" aria-hidden="true">
-      <svg viewBox="0 0 120 90"><path class="pg l" d="M60 18c-14-8-30-9-46-3v60c16-6 32-5 46 3z"/><path class="pg r" d="M60 18c14-8 30-9 46-3v60c-16-6-32-5-46 3z"/><path class="ribbon" d="M86 10v34l6-5 6 5V10z"/><path class="flip" d="M60 18c10-6 22-8 34-6v58c-12-2-24 0-34 6z"/></svg>
+    <div class="scene" aria-hidden="true">
+      <svg viewBox="0 0 360 230">
+        <ellipse cx="180" cy="212" rx="150" ry="12" class="shadow"/>
+        <g class="book">
+          <path class="cover" d="M180 50c-44-22-100-24-150-8v162c50-16 106-14 150 8 44-22 100-24 150-8V42c-50-16-106-14-150 8z"/>
+          <path class="page" d="M180 56c-40-20-90-22-136-8v148c46-14 96-12 136 8z"/>
+          <path class="page" d="M180 56c40-20 90-22 136-8v148c-46-14-96-12-136 8z"/>
+          <g class="read"><path d="M64 78c30-8 60-8 96 2M64 98c30-8 60-8 96 2M64 118c30-8 60-8 96 2M64 138c30-8 60-8 96 2M64 158c30-8 52-8 70 0"/></g>
+          <g class="unread"><path d="M200 80c34-10 66-10 96-2M200 100c34-10 66-10 96-2M200 120c34-10 66-10 96-2M200 140c34-10 66-10 96-2M200 160c34-10 66-10 96-2"/></g>
+          <path class="spine" d="M180 56v152"/>
+        </g>
+        <g class="mascot">
+          <path class="ribbon" d="M222 14h44v168l-22-18-22 18z"/>
+          <g class="eyes"><ellipse cx="236" cy="62" rx="4" ry="5.5"/><ellipse cx="252" cy="62" rx="4" ry="5.5"/></g>
+          <path class="smile" d="M236 76q8 7 16 0"/>
+          <circle class="cheek" cx="230" cy="72" r="4"/><circle class="cheek" cx="258" cy="72" r="4"/>
+          <path class="arm" d="M266 96c14-2 22-12 26-24"/><circle class="hand" cx="293" cy="70" r="6"/>
+        </g>
+        <g class="bubble"><path d="M282 10h66a10 10 0 0 1 10 10v22a10 10 0 0 1-10 10h-40l-12 10 2-10h-16a10 10 0 0 1-10-10V20a10 10 0 0 1 10-10z"/><text x="315" y="37" text-anchor="middle">no peeking!</text></g>
+      </svg>
     </div>
     <h1>Story <em>So Far</em></h1>
     <p class="tag">Everything that's happened. Nothing that hasn't.</p>
-    <p class="lede">Tell it where you are in a book, and get a recap of everything up to that page, drawn to suit the story. Nothing past your page is included.</p>
   </section>
 
   <form class="card ask" id="ask" autocomplete="off">
-    <div class="row two">
-      <label class="field"><span>Book</span><input id="f-title" required placeholder="e.g. Lessons in Chemistry"></label>
-      <label class="field"><span>Author <i>optional</i></span><input id="f-author" placeholder="e.g. Bonnie Garmus"></label>
-    </div>
-    <div class="field">
-      <span>How are you reading it?</span>
-      <div class="seg" role="radiogroup" aria-label="Format">
-        <button type="button" role="radio" data-fmt="book" aria-checked="true">📖 Book</button>
-        <button type="button" role="radio" data-fmt="ebook" aria-checked="false">📱 E-book</button>
-        <button type="button" role="radio" data-fmt="audio" aria-checked="false">🎧 Audiobook</button>
-      </div>
-    </div>
-    <div class="field" id="pos-pages">
-      <span>Where are you?</span>
-      <div class="pages"><span>Page</span><input id="f-page" type="number" min="1" inputmode="numeric" placeholder="150"><span>of</span><input id="f-total" aria-label="Total pages (optional)" type="number" min="1" inputmode="numeric" placeholder="416"></div>
-    </div>
-    <div class="field" id="pos-audio" hidden>
-      <span>How far through? <b id="pct-out">40%</b></span>
-      <input id="f-percent" type="range" min="1" max="99" value="40">
-    </div>
-    <label class="field"><span>What just happened?</span>
-      <textarea id="f-context" required rows="2" placeholder="e.g. Elizabeth just got fired from the lab"></textarea>
-      <small>One line about the last thing you read. It's the best way to find your exact page.</small>
+    <label class="field main"><span>What just happened?</span>
+      <textarea id="f-context" required rows="3" placeholder="e.g. Elizabeth just got fired from the lab"></textarea>
+      <small>One line about the last thing you read. Mention the book if you skip the details below.</small>
     </label>
+    <details class="more" id="more">
+      <summary>Add details <span class="soft">(optional): book, format, page</span></summary>
+      <div class="more-body">
+        <div class="row two">
+          <label class="field"><span>Book</span><input id="f-title" placeholder="e.g. Lessons in Chemistry"></label>
+          <label class="field"><span>Author</span><input id="f-author" placeholder="e.g. Bonnie Garmus"></label>
+        </div>
+        <div class="field">
+          <span>How are you reading it?</span>
+          <div class="seg" role="group" aria-label="Format">
+            <button type="button" data-fmt="book" aria-pressed="false">📖 Book</button>
+            <button type="button" data-fmt="ebook" aria-pressed="false">📱 E-book</button>
+            <button type="button" data-fmt="audio" aria-pressed="false">🎧 Audiobook</button>
+          </div>
+        </div>
+        <div class="field" id="pos-pages">
+          <span>Page</span>
+          <div class="pages"><input id="f-page" type="number" min="1" inputmode="numeric" placeholder="150" aria-label="Page you're on"><span>of</span><input id="f-total" type="number" min="1" inputmode="numeric" placeholder="416" aria-label="Total pages"></div>
+        </div>
+        <div class="field" id="pos-audio" hidden>
+          <span>How far through? <b id="pct-out">40%</b></span>
+          <input id="f-percent" type="range" min="1" max="99" value="40">
+        </div>
+      </div>
+    </details>
     <div class="go">
       <button class="btn primary" type="submit" id="go">Catch me up</button>
       <span class="small soft" id="go-note"></span>
