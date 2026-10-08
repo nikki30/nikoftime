@@ -115,8 +115,8 @@ const WEATHER = [[[0], "☀️", "Clear"], [[1, 2], "🌤️", "Mostly clear"], 
   [[61, 63, 65, 66, 67], "🌧️", "Rain"], [[71, 73, 75, 77, 85, 86], "🌨️", "Snow"], [[80, 81, 82], "🌦️", "Showers"], [[95, 96, 99], "⛈️", "Thunderstorms"]];
 const tilt = (i) => `${(((i * 53) % 7) - 3) * 0.6}deg`;
 
-function fc(kind, icon, title, body, i, extra = "") {
-  return `<article class="fc fc-${kind}" style="--r:${tilt(i)};--i:${i}" ${extra}><span class="ic" aria-hidden="true">${icon}</span><h3>${title}</h3>${body}</article>`;
+function fc(kind, icon, title, body, i, pic = false) {
+  return `<article class="fc fc-${kind}${pic ? " has-pic" : ""}" style="--r:${tilt(i)};--i:${i}" ${pic ? `data-pic="${kind}" tabindex="0" role="button" aria-label="${esc(title)}: show a picture"` : ""}><span class="ic" aria-hidden="true">${icon}</span>${pic ? `<span class="tap" aria-hidden="true">📷</span>` : ""}<h3>${title}</h3>${body}</article>`;
 }
 
 function showRing(p) {
@@ -125,14 +125,14 @@ function showRing(p) {
   const inCapital = c.capital && p.name.split(",")[0].trim() === c.capital;
   const left = [
     fc("song", "🎵", `Top of the charts in ${esc(p.country)}`, `<div id="song-slot"></div><a class="src" id="song-link" target="_blank" rel="noopener" hidden>Full song on Apple Music ↗</a>`, 0),
-    fc("food", "🌱", "Must-eat veg", `<div class="food"><img id="food-photo" alt="" hidden><div><b class="big">${esc(p.dish.name)}</b><span class="veg">Vegetarian</span></div></div><p class="clamp">${esc(p.dish.what)}</p><button class="more" type="button" data-food>Read more ›</button>`, 1),
-    x.visit ? fc("visit", "📍", "Must visit", `<b class="big">${esc(x.visit.name)}</b><p class="clamp">${esc(x.visit.why)}</p>`, 2) : "",
+    fc("food", "🌱", "Must-eat veg", `<div class="food"><img id="food-photo" alt="" hidden><div><b class="big">${esc(p.dish.name)}</b><span class="veg">Vegetarian</span></div></div><p class="clamp">${esc(p.dish.what)}</p>`, 1, true),
+    x.visit ? fc("visit", "📍", "Must visit", `<b class="big">${esc(x.visit.name)}</b><p class="clamp">${esc(x.visit.why)}</p>`, 2, true) : "",
   ];
   const right = [
-    x.only ? fc("only", "✨", "Only here", `<p>${esc(x.only)}</p>`, 4) : "",
+    x.only ? fc("only", "✨", "Only here", `<p>${esc(x.only)}</p>`, 4, true) : "",
     x.hello ? fc("hello", "💬", "Say hello", `<b class="huge">${esc(x.hello.word)}</b><p><i>${esc(x.hello.say)}</i> · ${esc(x.hello.lang)}</p>`, 5) : "",
     fc("now", "🕰️", "Right now there", `<div class="now-row"><b class="big" id="clock">--:--</b><span class="wx" id="wx"></span></div><p id="offset"></p>`, 6),
-    fc("know", "🏛️", "Good to know", `<p class="kv"><span>Capital</span><b>${esc(c.capital || "")}</b></p>${inCapital ? `<p class="hl">You're standing in it!</p>` : c.note ? `<p class="soft small">${esc(c.note[0].toUpperCase() + c.note.slice(1))}.</p>` : ""}<p class="kv"><span>Money</span><b>${esc(c.money || "")}</b></p><p class="kv"><span>Driving</span><b>on the ${esc(c.drive || "?")}${c.drive === "left" ? " (look right first!)" : ""}</b></p>`, 7),
+    fc("know", "🏛️", "Good to know", `<p class="kv"><span>Capital</span><b>${esc(c.capital || "")}</b></p>${inCapital ? `<p class="hl">You're standing in it!</p>` : c.note ? `<p class="soft small">${esc(c.note[0].toUpperCase() + c.note.slice(1))}.</p>` : ""}<p class="kv"><span>Money</span><b>${esc(c.money || "")}</b></p><p class="kv"><span>Driving</span><b>on the ${esc(c.drive || "?")}${c.drive === "left" ? " (look right first!)" : ""}</b></p>`, 7, true),
   ];
   $("ring").innerHTML = `
     <header class="ring-head"><span class="flag">${flag(p.cc)}</span><div><h2>${esc(p.name)}</h2><p>${esc(p.country)} · ${km != null ? `${km.toLocaleString()} km floated` : "your first stop"}${fresh ? ` · <b>new to your empire!</b>` : ""}</p></div></header>
@@ -142,8 +142,18 @@ function showRing(p) {
   $("zoom").hidden = false; $("zoom").disabled = false; $("dock").hidden = false;
   document.body.classList.add("landed");
   globe.lift(phone() ? 0.3 : 0); globe.scale(phone() ? 0.9 : 0.72);
-  $("ring").querySelector("[data-food]").onclick = () => showFood(p);
-  for (const el of $("ring").querySelectorAll(".clamp")) el.closest(".fc").addEventListener("click", (e) => { if (!e.target.closest("button, a")) el.closest(".fc").classList.toggle("open"); });
+  const city = p.name.split(",")[0].trim();
+  const pics = {
+    food: { kind: "🌱 Must-eat veg", title: p.dish.name, text: p.dish.what, exact: p.dish.wiki, search: `${p.dish.name} food` },
+    visit: x.visit && { kind: "📍 Must visit", title: x.visit.name, text: x.visit.why, exact: x.visit.wiki, search: `${x.visit.name} ${city}` },
+    only: { kind: "✨ Only here", title: p.name, text: x.only, exact: p.wiki, search: p.name },
+    know: { kind: `🏛️ Capital of ${p.country}`, title: c.capital, text: inCapital ? "You're standing in it!" : c.note ? `${c.note[0].toUpperCase() + c.note.slice(1)}.` : "", exact: c.wiki || c.capital, search: `${c.capital} city` },
+  };
+  for (const el of $("ring").querySelectorAll("[data-pic]")) {
+    const open = (e) => { if (e.target.closest("button, a")) return; const pic = pics[el.dataset.pic]; if (pic) { showPic(pic); if (el.dataset.pic === "food") tasted(p); } };
+    el.addEventListener("click", open);
+    el.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(e); } });
+  }
   paintSong();
   tickClock(p); weather(p); foodPhoto(p, $("food-photo"));
   leads();
@@ -185,6 +195,47 @@ async function foodPhoto(p, img) {
     if (src && img && S.here === p) { img.onerror = () => img.remove(); img.src = src.replace(/\/\d+px-/, "/320px-"); img.hidden = false; }
   } catch {}
 }
+
+/* ---------------- tap a card for a picture ---------------- */
+const picCache = new Map();
+async function wikiPic({ exact, search }) {
+  const key = exact || search;
+  if (picCache.has(key)) return picCache.get(key);
+  const big = (u) => u?.replace(/\/\d+px-/, "/1024px-");
+  let out = null;
+  if (exact) {
+    try {
+      const j = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(exact.replace(/ /g, "_"))}`).then((r) => (r.ok ? r.json() : null));
+      if (j?.thumbnail?.source && j.type !== "disambiguation") out = { src: big(j.thumbnail.source), url: j.content_urls?.desktop?.page };
+    } catch {}
+  }
+  if (!out && search) {
+    try {
+      const j = await fetch(`https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(search)}&gsrlimit=3&prop=pageimages|info&piprop=thumbnail&pithumbsize=1024&inprop=url&format=json&origin=*`).then((r) => r.json());
+      const pages = Object.values(j?.query?.pages || {}).sort((a, b) => a.index - b.index);
+      const hit = pages.find((pg) => pg.thumbnail?.source);
+      if (hit) out = { src: hit.thumbnail.source, url: hit.fullurl };
+    } catch {}
+  }
+  picCache.set(key, out);
+  return out;
+}
+
+async function showPic(pic) {
+  const d = $("pic"), img = $("pic-img");
+  $("pic-kind").textContent = pic.kind; $("pic-title").textContent = pic.title; $("pic-text").textContent = pic.text || "";
+  $("pic-src").hidden = true; img.hidden = true; img.removeAttribute("src");
+  d.classList.add("loading"); d.classList.remove("nopic");
+  if (!d.open) d.showModal();
+  const found = await wikiPic(pic);
+  if ($("pic-title").textContent !== pic.title) return;
+  if (!found) { d.classList.remove("loading"); d.classList.add("nopic"); return; }
+  img.onload = () => { d.classList.remove("loading"); img.hidden = false; };
+  img.onerror = () => { d.classList.remove("loading"); d.classList.add("nopic"); };
+  img.alt = pic.title; img.src = found.src;
+  if (found.url) { $("pic-src").href = found.url; $("pic-src").hidden = false; }
+}
+$("pic").addEventListener("click", (e) => { if (e.target.closest("[data-close]") || e.target.id === "pic") $("pic").close(); });
 
 // Dotted lines from each card to the spot on the globe (wide screens only).
 function leads() {

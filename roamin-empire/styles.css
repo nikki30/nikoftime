@@ -193,3 +193,25 @@ body.landed .intro { display: none; }
 .fc .kv { display: flex; gap: 8px; align-items: baseline; }
 .fc .kv span { flex: none; width: 58px; font: 500 .66rem var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--soft); }
 .fc .kv b { font-weight: 600; }
+
+/* tap a card for a picture */
+.fc.has-pic { cursor: pointer; }
+.fc .tap { position: absolute; top: 10px; right: 12px; font-size: .9rem; opacity: .55; transition: opacity .2s, transform .3s cubic-bezier(.3, 1.6, .5, 1); }
+.fc.has-pic:hover .tap, .fc.has-pic:focus-visible .tap { opacity: 1; transform: scale(1.3) rotate(-8deg); }
+.fc:focus-visible { outline: 2px solid var(--a); outline-offset: 3px; }
+.pic { width: min(720px, calc(100% - 24px)); max-height: calc(100% - 24px); padding: 0; border: 1px solid var(--line); border-radius: 22px; overflow: auto; background: #1d1236; color: var(--ink); box-shadow: 0 40px 80px -30px rgba(0, 0, 0, .9); }
+.pic[open] { animation: picIn .4s cubic-bezier(.2, 1.3, .4, 1); }
+@keyframes picIn { from { opacity: 0; transform: scale(.9) rotate(-1.5deg); } }
+.pic::backdrop { background: rgba(8, 4, 18, .7); backdrop-filter: blur(4px); }
+.pic .x { position: absolute; top: 12px; right: 12px; z-index: 2; background: rgba(20, 12, 38, .7); backdrop-filter: blur(6px); color: var(--ink); }
+.pic .frame { position: relative; min-height: 200px; display: grid; place-items: center; background: radial-gradient(circle at 50% 40%, #3a2a7a, #1d1236); }
+.pic .frame img { display: block; width: 100%; max-height: 62vh; object-fit: cover; animation: fadeUp .5s ease both; }
+@keyframes fadeUp { from { opacity: 0; transform: scale(1.03); } }
+.pic .spin { display: none; font-size: 2.4rem; animation: float 1.4s ease-in-out infinite; }
+@keyframes float { 50% { transform: translateY(-10px) rotate(5deg); } }
+.pic.loading .spin { display: block; }
+.pic .none { display: none; padding: 30px; color: var(--soft); font-style: italic; }
+.pic.nopic .none { display: block; }
+.pic .cap { padding: 16px 22px 22px; }
+.pic h2 { margin: 4px 0 6px; font: 400 2rem/1.1 var(--serif); }
+.pic p { margin: 0 0 10px; color: #ddd3ea; }

@@ -50,6 +50,12 @@
   <div id="pp-body"></div>
 </dialog>
 
+<dialog class="pic loading" id="pic" aria-labelledby="pic-title">
+  <button class="x" type="button" data-close aria-label="Close">×</button>
+  <div class="frame"><img id="pic-img" alt="" hidden><span class="spin" aria-hidden="true">🎈</span><span class="none">No picture for this one, sorry. Imagine something lovely.</span></div>
+  <div class="cap"><span class="label" id="pic-kind"></span><h2 id="pic-title"></h2><p id="pic-text"></p><a class="src" id="pic-src" target="_blank" rel="noopener" hidden>Photo and more on Wikipedia ↗</a></div>
+</dialog>
+
 <audio id="audio" preload="none"></audio>
 <footer class="credit" id="credit">Charts and previews from Apple Music · facts from Wikipedia · made by <a href="../">Nikita</a></footer>
 <script type="module" src="app.js"></script>
