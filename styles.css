@@ -120,6 +120,19 @@ a { color: inherit; text-decoration: none; }
 .a-empire .balloon { animation: drift 4s ease-in-out infinite; transform-box: fill-box; }
 .tile:hover .a-empire .notes { animation: pulse 1.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
 
+/* Playing the Lang Game art */
+.a-lang { background: radial-gradient(70% 80% at 15% 15%, color-mix(in srgb, #2e9d6a 75%, transparent), transparent 70%), radial-gradient(70% 80% at 90% 60%, color-mix(in srgb, #e07a2f 80%, transparent), transparent 70%), #f3e3c3; }
+.a-lang .bub path { fill: #fffdf8; stroke: #2a2233; stroke-width: 3; }
+.a-lang .bub text { font: 600 26px "Noto Sans Malayalam", "Noto Sans Telugu", sans-serif; fill: #2e9d6a; }
+.a-lang .b2 text { fill: #c05f1a; }
+.a-lang .tiles rect { fill: #f3d9a4; stroke: #2a2233; stroke-width: 2.5; }
+.a-lang .tiles text { font: 700 30px Georgia, serif; fill: #2a2233; text-anchor: middle; }
+.a-lang .tiles text.pt { font: 600 11px sans-serif; }
+.a-lang .bub { transform-box: fill-box; transform-origin: bottom left; transition: transform .5s cubic-bezier(.3, 1.6, .5, 1); }
+.tile:hover .a-lang .bub { transform: translateY(-6px) rotate(-2deg); }
+.tile:hover .a-lang .b2 { transform: translateY(-6px) rotate(2deg); }
+.a-lang .tiles g { transition: transform .5s cubic-bezier(.3, 1.6, .5, 1); }
+
 footer { margin-top: 110px; padding: 26px 0 40px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; font-size: 14px; color: var(--soft); }
 footer a:hover { color: var(--ink); }
 

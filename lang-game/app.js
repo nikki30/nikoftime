@@ -304,7 +304,8 @@ VIEWS.script = () => {
   $("tx").oninput = () => {
     $("tx-out").textContent = [...$("tx").value].map((ch) => { const c = ch.codePointAt(0);
       if (c >= 0x0900 && c <= 0x097f) return cell(B, c - 0x0900) || ch;
-      if (c >= 0x0b80 && c <= 0x0bff) return cell(B, c - 0x0b80) || ch;
+      // Tamil ன (the "alveolar n") has no everyday twin, so it becomes the ordinary n.
+      if (c >= 0x0b80 && c <= 0x0bff) return cell(B, c === 0x0ba9 ? 0x28 : c - 0x0b80) || ch;
       return ch; }).join("");
   };
 };
