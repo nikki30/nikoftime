@@ -339,3 +339,18 @@ body.landed .intro { display: none; }
 .col.bottom { flex-direction: row; justify-content: center; }
 .col.bottom > div:empty { display: none; }
 @media (max-width: 900px) { .col.bottom { flex-direction: column; } }
+.flag-img { height: 1em; width: auto; border-radius: 3px; vertical-align: -0.12em; box-shadow: 0 0 0 1px rgba(255, 255, 255, .15); }
+.ring-head .flag .flag-img, .where .flag .flag-img { height: 34px; border-radius: 5px; }
+.stamp .flag-img { height: 26px; }
+.ring-head .now-line { display: block; white-space: normal; }
+.ring-head .now-line #wx { white-space: nowrap; }
+.pic.nopic .frame { display: none; }
+.pic.nopic .cap { padding-top: 46px; }
+.origin { margin-top: 10px; padding-top: 8px; border-top: 1px dashed color-mix(in srgb, var(--a) 40%, transparent); }
+.o-label { font: 500 .62rem var(--mono); text-transform: uppercase; letter-spacing: .1em; color: var(--a); }
+.fc .o-fam { margin: 2px 0 6px; font-size: .82rem; }
+.small-bar { height: 8px; border-radius: 4px; }
+.fc .o-mix { margin: 5px 0 0; font-size: .72rem; color: var(--soft); }
+.o-mix i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin: 0 4px 0 6px; }
+.o-mix i:first-child { margin-left: 0; }
+.fc .o-more { margin: 4px 0 0; font-size: .72rem; color: var(--a); }

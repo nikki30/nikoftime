@@ -13,7 +13,8 @@ const store = {
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
 };
 const phone = () => matchMedia("(max-width: 900px)").matches;
-const flag = (cc) => flagOf(cc.toUpperCase());
+// Real flag pictures: Windows doesn't draw flag emoji (it shows letters like "PY").
+const flag = (cc) => `<img class="flag-img" src="https://flagcdn.com/${cc.toLowerCase()}.svg" alt="${esc(flagOf(cc.toUpperCase()))}" loading="lazy" onerror="this.replaceWith(document.createTextNode(this.alt))">`;
 const rand = (a) => a[Math.floor(Math.random() * a.length)];
 
 // Every country, with its capital as the landing spot. Countries with hand-picked places also get those.
@@ -163,13 +164,13 @@ function showRing(p) {
   ];
   const right = [
     I.only ? fc("only", "✨", "Only here", `<p>${esc(I.only)}</p>`, 4, true) : "",
-    I.hello ? fc("hello", "💬", "Say hello", `<div class="hello-row"><b class="huge">${esc(I.hello.word)}</b>${speakBtn("hello", I.hello.word)}</div>${I.hello.script ? `<p class="script">${esc(I.hello.script)}</p>` : ""}<p><i>${esc(I.hello.say)}</i> · ${esc(I.hello.lang)}</p>${langOf(I.hello.lang) ? `<p class="soft small">Tap to see where ${esc(langName(I.hello.lang))} comes from</p>` : ""}`, 5, !!langOf(I.hello.lang)) : "",
+    I.hello ? fc("hello", "💬", "Say hello", `<div class="hello-row"><b class="huge">${esc(I.hello.word)}</b>${speakBtn("hello", I.hello.word)}</div>${I.hello.script ? `<p class="script">${esc(I.hello.script)}</p>` : ""}<p><i>${esc(I.hello.say)}</i> · ${esc(I.hello.lang)}</p>${langOf(I.hello.lang) ? originHTML(langOf(I.hello.lang)) : ""}`, 5, !!langOf(I.hello.lang)) : "",
     I.politics ? fc("politics", "⚖️", "Who runs it", `<p class="sys">${esc(I.politics.system)}</p><div id="leaders" class="leaders"><span class="soft small">Looking up who's in charge…</span></div>`, 6, true) : "",
     fc("know", "🏛️", "Good to know", `<p class="kv"><span>Capital</span><b>${esc(I.capital || "")}</b></p>${inCapital ? `<p class="hl">You're standing in it!</p>` : I.note ? `<p class="soft small">${esc(I.note[0].toUpperCase() + I.note.slice(1))}.</p>` : ""}<p class="kv"><span>Money</span><b>${esc(I.money || "")}</b></p><p class="kv"><span>Driving</span><b>on the ${esc(I.drive || "?")}${I.drive === "left" ? " (look right first!)" : ""}</b></p>`, 7, true),
   ];
   $("ring").innerHTML = `
     <header class="ring-head"><span class="flag">${flag(p.cc)}</span><div><h2>${esc(p.name)}</h2><p>${p.name.split(",")[0].trim() !== p.country ? `${esc(p.country)} · ` : ""}${km != null ? `${km.toLocaleString()} km floated` : "your first stop"}${fresh ? ` · <b>new to your empire!</b>` : ""}</p>
-      <p class="now-line"><span>🕰️ <b id="clock">--:--</b> <span id="offset"></span></span><span id="wx"></span></p></div></header>
+      <p class="now-line">🕰️ <b id="clock">--:--</b> <span id="offset"></span> <span id="wx"></span></p></div></header>
     <div class="col left">${left.join("")}</div><div class="col right">${right.join("")}</div>
     <div class="col bottom"><div id="names-slot">${I.names ? namesCard(I.names) : ""}</div><div id="news-slot"></div></div>`;
   $("ring").hidden = false; $("ring").scrollTop = 0;
@@ -227,7 +228,7 @@ async function weather(p) {
     const j = await r.json(), cur = j.current; if (!cur || S.here !== p || !$("wx")) return;
     const w = WEATHER.find(([codes]) => codes.includes(cur.weather_code)) || [[], "🌡️", ""];
     const icon = !cur.is_day && w[1] === "☀️" ? "🌙" : w[1];
-    $("wx").innerHTML = `<span class="wx-ic">${icon}</span> <b>${Math.round(cur.temperature_2m)}°C</b> ${esc(w[2].toLowerCase())}`;
+    $("wx").innerHTML = `· ${icon} <b>${Math.round(cur.temperature_2m)}°C</b> ${esc(w[2].toLowerCase())}`;
   } catch {}
 }
 
@@ -359,6 +360,13 @@ function namesCard(N) {
 /* ---------------- where the language comes from ---------------- */
 const langName = (l) => l.replace(/\s*\(.*\)\s*$/, "").split(",")[0].trim();
 const langOf = (l) => l && (LANGS[l] || LANGS[langName(l)]);
+// The origin of the language, right on the Say hello card.
+function originHTML(L) {
+  return `<div class="origin"><span class="o-label">🌳 Where it comes from</span><p class="o-fam">${esc(L.family)}</p>
+    ${L.mix?.length ? `<div class="mix-bar small-bar">${L.mix.map(([src, pct], i) => `<span style="flex:${pct};background:${MIX[i % MIX.length]}" title="${esc(src)}: ${pct}%"></span>`).join("")}</div>
+    <p class="o-mix">${L.mix.slice(0, 3).map(([src, pct], i) => `<i style="background:${MIX[i % MIX.length]}"></i>${esc(src.replace(/\s*\(.*\)/, ""))} ${pct}%`).join(" ")}</p>` : ""}
+    <p class="o-more">Tap for the full story</p></div>`;
+}
 const MIX = ["#ffd166", "#ff7a59", "#6fd6ff", "#5fd38d", "#b69bff", "#ff7ac6", "#9fb4ff"];
 function mixHTML(mix) {
   if (!mix?.length) return "";
