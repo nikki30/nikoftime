@@ -49,5 +49,11 @@ const queue = [...countries];
 await Promise.all(Array.from({ length: 6 }, async () => {
   while (queue.length) { await one(queue.shift()); await save(); }
 }));
+// Apple's feed is sometimes slow: give the countries that missed out one more go.
+const missed = countries.filter((cc) => !out.charts[cc]);
+queue.push(...missed);
+await Promise.all(Array.from({ length: 3 }, async () => {
+  while (queue.length) { await one(queue.shift()); await save(); }
+}));
 await save();
 console.log(`wrote ${Object.keys(out.charts).length}/${countries.length} countries`);
