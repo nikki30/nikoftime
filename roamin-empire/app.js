@@ -116,7 +116,7 @@ function showLanding(p) {
   card(`
     <div class="where"><span class="flag">${flag(p.cc)}</span><div><b>${esc(p.name)}</b><span>${esc(p.country)} · ${km != null ? `${km.toLocaleString()} km floated` : "your first stop"}${fresh ? " · new to your empire" : ""}</span></div></div>
     <div id="song-slot"></div>
-    <div class="actions"><button class="btn go" id="zoom" type="button">🔍 Zoom in</button><button class="btn" id="taste" type="button">🌱 Just the food</button></div>
+    <div class="actions"><button class="btn go" id="zoom" type="button">🔍 Zoom in</button><button class="btn" id="taste" type="button">🌱 What's eaten here</button></div>
     <div class="fact" id="fact" hidden></div>`);
   $("zoom").onclick = () => zoomIn(p);
   $("taste").onclick = () => showFood(p);
