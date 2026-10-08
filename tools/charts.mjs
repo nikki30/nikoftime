@@ -6,7 +6,7 @@ import { PLACES } from "../roamin-empire/places.js";
 
 const countries = [...new Set(PLACES.map((p) => p.cc))];
 const out = { updated: new Date().toISOString(), charts: {} };
-const get = async (url) => { const r = await fetch(url); if (!r.ok) throw new Error(`${r.status} ${url}`); return r.json(); };
+const get = async (url) => { const r = await fetch(url, { signal: AbortSignal.timeout(12000) }); if (!r.ok) throw new Error(`${r.status} ${url}`); return r.json(); };
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
 for (const cc of countries) {

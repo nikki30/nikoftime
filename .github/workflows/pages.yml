@@ -27,6 +27,7 @@ jobs:
       - uses: actions/configure-pages@v5
       - name: Fetch this week's top songs for My Roamin' Empire
         continue-on-error: true
+        timeout-minutes: 4
         run: node tools/charts.mjs
       - uses: actions/upload-pages-artifact@v3
         with:
