@@ -112,7 +112,8 @@ function songHTML(p) {
 function paintSong() {
   const box = $("song-slot"); if (!box || !S.here) return;
   box.innerHTML = songHTML(S.here);
-  const link = $("song-link"); if (link) { const s = S.chart[S.track]; link.hidden = !s; if (s) link.href = s.url; }
+  const links = $("song-links"), s = S.chart[S.track];
+  if (links) { links.hidden = !s; if (s) { $("song-link").href = s.url; $("song-ytm").href = `https://music.youtube.com/search?q=${encodeURIComponent(`${s.artist} ${s.name}`)}`; } }
   $("play") && ($("play").onclick = () => (audio.paused ? audio.play().catch(() => {}) : audio.pause()));
   $("next") && ($("next").onclick = nextSong);
   artistFact();
@@ -153,7 +154,7 @@ function showRing(p) {
   const inCapital = I.capital && p.name.split(",")[0].trim() === I.capital;
   const speakBtn = (what, label) => `<button class="say-btn" type="button" data-say="${what}" aria-label="Hear ${esc(label)}">🔊</button>`;
   const left = [
-    fc("song", "🎵", `Top of the charts in ${esc(p.country)}`, `<div id="song-slot"></div><a class="src" id="song-link" target="_blank" rel="noopener" hidden>Full song on Apple Music ↗</a>`, 0),
+    fc("song", "🎵", `Top of the charts in ${esc(p.country)}`, `<div id="song-slot"></div><p class="song-links" id="song-links" hidden><a class="ytm-link" id="song-ytm" target="_blank" rel="noopener">♡ Save to YouTube Music</a> <a class="src" id="song-link" target="_blank" rel="noopener">Apple Music ↗</a></p>`, 0),
     d ? fc("food", "🌱", "Must-eat veg", `<div class="food"><img id="food-photo" alt="" hidden><div><b class="big">${esc(d.name)} ${speakBtn("food", d.name)}</b>${d.say ? `<i class="say">${esc(d.say)}</i>` : ""}<span class="veg">Vegetarian</span></div></div><p class="clamp">${esc(d.what)}</p>`, 1, true) : "",
     I.visit ? fc("visit", "📍", "Must visit", `<b class="big">${esc(I.visit.name)}</b><p class="clamp">${esc(I.visit.why)}</p>`, 2, true) : "",
     I.book ? fc("book", "📚", "Read its history", `<b class="big book-t">${esc(I.book.title)}</b><p class="by">${esc(I.book.author)}${I.book.year ? `, ${esc(I.book.year)}` : ""}</p><p class="soft small">${I.book.original && I.book.original !== "English" ? `Translated from ${esc(I.book.original)}` : "Written in English"}${I.book.local === false ? " · by an outsider" : ""}</p>`, 3, true) : "",
@@ -181,7 +182,7 @@ function showRing(p) {
     only: { kind: "✨ Only here", title: p.name, text: I.only, find: () => wikiPic({ exact: p.capitalStop ? I.capitalWiki : p.wiki, search: p.name }) },
     know: { kind: `🏛️ Capital of ${p.country}`, title: I.capital, text: inCapital ? "You're standing in it!" : I.note ? `${I.note[0].toUpperCase() + I.note.slice(1)}.` : "", find: () => wikiPic({ exact: I.capitalWiki, search: `${I.capital} city` }) },
     book: I.book && { kind: "📚 Read its history", title: I.book.title, sub: `${I.book.author}${I.book.year ? `, ${I.book.year}` : ""}${I.book.original && I.book.original !== "English" ? ` · translated from ${I.book.original}` : ""}`, text: I.book.about, cover: true, find: () => bookCover(I.book) },
-    politics: I.politics && { kind: `⚖️ Who runs ${p.country}`, title: I.politics.system, text: I.politics.about, find: () => leaders(p.cc).then((L) => L.photo ? { src: L.photo, url: L.url, caption: L.photoOf } : null), extra: () => leadersHTML(S.leaders) },
+    politics: I.politics && { kind: `⚖️ Who runs ${p.country}`, title: I.politics.system, text: I.politics.about, find: () => leaders(p.cc).then((L) => L.photo ? { src: L.photo, url: L.url, caption: L.photoOf, linkText: "More on Wikidata ↗" } : null), extra: () => leadersHTML(S.leaders) },
   };
   for (const el of $("ring").querySelectorAll("[data-pic]")) {
     const open = (e) => { if (e.target.closest("button, a")) return; const pic = pics[el.dataset.pic]; if (pic) { showPic(pic); if (el.dataset.pic === "food") tasted(p); } };

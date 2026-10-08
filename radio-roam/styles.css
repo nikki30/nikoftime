@@ -114,3 +114,11 @@ code { font: 500 .85em var(--mono); }
   .credit { left: 0; right: 0; text-align: center; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+.btn.ytm { margin-top: 10px; background: #ff0033; border-color: #ff0033; color: #fff; font-weight: 600; }
+.btn.ytm:hover { border-color: #fff; }
+.saved a.liked { display: block; text-decoration: none; border: 1px solid var(--line); background: rgba(255, 255, 255, .05); border-radius: 12px; padding: 10px 12px; }
+.saved a.liked span { color: var(--soft); font-size: .82rem; margin-left: 4px; }
+.saved a.liked em { float: right; font-style: normal; font-size: .75rem; color: #ff6b81; }
+.inspired { margin: 8px 0 0; font-size: .82rem; color: #b9bcd6; }
+.inspired a { color: var(--v3); }
+.inspired { pointer-events: auto; }

@@ -139,7 +139,7 @@ button.stamp:hover { border-color: var(--gold); }
 .leads circle { fill: #ffe08a; }
 @keyframes march { to { stroke-dashoffset: -16; } }
 
-.ring { position: absolute; z-index: 4; inset: 66px 18px 100px; display: grid; grid-template-columns: minmax(250px, 300px) 1fr minmax(250px, 300px); grid-template-rows: auto 1fr; gap: 0 16px; pointer-events: none; }
+.ring { position: absolute; z-index: 4; inset: 66px 18px 116px; display: grid; grid-template-columns: minmax(250px, 300px) 1fr minmax(250px, 300px); grid-template-rows: auto 1fr; gap: 0 16px; pointer-events: none; }
 .ring-head { grid-column: 1 / -1; justify-self: center; display: flex; align-items: center; gap: 12px; padding: 8px 18px 8px 12px; border-radius: 999px; background: rgba(20, 12, 38, .7); border: 1px solid var(--line); backdrop-filter: blur(8px); pointer-events: auto; margin-bottom: 8px; animation: drop .6s cubic-bezier(.2, 1.4, .4, 1) both; }
 .ring-head .flag { font-size: 2rem; line-height: 1; }
 .ring-head h2 { margin: 0; font: 400 1.7rem/1 var(--serif); }
@@ -302,3 +302,6 @@ body.landed .intro { display: none; }
   .upgrade { padding: 7px 10px; font-size: .78rem; }
 }
 @media (max-width: 420px) { .passport-btn b { max-width: 70px; } }
+.song-links { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 6px 0 0 !important; }
+.ytm-link { font-size: .78rem; font-weight: 600; color: #fff; background: #ff0033; padding: 4px 10px; border-radius: 999px; text-decoration: none; }
+.ytm-link:hover { filter: brightness(1.1); }

@@ -9,7 +9,7 @@ A shelf of little apps you can use right now, in the spirit of [neal.fun](https:
 | [**Do Not Fret**](do-not-fret/) | A guitar practice app: a daily routine with a metronome, fretboards that light up each note on the beat, theory lessons, songs with tab play-along, and charts of your clean tempo. [README](do-not-fret/README.md) |
 | [**Story So Far**](story-so-far/) | Spoiler-free recaps of the book you're reading, up to your exact page, drawn as a timeline, journey map, lab notebook, case file or scrapbook. [README](story-so-far/README.md) |
 | [**My Roamin' Empire**](roamin-empire/) | Float to a hand-picked place, hear the country's #1 song, zoom in to see why its streets look the way they do, then meet a local vegetarian dish. Every new place grows your empire. [README](roamin-empire/README.md) |
-| [**Radio Roam**](radio-roam/) | Float to a random place on Earth in a hot-air balloon and hear its radio live, with what's playing, a fact about the artist, and a passport of the countries you've visited. [README](radio-roam/README.md) |
+| [**Radio Roam**](radio-roam/) | Inspired by [radio.garden](https://radio.garden). Float to a random place on Earth in a hot-air balloon and hear its radio live, with what's playing, a fact about the artist, a one-tap "Save to YouTube Music" for songs you love, and a passport of the countries you've visited. [README](radio-roam/README.md) |
 
 More tiles are on the way.
 

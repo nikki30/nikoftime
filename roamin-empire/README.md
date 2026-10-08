@@ -38,3 +38,15 @@ Add an entry to `PLACES` in `places.js`:
 ```
 
 `cc` is the two-letter country code used for the chart. Keep dishes vegetarian.
+
+## Every country
+
+The balloon can land in any of 196 countries. Featured places (above) get a hand-written street tour; everywhere else lands at the capital and the zoom tours the most interesting nearby places on Wikipedia. Each country's cards live in [`world.js`](world.js): capital, money, driving side, how to say hello (with a 🔊 button that uses your device's voice, or reads the pronunciation if there's no voice for that language), a must-eat vegetarian dish with its pronunciation, a must-visit place, an "only here" fact, a historical novel available in English, and how the country is run.
+
+- **Who's in charge** is looked up live on Wikidata, so it stays current.
+- **Today's news** is a few English headlines per country from Google News, fetched by [`tools/news.mjs`](../tools/news.mjs) in the daily build.
+- **Songs** have a "Save to YouTube Music" button that opens the song there, ready to add to your library.
+
+## Titles
+
+Visit enough countries and a **👑 Title upgrade?** button appears. Score 8 out of 10 on a quiz about the places you've been to earn the next title: Traveller, Explorer, Consul, Governor, Emperor.

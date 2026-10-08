@@ -2,6 +2,8 @@
 
 **Everything that's happened. Nothing that hasn't.**
 
+> Let's be real: I zone out mid-chapter. Asking a chatbot to catch me up always came with a little dread, because it has spoiled books for me before, and spoilers are my biggest pet peeve. So I made this. It tells me what I missed, and not one word more.
+
 A spoiler-free "previously on…" for the book you're reading. Tell it the book, the author and what just happened. You can also add the format and your page, or your percentage for audiobooks. It writes a recap of everything up to that moment and nothing after it, drawn to suit the story:
 
 | Style | Used for | Looks like |

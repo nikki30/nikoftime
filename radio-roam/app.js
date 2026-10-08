@@ -123,8 +123,10 @@ async function listen(s) {
     if (key === S.nowKey) return;
     S.nowKey = key;
     $("now").innerHTML = np
-      ? `<span class="label">Now playing</span><p class="song">${esc(np.song)}</p>${np.artist ? `<p class="artist">${esc(np.artist)}</p>` : ""}`
+      ? `<span class="label">Now playing</span><p class="song">${esc(np.song)}</p>${np.artist ? `<p class="artist">${esc(np.artist)}</p>` : ""}
+         <button class="btn ytm" id="ytm" type="button">${isLiked(np) ? "♥ Saved" : "♡ Save to YouTube Music"}</button>`
       : `<span class="label">On air</span><p class="soft">This station doesn't share what's playing, so here's where you are.</p>`;
+    if (np) $("ytm").onclick = () => { like(np, s); $("ytm").textContent = "♥ Saved"; window.open(ytmUrl(np), "_blank", "noopener"); };
     if (np?.artist) factAboutArtist(np.artist, s); else if (!S.factFor) factAboutPlace(s);
   };
   await check();
@@ -186,6 +188,15 @@ $("key-save").onclick = () => { const k = $("f-key").value.trim(); if (k) { stor
 $("key-forget").onclick = () => { try { localStorage.removeItem(KEY); } catch {} paintKey(); };
 paintKey();
 
+/* ---------------- songs you loved, sent to YouTube Music ---------------- */
+// Opens the song on YouTube Music, where one tap adds it to your library, and keeps a list here too.
+const ytmUrl = (np) => `https://music.youtube.com/search?q=${encodeURIComponent(`${np.artist} ${np.song}`.trim())}`;
+const isLiked = (np) => store.get("rr-liked", []).some((x) => x.song === np.song && x.artist === np.artist);
+function like(np, s) {
+  if (isLiked(np)) return;
+  store.set("rr-liked", [{ song: np.song, artist: np.artist, station: s.name, country: s.country, cc: s.cc, at: new Date().toISOString() }, ...store.get("rr-liked", [])].slice(0, 200));
+}
+
 /* ---------------- passport + saved stations ---------------- */
 function stamp(s) {
   const p = store.get("rr-passport", {});
@@ -197,10 +208,11 @@ const isSaved = (s) => store.get("rr-saved", []).some((x) => x.id === s.id);
 function toggleSave(s) { const list = store.get("rr-saved", []); store.set("rr-saved", isSaved(s) ? list.filter((x) => x.id !== s.id) : [s, ...list].slice(0, 50)); }
 
 $("passport-btn").onclick = () => {
-  const p = store.get("rr-passport", {}), saved = store.get("rr-saved", []), rides = store.get("rr-rides", 0);
+  const p = store.get("rr-passport", {}), saved = store.get("rr-saved", []), liked = store.get("rr-liked", []), rides = store.get("rr-rides", 0);
   const stamps = Object.entries(p).sort((a, b) => a[1].first.localeCompare(b[1].first));
   $("pp-body").innerHTML = `<p class="soft">${rides} ride${rides === 1 ? "" : "s"} · ${stamps.length} countr${stamps.length === 1 ? "y" : "ies"}</p>
     ${stamps.length ? `<div class="stamps">${stamps.map(([cc, v], i) => `<div class="stamp" style="--r:${((i * 37) % 13) - 6}deg"><span>${flag(cc)}</span><b>${esc(v.country)}</b>${v.n > 1 ? `<i>×${v.n}</i>` : ""}</div>`).join("")}</div>` : `<p>No stamps yet. Take a ride!</p>`}
+    ${liked.length ? `<h3>Songs you loved</h3><ul class="saved">${liked.map((x) => `<li><a class="liked" href="${esc(ytmUrl(x))}" target="_blank" rel="noopener">${flag(x.cc)} <b>${esc(x.song)}</b> <span>${esc(x.artist)} · heard on ${esc(x.station)}</span> <em>YouTube Music ↗</em></a></li>`).join("")}</ul>` : ""}
     ${saved.length ? `<h3>Saved stations</h3><ul class="saved">${saved.map((s) => `<li><button type="button" data-go="${esc(s.id)}">${flag(s.cc)} ${esc(s.name)} <span>${esc(s.country)}</span></button></li>`).join("")}</ul>` : ""}`;
   $("passport").showModal();
 };
