@@ -1593,11 +1593,13 @@
    "active": true,
    "category": "scale",
    "ex": {
-    "rotate": "major"
+    "rotate": "major",
+    "rootToRoot": true,
+    "dir": "both"
    },
-   "how": "The key changes every day. Root on the 6th string; play every note once through. Say each note name.",
+   "how": "The key changes every day. Start on the root on the 6th (low E) string, climb across to the root on the 1st (high e) string, then come back down to the root you started on. The root rings twice each time you change direction: the top root at the turnaround, and the bottom root when you go round again. Let each note ring and say each note name.",
    "minutes": 4,
-   "name": "Major pentatonic of the day",
+   "name": "Major pentatonic of the day, up and down",
    "order": 4,
    "rotateFrom": "A",
    "rotateStart": "2026-10-04",
@@ -1607,11 +1609,13 @@
    "active": true,
    "category": "scale",
    "ex": {
-    "rotate": "minor"
+    "rotate": "minor",
+    "rootToRoot": true,
+    "dir": "both"
    },
-   "how": "The relative minor of today's major key: same five notes, starting from the 6th note of the major scale. Say each note name.",
+   "how": "The relative minor of today's major key: the same five notes, but home is the 6th note of the major scale. Start on that root on the 6th (low E) string, climb to the root on the 1st (high e) string, then come back down to where you started. The root rings twice each time you change direction. Let each note ring and say each note name.",
    "minutes": 4,
-   "name": "Its relative minor pentatonic",
+   "name": "Its relative minor pentatonic, up and down",
    "order": 5,
    "rotateFrom": "A",
    "rotateStart": "2026-10-04",
