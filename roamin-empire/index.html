@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>My Roamin' Empire</title>
+<meta name="description" content="Float to a corner of the world, hear its #1 song, zoom in to see why its streets look the way they do, and taste a local vegetarian dish.">
+<meta name="theme-color" content="#1a1030">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%231a1030'/%3E%3Cpath d='M32 44c-12-6-14-30 0-30s12 24 0 30z' fill='%23e8b04a'/%3E%3Cpath d='M20 52h24l-3-6H23z' fill='%23c2410c'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="stars" aria-hidden="true"></div>
+<header class="bar">
+  <a class="home" href="../">← <span class="lbl">More apps</span></a>
+  <div class="brand"><span class="mark" aria-hidden="true">🏛️</span><span>My <em>Roamin'</em> Empire</span></div>
+  <button class="passport-btn" id="passport-btn" type="button"><span aria-hidden="true">👑</span> <b id="title">Wanderer</b></button>
+</header>
+
+<main class="stage">
+  <canvas id="globe" aria-label="A globe. Each dot is a place in your future empire."></canvas>
+  <div id="map" class="map" hidden></div>
+  <div class="map-tools" id="map-tools" hidden>
+    <button type="button" class="chip" id="sat" aria-pressed="false">🛰️ Satellite</button>
+  </div>
+
+  <section class="intro" id="intro">
+    <h1>Every trip <em>grows</em> your empire.</h1>
+    <p>Float somewhere new, hear what the country is playing, zoom in to see why it looks the way it does, then have a taste.</p>
+  </section>
+
+  <section class="card" id="card" hidden aria-live="polite"></section>
+
+  <div class="dock" id="dock">
+    <button class="ride" id="ride" type="button"><span aria-hidden="true">🎈</span> <span id="ride-label">Take a trip</span></button>
+    <p class="status" id="status" role="status"></p>
+  </div>
+</main>
+
+<dialog class="passport" id="passport" aria-labelledby="pp-h">
+  <header><h2 id="pp-h">Your empire</h2><button class="x" type="button" data-close aria-label="Close">×</button></header>
+  <div id="pp-body"></div>
+</dialog>
+
+<audio id="audio" preload="none"></audio>
+<footer class="credit" id="credit">Charts and previews from Apple Music · facts from Wikipedia · made by <a href="../">Nikita</a></footer>
+<script type="module" src="app.js"></script>
+</body>
+</html>

@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: "17 5 * * *" # daily, so My Roamin' Empire plays this week's hits
 
 permissions:
   contents: read
@@ -23,6 +25,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      - name: Fetch this week's top songs for My Roamin' Empire
+        continue-on-error: true
+        run: node tools/charts.mjs
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .
