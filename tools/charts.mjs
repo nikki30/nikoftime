@@ -2,9 +2,9 @@
 // roamin-empire/charts.json. Runs in the Pages workflow (daily), because Apple's feeds can't be
 // read straight from a browser on another site.
 import { writeFile } from "node:fs/promises";
-import { PLACES } from "../roamin-empire/places.js";
+import { WORLD } from "../roamin-empire/world.js";
 
-const countries = [...new Set(PLACES.map((p) => p.cc))];
+const countries = WORLD.map((w) => w.cc);
 const out = { updated: new Date().toISOString(), charts: {} };
 const OUT = new URL("../roamin-empire/charts.json", import.meta.url);
 const get = async (url) => { const r = await fetch(url, { signal: AbortSignal.timeout(10000) }); if (!r.ok) throw new Error(`${r.status}`); return r.json(); };

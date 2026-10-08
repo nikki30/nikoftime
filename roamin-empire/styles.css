@@ -215,3 +215,90 @@ body.landed .intro { display: none; }
 .pic .cap { padding: 16px 22px 22px; }
 .pic h2 { margin: 4px 0 6px; font: 400 2rem/1.1 var(--serif); }
 .pic p { margin: 0 0 10px; color: #ddd3ea; }
+
+/* ---------- round 3: more cards, news, speech, quiz ---------- */
+.bar-right { display: flex; gap: 8px; align-items: center; }
+.upgrade { border: 0; border-radius: 999px; padding: 8px 14px; font-weight: 600; font-size: .86rem; cursor: pointer; color: #2b1300; background: linear-gradient(100deg, #ffd166, var(--gold)); box-shadow: 0 0 0 0 rgba(255, 209, 102, .7); animation: glow 1.8s infinite; }
+@keyframes glow { 70% { box-shadow: 0 0 0 12px rgba(255, 209, 102, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 209, 102, 0); } }
+
+.ring { grid-template-rows: auto 1fr auto; }
+.col.left, .col.right { grid-row: 2 / 4; }
+.col.bottom { grid-column: 2; grid-row: 3; justify-self: center; width: min(440px, 100%); padding: 0; overflow: visible; }
+.ring-head .now-line { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 4px; font: 500 .74rem var(--mono); color: #cfe9ff; }
+.ring-head .now-line b { color: var(--ink); }
+.fc-book { --a: #f2b880; } .fc-politics { --a: #9fb4ff; }
+
+.say-btn { border: 0; background: rgba(255, 255, 255, .12); border-radius: 50%; width: 30px; height: 30px; font-size: .9rem; cursor: pointer; vertical-align: middle; flex: none; transition: transform .2s; }
+.say-btn:hover { transform: scale(1.12); background: rgba(255, 255, 255, .2); }
+.say-btn.talking { animation: talk .5s ease-in-out infinite alternate; background: var(--a); }
+@keyframes talk { to { transform: scale(1.18); } }
+.fc .big .say-btn { width: 26px; height: 26px; font-size: .78rem; margin-left: 2px; }
+.fc i.say { display: block; font-size: .78rem; color: var(--soft); margin: 2px 0; }
+.hello-row { display: flex; align-items: center; gap: 10px; }
+.fc .script { font-size: 1.15rem; margin: 2px 0 0; }
+.fc .book-t { font-style: italic; }
+.fc .by { color: var(--ink); }
+.fc .sys { font: 400 1.1rem/1.2 var(--serif); margin: 0 0 6px; }
+.leaders .kv { flex-wrap: wrap; }
+.leaders .kv span { width: auto; min-width: 104px; }
+.leaders .kv em { width: 100%; padding-left: 112px; margin-top: -2px; font-size: .72rem; color: var(--soft); font-style: normal; }
+.pic .leaders .kv em, #pic-extra .kv em { padding-left: 0; }
+
+/* the newspaper clipping */
+.clipping { position: relative; padding: 12px 16px 12px; color: #2a2118; cursor: pointer; transform: rotate(-1.2deg); animation: pop .6s cubic-bezier(.2, 1.5, .4, 1) both; animation-delay: .55s;
+  background: #f3ecdc linear-gradient(transparent 0 0); box-shadow: 0 14px 30px -12px rgba(0, 0, 0, .8);
+  clip-path: polygon(0 4%, 3% 0, 8% 3%, 14% 0, 21% 2%, 28% 0, 36% 3%, 44% 0, 52% 2%, 60% 0, 68% 3%, 76% 0, 84% 2%, 92% 0, 100% 3%, 98% 50%, 100% 97%, 94% 100%, 86% 97%, 78% 100%, 70% 98%, 62% 100%, 54% 97%, 46% 100%, 38% 98%, 30% 100%, 22% 97%, 14% 100%, 6% 98%, 0 100%, 2% 50%);
+  transition: transform .3s cubic-bezier(.3, 1.6, .5, 1); }
+.clipping:hover { transform: rotate(0) scale(1.03); }
+.clipping .mast { display: flex; justify-content: space-between; gap: 10px; padding-bottom: 5px; margin-bottom: 6px; border-bottom: 3px double #2a2118; font: 700 .64rem "Times New Roman", Georgia, serif; letter-spacing: .12em; }
+.clipping .mast span:last-child { font-weight: 400; letter-spacing: 0; font-style: italic; }
+.clipping h3 { margin: 0; font: 700 1.12rem/1.2 Georgia, "Times New Roman", serif; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.clipping .src-line { margin: 6px 0 0; font: italic .72rem Georgia, serif; color: #6b5c49; }
+
+/* picture dialog extras */
+.pic .pic-cap { margin: 0; padding: 6px 22px 0; font-size: .74rem; color: var(--soft); }
+.pic .pic-cap:empty { display: none; }
+.pic .pic-sub { margin: -2px 0 10px; color: var(--gold); font-size: .9rem; }
+.pic .pic-sub:empty { display: none; }
+.pic.cover .frame img { width: auto; max-width: 70%; max-height: 52vh; margin: 22px auto; border-radius: 6px; box-shadow: 0 20px 40px -10px rgba(0, 0, 0, .8); object-fit: contain; }
+.pic.clip .frame { display: none; }
+.pic.clip .cap { background: #f3ecdc; color: #2a2118; padding-top: 50px; }
+.pic.clip h2 { font: 700 1.9rem/1.15 Georgia, serif; }
+.pic.clip .label, .pic.clip .pic-sub { color: #8a4b1c; }
+.pic.clip p, .pic.clip .src { color: #4a3d2e; }
+.pic.clip .x { color: #2a2118; background: rgba(0, 0, 0, .08); }
+#pic-extra h4 { margin: 16px 0 6px; font: 700 .8rem Georgia, serif; text-transform: uppercase; letter-spacing: .1em; border-top: 1px solid rgba(0, 0, 0, .2); padding-top: 12px; }
+.more-news { margin: 0 0 12px; padding-left: 18px; }
+.more-news li { margin: 6px 0; } .more-news a { color: inherit; font-weight: 600; }
+.look-t { margin: 0; font: 600 1rem var(--sans); color: var(--gold); }
+
+/* quiz */
+.quiz { width: min(560px, calc(100% - 24px)); border: 1px solid var(--line); border-radius: 24px; padding: 26px; background: radial-gradient(120% 80% at 50% 0%, #3a2266, #1d1236); color: var(--ink); box-shadow: 0 40px 80px -30px rgba(0, 0, 0, .9); }
+.quiz[open] { animation: picIn .4s cubic-bezier(.2, 1.3, .4, 1); }
+.quiz::backdrop { background: rgba(8, 4, 18, .75); backdrop-filter: blur(4px); }
+.quiz .x { position: absolute; top: 14px; right: 14px; }
+.quiz h2 { margin: 10px 0 18px; font: 400 1.7rem/1.2 var(--serif); }
+.quiz .dots { display: flex; gap: 5px; margin-top: 8px; }
+.quiz .dots i { flex: 1; height: 5px; border-radius: 3px; background: var(--line); }
+.quiz .dots i.on { background: var(--gold); } .quiz .dots i.ok { background: var(--leaf); } .quiz .dots i.no { background: #e8505b; }
+.choices { display: grid; gap: 10px; }
+.choice { text-align: left; border: 1px solid var(--line); background: rgba(255, 255, 255, .06); border-radius: 14px; padding: 13px 16px; font-size: 1rem; cursor: pointer; transition: transform .15s, border-color .15s; }
+.choice:hover:not(:disabled) { border-color: var(--gold); transform: translateX(4px); }
+.choice.right { background: rgba(63, 174, 106, .3); border-color: var(--leaf); }
+.choice.wrong { background: rgba(232, 80, 91, .3); border-color: #e8505b; animation: shake .4s; }
+@keyframes shake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+.choice:disabled { cursor: default; }
+.verdict { min-height: 1.4em; margin: 14px 0 0; }
+.crowned { text-align: center; display: grid; justify-items: center; gap: 6px; }
+.crowned .crown { font-size: 4rem; animation: crown 1s cubic-bezier(.2, 1.6, .4, 1) both; }
+.crowned .crown.sad { animation: none; }
+@keyframes crown { from { transform: translateY(-60px) rotate(-30deg) scale(.4); opacity: 0; } }
+.crowned h2 { margin: 4px 0; }
+.crowned p { margin: 0 0 12px; color: #ddd3ea; }
+
+@media (max-width: 900px) {
+  .col.bottom { display: block; width: 100%; margin: 4px 0 18px; padding: 8px 4px; }
+  .col .fc-book, .col .fc-politics { grid-column: 1 / -1; }
+  .upgrade { padding: 7px 10px; font-size: .78rem; }
+}
+@media (max-width: 420px) { .passport-btn b { max-width: 70px; } }

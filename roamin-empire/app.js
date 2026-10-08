@@ -1,7 +1,8 @@
 import { createGlobe } from "../radio-roam/globe.js";
 import { artistFacts, flag as flagOf, firstSentences } from "../radio-roam/data.js";
-import { PLACES, TITLES } from "./places.js";
+import { PLACES } from "./places.js";
 import { COUNTRY, EXTRA } from "./extras.js";
+import { WORLD } from "./world.js";
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -13,20 +14,47 @@ const phone = () => matchMedia("(max-width: 900px)").matches;
 const flag = (cc) => flagOf(cc.toUpperCase());
 const rand = (a) => a[Math.floor(Math.random() * a.length)];
 
+// Every country, with its capital as the landing spot. Countries with hand-picked places also get those.
+const W = Object.fromEntries(WORLD.map((w) => [w.cc, w]));
+const CAPITALS = WORLD.map((w) => ({ id: `c-${w.cc}`, name: w.capital, country: w.name, cc: w.cc, at: w.at, dish: w.food, capitalStop: true }));
+for (const p of PLACES) if (!p.dish.bcp47 && EXTRA[p.id]?.hello?.bcp47) p.dish.bcp47 = EXTRA[p.id].hello.bcp47;
+const STOPS = [...PLACES, ...CAPITALS];
+const STOP = Object.fromEntries(STOPS.map((p) => [p.id, p]));
+const COUNTRIES = new Set(WORLD.map((w) => w.cc));
+const TITLES = [[0, "Wanderer"], [3, "Traveller"], [8, "Explorer"], [15, "Consul"], [30, "Governor"], [60, "Emperor"], [COUNTRIES.size, "Emperor of the whole Roamin' Empire"]];
+
 const S = { view: "globe", km: null, fresh: false, here: null, flying: false, chart: [], track: 0, step: 0, map: null, marker: null, ctl: null };
 const globe = createGlobe($("globe"));
-globe.setStations(PLACES.map((p) => ({ lon: p.at[0], lat: p.at[1] })));
+globe.setStations(STOPS.map((p) => ({ lon: p.at[0], lat: p.at[1] })));
 const audio = $("audio");
 
 // This week's charts, fetched by the site's daily build (see tools/charts.mjs).
 const charts = fetch("charts.json").then((r) => (r.ok ? r.json() : null)).then((j) => j?.charts || {}).catch(() => ({}));
+// Today's headlines, also fetched by the daily build (tools/news.mjs).
+const news = fetch("news.json").then((r) => (r.ok ? r.json() : null)).then((j) => j?.news || {}).catch(() => ({}));
+
+// Everything the cards need for a stop: hand-written extras win, then the country's entry.
+function info(p) {
+  const w = W[p.cc] || {}, c = COUNTRY[p.cc] || {}, x = EXTRA[p.id] || {};
+  return {
+    w, capital: c.capital || w.capital, capitalWiki: w.capitalWiki || c.capital || w.capital, note: c.note, money: c.money || w.money, drive: c.drive || w.drive,
+    tz: x.tz || w.tz, hello: x.hello || w.hello, visit: x.visit || w.visit, only: x.only || w.only, book: w.book, politics: w.politics,
+    dish: p.dish || w.food,
+  };
+}
 
 /* ---------------- the trip ---------------- */
+// Go somewhere new: a country you haven't visited if there is one, then a spot in it you haven't seen.
 function pick() {
-  const been = store.get("re-visited", {});
-  const fresh = PLACES.filter((p) => !been[p.id] && p !== S.here);
-  return rand(fresh.length ? fresh : PLACES.filter((p) => p !== S.here));
+  const been = store.get("re-visited", {}), seen = visitedCountries();
+  const fresh = [...COUNTRIES].filter((cc) => !seen.has(cc) && cc !== S.here?.cc);
+  const cc = rand(fresh.length ? fresh : [...COUNTRIES].filter((x) => x !== S.here?.cc));
+  const spots = STOPS.filter((p) => p.cc === cc && p !== S.here);
+  const unseen = spots.filter((p) => !been[p.id]);
+  const featured = unseen.filter((p) => !p.capitalStop);
+  return rand(featured.length ? featured : unseen.length ? unseen : spots);
 }
+function visitedCountries() { return new Set(Object.keys(store.get("re-visited", {})).map((id) => STOP[id]?.cc).filter(Boolean)); }
 
 $("ride").addEventListener("click", () => trip());
 $("zoom").addEventListener("click", () => S.here && zoomIn(S.here));
@@ -71,7 +99,7 @@ function nextSong() {
 }
 
 function songHTML(p) {
-  if (!S.chart.length) return `<p class="soft">Apple doesn't publish a chart for ${esc(p.country)} today, so this stop is a quiet one. Listen to the wind.</p>`;
+  if (!S.chart.length) return `<p class="soft">Apple Music doesn't publish a chart for ${esc(p.country)}, so this stop is a quiet one. Listen to the wind.</p>`;
   const s = S.chart[S.track];
   return `<div class="song">${s.art ? `<img src="${esc(s.art)}" alt="">` : `<span class="noart" aria-hidden="true">♪</span>`}<div><span class="rank-chip">#${s.rank} this week</span><p class="name">${esc(s.name)}</p><p class="artist">${esc(s.artist)}</p></div></div>
     <div class="player">
@@ -120,42 +148,56 @@ function fc(kind, icon, title, body, i, pic = false) {
 }
 
 function showRing(p) {
-  const { km, fresh } = S, c = COUNTRY[p.cc] || {}, x = EXTRA[p.id] || {};
+  const { km, fresh } = S, I = info(p), d = I.dish;
   S.view = "land";
-  const inCapital = c.capital && p.name.split(",")[0].trim() === c.capital;
+  const inCapital = I.capital && p.name.split(",")[0].trim() === I.capital;
+  const speakBtn = (what, label) => `<button class="say-btn" type="button" data-say="${what}" aria-label="Hear ${esc(label)}">🔊</button>`;
   const left = [
     fc("song", "🎵", `Top of the charts in ${esc(p.country)}`, `<div id="song-slot"></div><a class="src" id="song-link" target="_blank" rel="noopener" hidden>Full song on Apple Music ↗</a>`, 0),
-    fc("food", "🌱", "Must-eat veg", `<div class="food"><img id="food-photo" alt="" hidden><div><b class="big">${esc(p.dish.name)}</b><span class="veg">Vegetarian</span></div></div><p class="clamp">${esc(p.dish.what)}</p>`, 1, true),
-    x.visit ? fc("visit", "📍", "Must visit", `<b class="big">${esc(x.visit.name)}</b><p class="clamp">${esc(x.visit.why)}</p>`, 2, true) : "",
+    d ? fc("food", "🌱", "Must-eat veg", `<div class="food"><img id="food-photo" alt="" hidden><div><b class="big">${esc(d.name)} ${speakBtn("food", d.name)}</b>${d.say ? `<i class="say">${esc(d.say)}</i>` : ""}<span class="veg">Vegetarian</span></div></div><p class="clamp">${esc(d.what)}</p>`, 1, true) : "",
+    I.visit ? fc("visit", "📍", "Must visit", `<b class="big">${esc(I.visit.name)}</b><p class="clamp">${esc(I.visit.why)}</p>`, 2, true) : "",
+    I.book ? fc("book", "📚", "Read its history", `<b class="big book-t">${esc(I.book.title)}</b><p class="by">${esc(I.book.author)}${I.book.year ? `, ${esc(I.book.year)}` : ""}</p><p class="soft small">${I.book.original && I.book.original !== "English" ? `Translated from ${esc(I.book.original)}` : "Written in English"}${I.book.local === false ? " · by an outsider" : ""}</p>`, 3, true) : "",
   ];
   const right = [
-    x.only ? fc("only", "✨", "Only here", `<p>${esc(x.only)}</p>`, 4, true) : "",
-    x.hello ? fc("hello", "💬", "Say hello", `<b class="huge">${esc(x.hello.word)}</b><p><i>${esc(x.hello.say)}</i> · ${esc(x.hello.lang)}</p>`, 5) : "",
-    fc("now", "🕰️", "Right now there", `<div class="now-row"><b class="big" id="clock">--:--</b><span class="wx" id="wx"></span></div><p id="offset"></p>`, 6),
-    fc("know", "🏛️", "Good to know", `<p class="kv"><span>Capital</span><b>${esc(c.capital || "")}</b></p>${inCapital ? `<p class="hl">You're standing in it!</p>` : c.note ? `<p class="soft small">${esc(c.note[0].toUpperCase() + c.note.slice(1))}.</p>` : ""}<p class="kv"><span>Money</span><b>${esc(c.money || "")}</b></p><p class="kv"><span>Driving</span><b>on the ${esc(c.drive || "?")}${c.drive === "left" ? " (look right first!)" : ""}</b></p>`, 7, true),
+    I.only ? fc("only", "✨", "Only here", `<p>${esc(I.only)}</p>`, 4, true) : "",
+    I.hello ? fc("hello", "💬", "Say hello", `<div class="hello-row"><b class="huge">${esc(I.hello.word)}</b>${speakBtn("hello", I.hello.word)}</div>${I.hello.script ? `<p class="script">${esc(I.hello.script)}</p>` : ""}<p><i>${esc(I.hello.say)}</i> · ${esc(I.hello.lang)}</p>`, 5) : "",
+    I.politics ? fc("politics", "⚖️", "Who runs it", `<p class="sys">${esc(I.politics.system)}</p><div id="leaders" class="leaders"><span class="soft small">Looking up who's in charge…</span></div>`, 6, true) : "",
+    fc("know", "🏛️", "Good to know", `<p class="kv"><span>Capital</span><b>${esc(I.capital || "")}</b></p>${inCapital ? `<p class="hl">You're standing in it!</p>` : I.note ? `<p class="soft small">${esc(I.note[0].toUpperCase() + I.note.slice(1))}.</p>` : ""}<p class="kv"><span>Money</span><b>${esc(I.money || "")}</b></p><p class="kv"><span>Driving</span><b>on the ${esc(I.drive || "?")}${I.drive === "left" ? " (look right first!)" : ""}</b></p>`, 7, true),
   ];
   $("ring").innerHTML = `
-    <header class="ring-head"><span class="flag">${flag(p.cc)}</span><div><h2>${esc(p.name)}</h2><p>${esc(p.country)} · ${km != null ? `${km.toLocaleString()} km floated` : "your first stop"}${fresh ? ` · <b>new to your empire!</b>` : ""}</p></div></header>
-    <div class="col left">${left.join("")}</div><div class="col right">${right.join("")}</div>`;
+    <header class="ring-head"><span class="flag">${flag(p.cc)}</span><div><h2>${esc(p.name)}</h2><p>${p.name.split(",")[0].trim() !== p.country ? `${esc(p.country)} · ` : ""}${km != null ? `${km.toLocaleString()} km floated` : "your first stop"}${fresh ? ` · <b>new to your empire!</b>` : ""}</p>
+      <p class="now-line"><span>🕰️ <b id="clock">--:--</b> <span id="offset"></span></span><span id="wx"></span></p></div></header>
+    <div class="col left">${left.join("")}</div><div class="col right">${right.join("")}</div>
+    <div class="col bottom" id="news-slot"></div>`;
   $("ring").hidden = false; $("ring").scrollTop = 0;
   requestAnimationFrame(() => $("ring").classList.add("in"));
   $("zoom").hidden = false; $("zoom").disabled = false; $("dock").hidden = false;
   document.body.classList.add("landed");
-  globe.lift(phone() ? 0.3 : 0); globe.scale(phone() ? 0.9 : 0.72);
+  globe.lift(phone() ? 0.3 : 0.04); globe.scale(phone() ? 0.9 : 0.6);
   const city = p.name.split(",")[0].trim();
   const pics = {
-    food: { kind: "🌱 Must-eat veg", title: p.dish.name, text: p.dish.what, exact: p.dish.wiki, search: `${p.dish.name} food` },
-    visit: x.visit && { kind: "📍 Must visit", title: x.visit.name, text: x.visit.why, exact: x.visit.wiki, search: `${x.visit.name} ${city}` },
-    only: { kind: "✨ Only here", title: p.name, text: x.only, exact: p.wiki, search: p.name },
-    know: { kind: `🏛️ Capital of ${p.country}`, title: c.capital, text: inCapital ? "You're standing in it!" : c.note ? `${c.note[0].toUpperCase() + c.note.slice(1)}.` : "", exact: c.wiki || c.capital, search: `${c.capital} city` },
+    food: d && { kind: "🌱 Must-eat veg", title: d.name, text: d.what, find: () => wikiPic({ exact: d.wiki, search: `${d.name} food` }) },
+    visit: I.visit && { kind: "📍 Must visit", title: I.visit.name, text: I.visit.why, find: () => wikiPic({ exact: I.visit.wiki, search: `${I.visit.name} ${city}` }) },
+    only: { kind: "✨ Only here", title: p.name, text: I.only, find: () => wikiPic({ exact: p.capitalStop ? I.capitalWiki : p.wiki, search: p.name }) },
+    know: { kind: `🏛️ Capital of ${p.country}`, title: I.capital, text: inCapital ? "You're standing in it!" : I.note ? `${I.note[0].toUpperCase() + I.note.slice(1)}.` : "", find: () => wikiPic({ exact: I.capitalWiki, search: `${I.capital} city` }) },
+    book: I.book && { kind: "📚 Read its history", title: I.book.title, sub: `${I.book.author}${I.book.year ? `, ${I.book.year}` : ""}${I.book.original && I.book.original !== "English" ? ` · translated from ${I.book.original}` : ""}`, text: I.book.about, cover: true, find: () => bookCover(I.book) },
+    politics: I.politics && { kind: `⚖️ Who runs ${p.country}`, title: I.politics.system, text: I.politics.about, find: () => leaders(p.cc).then((L) => L.photo ? { src: L.photo, url: L.url, caption: L.photoOf } : null), extra: () => leadersHTML(S.leaders) },
   };
   for (const el of $("ring").querySelectorAll("[data-pic]")) {
     const open = (e) => { if (e.target.closest("button, a")) return; const pic = pics[el.dataset.pic]; if (pic) { showPic(pic); if (el.dataset.pic === "food") tasted(p); } };
     el.addEventListener("click", open);
-    el.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(e); } });
+    el.addEventListener("keydown", (e) => { if (e.target === el && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); open(e); } });
   }
+  for (const b of $("ring").querySelectorAll("[data-say]")) b.onclick = () => {
+    b.classList.add("talking");
+    const done = () => b.classList.remove("talking");
+    if (b.dataset.say === "hello") speak(I.hello.script || I.hello.word, I.hello.bcp47, I.hello.say, done);
+    else speak(d.name, I.hello?.script ? "" : (d.bcp47 || I.hello?.bcp47), d.say, done);
+  };
   paintSong();
-  tickClock(p); weather(p); foodPhoto(p, $("food-photo"));
+  tickClock(I.tz); weather(p); if (d) foodPhoto(d, p, $("food-photo"));
+  if (I.politics) leaders(p.cc).then((L) => { if (S.here === p && $("leaders")) $("leaders").innerHTML = leadersHTML(L) || `<span class="soft small">Couldn't look that up right now.</span>`; });
+  paintNews(p);
   leads();
 }
 
@@ -165,8 +207,8 @@ function hideRing() {
   clearInterval(S.clock);
 }
 
-function tickClock(p) {
-  const tz = EXTRA[p.id]?.tz; clearInterval(S.clock);
+function tickClock(tz) {
+  clearInterval(S.clock);
   if (!tz) return;
   const fmt = new Intl.DateTimeFormat([], { timeZone: tz, hour: "numeric", minute: "2-digit", weekday: "short" });
   const tick = () => { const el = $("clock"); if (el) el.textContent = fmt.format(new Date()); };
@@ -175,7 +217,7 @@ function tickClock(p) {
   const off = new Intl.DateTimeFormat("en", { timeZone: tz, timeZoneName: "longOffset" }).formatToParts(new Date()).find((x) => x.type === "timeZoneName")?.value || "GMT";
   const m = off.match(/([+-])(\d{2}):?(\d{2})?/), theirs = m ? (m[1] === "-" ? -1 : 1) * (+m[2] * 60 + +(m[3] || 0)) : 0;
   const diff = theirs + new Date().getTimezoneOffset(), h = Math.floor(Math.abs(diff) / 60), mm = Math.abs(diff) % 60;
-  $("offset").textContent = diff === 0 ? "Same time as you" : `${h ? `${h} h` : ""}${mm ? ` ${mm} min` : ""} ${diff > 0 ? "ahead of" : "behind"} you`.trim();
+  $("offset").textContent = diff === 0 ? "· same time as you" : `· ${`${h ? `${h} h` : ""}${mm ? ` ${mm} min` : ""}`.trim()} ${diff > 0 ? "ahead of" : "behind"} you`;
 }
 
 async function weather(p) {
@@ -184,13 +226,13 @@ async function weather(p) {
     const j = await r.json(), cur = j.current; if (!cur || S.here !== p || !$("wx")) return;
     const w = WEATHER.find(([codes]) => codes.includes(cur.weather_code)) || [[], "🌡️", ""];
     const icon = !cur.is_day && w[1] === "☀️" ? "🌙" : w[1];
-    $("wx").innerHTML = `<span class="wx-ic">${icon}</span> <b>${Math.round(cur.temperature_2m)}°C</b> <span class="soft">${esc(w[2])}</span>`;
+    $("wx").innerHTML = `<span class="wx-ic">${icon}</span> <b>${Math.round(cur.temperature_2m)}°C</b> ${esc(w[2].toLowerCase())}`;
   } catch {}
 }
 
-async function foodPhoto(p, img) {
+async function foodPhoto(d, p, img) {
   try {
-    const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(p.dish.wiki.replace(/ /g, "_"))}`);
+    const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(d.wiki.replace(/ /g, "_"))}`);
     const j = r.ok ? await r.json() : null, src = j?.thumbnail?.source;
     if (src && img && S.here === p) { img.onerror = () => img.remove(); img.src = src.replace(/\/\d+px-/, "/320px-"); img.hidden = false; }
   } catch {}
@@ -223,18 +265,94 @@ async function wikiPic({ exact, search }) {
 
 async function showPic(pic) {
   const d = $("pic"), img = $("pic-img");
-  $("pic-kind").textContent = pic.kind; $("pic-title").textContent = pic.title; $("pic-text").textContent = pic.text || "";
+  $("pic-kind").textContent = pic.kind; $("pic-title").textContent = pic.title; $("pic-sub").textContent = pic.sub || ""; $("pic-text").textContent = pic.text || "";
+  $("pic-extra").innerHTML = pic.extra ? pic.extra() || "" : ""; $("pic-cap").textContent = "";
   $("pic-src").hidden = true; img.hidden = true; img.removeAttribute("src");
+  d.classList.toggle("cover", !!pic.cover); d.classList.toggle("clip", !!pic.clip);
   d.classList.add("loading"); d.classList.remove("nopic");
   if (!d.open) d.showModal();
-  const found = await wikiPic(pic);
+  if (pic.link) { $("pic-src").href = pic.link.url; $("pic-src").textContent = pic.link.text; $("pic-src").hidden = false; }
+  const found = pic.find ? await pic.find().catch(() => null) : null;
   if ($("pic-title").textContent !== pic.title) return;
+  if (pic.extra) $("pic-extra").innerHTML = pic.extra() || "";
   if (!found) { d.classList.remove("loading"); d.classList.add("nopic"); return; }
   img.onload = () => { d.classList.remove("loading"); img.hidden = false; };
   img.onerror = () => { d.classList.remove("loading"); d.classList.add("nopic"); };
-  img.alt = pic.title; img.src = found.src;
-  if (found.url) { $("pic-src").href = found.url; $("pic-src").hidden = false; }
+  img.alt = found.caption || pic.title; img.src = found.src; $("pic-cap").textContent = found.caption || "";
+  if (found.url && !pic.link) { $("pic-src").href = found.url; $("pic-src").textContent = found.linkText || "Photo and more on Wikipedia ↗"; $("pic-src").hidden = false; }
 }
+
+/* ---------------- book covers (Open Library) ---------------- */
+async function bookCover(b) {
+  const j = await fetch(`https://openlibrary.org/search.json?title=${encodeURIComponent(b.title)}&author=${encodeURIComponent(b.author)}&limit=3&fields=key,cover_i`).then((r) => r.json());
+  const hit = (j.docs || []).find((x) => x.cover_i) || j.docs?.[0];
+  return hit?.cover_i ? { src: `https://covers.openlibrary.org/b/id/${hit.cover_i}-L.jpg`, url: `https://openlibrary.org${hit.key}`, linkText: "Find it on Open Library ↗" } : null;
+}
+
+/* ---------------- who's in charge, live from Wikidata ---------------- */
+const leaderCache = new Map();
+function leaders(cc) {
+  if (leaderCache.has(cc)) return leaderCache.get(cc);
+  const q = `SELECT ?role ?p ?pLabel ?img ?officeLabel ?start WHERE {
+    ?c wdt:P297 "${cc.toUpperCase()}".
+    { ?c p:P35 ?st. ?st ps:P35 ?p. BIND("state" AS ?role) OPTIONAL { ?c wdt:P1906 ?office } }
+    UNION { ?c p:P6 ?st. ?st ps:P6 ?p. BIND("gov" AS ?role) OPTIONAL { ?c wdt:P1313 ?office } }
+    ?st wikibase:rank ?rank. FILTER(?rank != wikibase:DeprecatedRank)
+    FILTER NOT EXISTS { ?st pq:P582 ?end }
+    OPTIONAL { ?st pq:P580 ?start }
+    OPTIONAL { ?p wdt:P18 ?img }
+    SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+  }`;
+  const job = fetch(`https://query.wikidata.org/sparql?format=json&query=${encodeURIComponent(q)}`, { headers: { accept: "application/sparql-results+json" } })
+    .then((r) => r.json()).then((j) => {
+      const rows = j.results.bindings.map((b) => ({ role: b.role.value, name: b.pLabel?.value, office: b.officeLabel?.value, img: b.img?.value, start: b.start?.value || "", id: b.p.value.split("/").pop() }));
+      const latest = (role) => rows.filter((r) => r.role === role && !/^Q\d+$/.test(r.name)).sort((a, b) => b.start.localeCompare(a.start))[0];
+      const state = latest("state"), gov = latest("gov"), face = (gov?.img && gov) || (state?.img && state);
+      const L = { state, gov, photo: face ? `${face.img.replace(/^http:/, "https:")}?width=800` : null, photoOf: face ? `${face.name}${face.office ? `, ${face.office}` : ""}` : "", url: face ? `https://www.wikidata.org/wiki/${face.id}` : null };
+      S.leaders = L; return L;
+    }).catch(() => ({}));
+  leaderCache.set(cc, job);
+  return job;
+}
+function leadersHTML(L) {
+  if (!L?.state && !L?.gov) return "";
+  const same = L.state && L.gov && L.state.name === L.gov.name;
+  const row = (icon, label, x) => x ? `<p class="kv"><span>${icon} ${label}</span><b>${esc(x.name)}</b>${x.office ? `<em>${esc(x.office)}</em>` : ""}</p>` : "";
+  return same ? row("👤", "Leader", L.state) : row("👑", "Head of state", L.state) + row("🏛️", "Government", L.gov);
+}
+
+/* ---------------- today's news ---------------- */
+async function paintNews(p) {
+  const items = (await news)[p.cc] || [];
+  const slot = $("news-slot"); if (!slot || S.here !== p) return;
+  if (!items.length) { slot.remove(); return; }
+  const n = items[0], day = new Date(n.date).toLocaleDateString([], { weekday: "long", day: "numeric", month: "long" });
+  slot.innerHTML = `<article class="clipping" tabindex="0" role="button" aria-label="Open the news from ${esc(p.country)}" style="--i:8">
+    <div class="mast"><span>THE DAILY ROAM</span><span>${esc(day)}</span></div>
+    <h3>${esc(n.title)}</h3><p class="src-line">${esc(n.source)} · tap for more</p></article>`;
+  const open = () => showPic({ kind: `📰 News from ${p.country}`, title: n.title, sub: `${n.source} · ${day}`, clip: true,
+    link: { url: n.url, text: "Read the full story ↗" },
+    extra: () => items.length > 1 ? `<h4>Also in the news</h4><ul class="more-news">${items.slice(1).map((x) => `<li><a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.title)}</a> <span class="soft">${esc(x.source)}</span></li>`).join("")}</ul>` : "" });
+  const el = slot.querySelector(".clipping");
+  el.onclick = open; el.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } };
+}
+
+/* ---------------- say it out loud ---------------- */
+function speak(text, tag, say, done) {
+  const synth = window.speechSynthesis;
+  if (!synth) return done?.();
+  synth.cancel();
+  const voices = synth.getVoices(), t = (tag || "").toLowerCase(), base = t.split("-")[0];
+  const voice = t && (voices.find((v) => v.lang.toLowerCase().replace("_", "-") === t) || voices.find((v) => v.lang.toLowerCase().split(/[-_]/)[0] === base));
+  // No voice for this language on your device: read the pronunciation guide in English instead.
+  const u = new SpeechSynthesisUtterance(voice ? text : (say || text).replace(/-/g, " "));
+  if (voice) { u.voice = voice; u.lang = voice.lang; } else u.lang = "en-US";
+  u.rate = 0.8;
+  const vol = audio.volume; audio.volume = Math.min(vol, 0.15);
+  u.onend = u.onerror = () => { audio.volume = vol; done?.(); };
+  synth.speak(u);
+}
+window.speechSynthesis?.getVoices();
 $("pic").addEventListener("click", (e) => { if (e.target.closest("[data-close]") || e.target.id === "pic") $("pic").close(); });
 
 // Dotted lines from each card to the spot on the globe (wide screens only).
@@ -257,6 +375,19 @@ function leads() {
 }
 
 /* ---------------- zoom in: the map tour ---------------- */
+// Capital stops don't have hand-written tours, so tour the most interesting things nearby on Wikipedia.
+async function nearby(p) {
+  try {
+    const j = await fetch(`https://en.wikipedia.org/w/api.php?action=query&generator=geosearch&ggscoord=${p.at[1]}|${p.at[0]}&ggsradius=10000&ggslimit=40&prop=coordinates|pageimages|extracts&exintro=1&explaintext=1&exsentences=2&exlimit=20&piprop=thumbnail&pithumbsize=200&format=json&origin=*`).then((r) => r.json());
+    const skip = new RegExp(`^(${[p.name, p.country].map((x) => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})$`, "i");
+    const pages = Object.values(j?.query?.pages || {}).filter((pg) => pg.coordinates && pg.extract && pg.extract.length > 80 && !skip.test(pg.title) && !/(station|district|ward|constituency|school|embassy|street|road|stop)\b/i.test(pg.title));
+    pages.sort((a, b) => (b.thumbnail ? 1 : 0) - (a.thumbnail ? 1 : 0) || b.extract.length - a.extract.length);
+    const look = pages.slice(0, 4).map((pg) => ({ at: [pg.coordinates[0].lon, pg.coordinates[0].lat], z: 16.2, title: pg.title, t: pg.extract }));
+    if (look.length) return look;
+  } catch {}
+  return [{ at: p.at, z: 12.5, title: p.name, t: `Welcome to ${p.name}. Drag the map around and explore the streets.` }];
+}
+
 let mapLib = null;
 function loadMapLib() {
   mapLib ||= new Promise((resolve, reject) => {
@@ -289,7 +420,9 @@ async function zoomIn(p) {
   $("map").hidden = false; $("map-tools").hidden = false; paintSat();
   requestAnimationFrame(() => { S.map.resize(); $("map").classList.add("in"); $("globe").classList.add("away"); });
   $("dock").hidden = true;
-  S.step = 0; tour(p);
+  S.step = 0;
+  if (!p.look) { setStatus("Finding things to look at…"); p.look = await nearby(p); setStatus(""); }
+  tour(p);
 }
 
 function tour(p) {
@@ -298,9 +431,9 @@ function tour(p) {
   S.marker.setLngLat(v.at).addTo(S.map);
   S.map.flyTo({ center: v.at, zoom: v.z - (phone() ? 0.6 : 0), speed: S.step === 0 ? 0.9 : 1.2, curve: 1.5, essential: true, padding: phone() ? { bottom: innerHeight * 0.45 } : { left: 400 } });
   card(`
-    <div class="where"><span class="flag">${flag(p.cc)}</span><div><b>${esc(p.name)}</b><span>Look closer · ${S.step + 1} of ${n}</span></div></div>
+    <div class="where"><span class="flag">${flag(p.cc)}</span><div><b>${esc(p.name)}</b><span>${p.capitalStop ? "Around town" : "Look closer"} · ${S.step + 1} of ${n}</span></div></div>
     <div class="steps" aria-hidden="true">${p.look.map((_, i) => `<i class="${i <= S.step ? "on" : ""}"></i>`).join("")}</div>
-    <p class="notice">${esc(v.t)}</p>
+    ${v.title ? `<h3 class="look-t">${esc(v.title)}</h3>` : ""}<p class="notice">${esc(v.t)}</p>
     <div class="actions">
       <button class="btn" id="back" type="button" ${S.step ? "" : "disabled"}>‹ Back</button>
       <span class="spacer"></span>
@@ -333,7 +466,7 @@ function paintSat() {
 
 /* ---------------- food ---------------- */
 async function showFood(p) {
-  const d = p.dish, inMap = !$("map").hidden;
+  const d = info(p).dish, inMap = !$("map").hidden;
   if (!inMap) { hideRing(); $("dock").hidden = true; globe.scale(1); globe.lift(phone() ? 0.3 : 0); }
   S.view = "food";
   card(`
@@ -372,28 +505,92 @@ function conquer(p) {
   return fresh;
 }
 function tasted(p) { const t = store.get("re-tasted", {}); t[p.id] = true; store.set("re-tasted", t); }
-function title(n) { let t = TITLES[0][1]; for (const [min, name] of TITLES) if (n >= min) t = name; return t; }
-function paintTitle() { $("title").textContent = title(Object.keys(store.get("re-visited", {})).length); }
+// Your title is earned by quiz: you can sit the next one once you've visited enough countries.
+const rank = () => Math.min(store.get("re-rank", 0), TITLES.length - 1);
+const title = () => TITLES[rank()][1];
+const nextTitle = () => TITLES[rank() + 1];
+const canUpgrade = () => !!nextTitle() && visitedCountries().size >= nextTitle()[0];
+function paintTitle() { $("title").textContent = title(); $("upgrade").hidden = !canUpgrade(); }
 
 $("passport-btn").onclick = () => {
-  const v = store.get("re-visited", {}), tasted = store.get("re-tasted", {}), n = Object.keys(v).length;
-  const nextT = TITLES.find(([min]) => min > n);
-  const countries = new Set(PLACES.filter((p) => v[p.id]).map((p) => p.cc)).size;
+  const v = store.get("re-visited", {}), tasted = store.get("re-tasted", {}), n = visitedCountries().size;
+  const nextT = nextTitle();
+  const stamps = Object.entries(v).filter(([id]) => STOP[id]).sort((a, b) => a[1].first.localeCompare(b[1].first));
   $("pp-body").innerHTML = `
-    <p class="rank">${esc(title(n))}</p>
-    <div class="meter"><i style="width:${(n / PLACES.length) * 100}%"></i></div>
-    <p class="soft small">${n} of ${PLACES.length} places · ${countries} countr${countries === 1 ? "y" : "ies"} · ${Object.keys(tasted).length} dishes tasted${nextT ? ` · ${nextT[0] - n} more to become ${esc(nextT[1])}` : ""}</p>
+    <p class="rank">${esc(title())}</p>
+    <div class="meter"><i style="width:${(n / COUNTRIES.size) * 100}%"></i></div>
+    <p class="soft small">${n} of ${COUNTRIES.size} countries · ${stamps.length} place${stamps.length === 1 ? "" : "s"} · ${Object.keys(tasted).length} dishes tasted</p>
+    ${nextT ? (canUpgrade() ? `<button class="btn go" type="button" data-quiz>👑 Take the quiz to become ${esc(nextT[1])}</button>` : `<p class="soft small">Visit ${nextT[0] - n} more countr${nextT[0] - n === 1 ? "y" : "ies"} to unlock the quiz for <b>${esc(nextT[1])}</b>.</p>`) : ""}
     <h3>Your stamps</h3>
-    <div class="stamps">${PLACES.map((p, i) => v[p.id]
-      ? `<button type="button" class="stamp" data-go="${p.id}" style="--r:${((i * 37) % 13) - 6}deg"><span>${flag(p.cc)}</span><b>${esc(p.name.split(",")[0])}</b><i>${tasted[p.id] ? "🌱 tasted" : "not tasted yet"}</i></button>`
-      : `<div class="stamp todo" style="--r:${((i * 37) % 13) - 6}deg"><span>?</span><b>Unexplored</b></div>`).join("")}</div>`;
+    ${stamps.length ? `<div class="stamps">${stamps.map(([id], i) => { const p = STOP[id]; return `<button type="button" class="stamp" data-go="${id}" style="--r:${((i * 37) % 13) - 6}deg"><span>${flag(p.cc)}</span><b>${esc(p.name.split(",")[0])}</b><i>${tasted[id] ? "🌱 tasted" : esc(p.country)}</i></button>`; }).join("")}</div>` : `<p>No stamps yet. Take a trip!</p>`}`;
   $("passport").showModal();
 };
 $("passport").addEventListener("click", (e) => {
   if (e.target.closest("[data-close]") || e.target.id === "passport") return $("passport").close();
+  if (e.target.closest("[data-quiz]")) { $("passport").close(); return startQuiz(); }
   const go = e.target.closest("[data-go]");
-  if (go) { $("passport").close(); const p = PLACES.find((x) => x.id === go.dataset.go); if (p && p !== S.here) trip(p); }
+  if (go) { $("passport").close(); const p = STOP[go.dataset.go]; if (p && p !== S.here) trip(p); }
 });
+
+/* ---------------- title upgrade quiz ---------------- */
+const shuffle = (a) => { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+function makeQuiz() {
+  const v = store.get("re-visited", {});
+  const mine = shuffle(Object.keys(v).map((id) => STOP[id]).filter(Boolean));
+  const others = (cc) => shuffle(WORLD.filter((w) => w.cc !== cc));
+  const opts = (right, wrong) => shuffle([right, ...shuffle([...new Set(wrong.filter((x) => x && x !== right))]).slice(0, 3)]);
+  const makers = [
+    (p, I) => I.capital && { q: `What's the capital of ${p.country}?`, a: I.capital, o: opts(I.capital, others(p.cc).map((w) => w.capital)) },
+    (p, I) => I.dish && { q: `Which country's must-eat veg dish is ${I.dish.name}?`, a: p.country, o: opts(p.country, others(p.cc).map((w) => w.name)) },
+    (p, I) => I.hello && { q: `Where would you greet people with "${I.hello.word}"?`, a: p.country, o: opts(p.country, others(p.cc).filter((w) => w.hello?.word !== I.hello.word).map((w) => w.name)) },
+    (p, I) => I.visit && { q: `${I.visit.name} is a must-visit in which country?`, a: p.country, o: opts(p.country, others(p.cc).map((w) => w.name)) },
+    (p, I) => I.money && { q: `What money do they use in ${p.country}?`, a: I.money, o: opts(I.money, others(p.cc).map((w) => w.money)) },
+    (p, I) => I.drive && { q: `Which side of the road do they drive on in ${p.country}?`, a: `On the ${I.drive}`, o: ["On the left", "On the right"] },
+    (p, I) => I.book && { q: `Which novel would teach you the history of ${p.country}?`, a: I.book.title, o: opts(I.book.title, others(p.cc).map((w) => w.book?.title)) },
+    (p, I) => I.only && { q: `Only here: "${I.only.replace(new RegExp(p.country.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"), "____")}" Where is here?`, a: p.country, o: opts(p.country, others(p.cc).map((w) => w.name)) },
+  ];
+  const qs = [], used = new Set();
+  for (let round = 0; qs.length < 10 && round < 40; round++) {
+    const p = mine[round % mine.length], I = info(p), m = makers[Math.floor(Math.random() * makers.length)];
+    const q = m(p, I); if (!q || q.o.length < 2 || used.has(q.q)) continue;
+    used.add(q.q); qs.push(q);
+  }
+  return qs;
+}
+
+function startQuiz() {
+  if (!canUpgrade()) return;
+  const Q = { qs: makeQuiz(), i: 0, right: 0, goal: nextTitle() };
+  if (Q.qs.length < 10) { setStatus("Take a few more trips first: there isn't enough to quiz you on yet."); return; }
+  const d = $("quiz");
+  const ask = () => {
+    const q = Q.qs[Q.i];
+    d.querySelector(".quiz-body").innerHTML = `
+      <p class="label">Question ${Q.i + 1} of 10 · to become ${esc(Q.goal[1])}</p>
+      <div class="dots">${Q.qs.map((_, i) => `<i class="${i < Q.i ? (Q.qs[i].ok ? "ok" : "no") : i === Q.i ? "on" : ""}"></i>`).join("")}</div>
+      <h2>${esc(q.q)}</h2>
+      <div class="choices">${q.o.map((o) => `<button type="button" class="choice" data-a="${esc(o)}">${esc(o)}</button>`).join("")}</div>
+      <p class="verdict" id="verdict"></p>`;
+    for (const b of d.querySelectorAll(".choice")) b.onclick = () => {
+      if (q.done) return; q.done = true; q.ok = b.dataset.a === q.a; if (q.ok) Q.right++;
+      for (const x of d.querySelectorAll(".choice")) { x.disabled = true; if (x.dataset.a === q.a) x.classList.add("right"); }
+      if (!q.ok) b.classList.add("wrong");
+      $("verdict").innerHTML = q.ok ? "✅ Yes!" : `❌ It's <b>${esc(q.a)}</b>.`;
+      setTimeout(() => { Q.i++; Q.i < 10 ? ask() : finish(); }, q.ok ? 900 : 1700);
+    };
+  };
+  const finish = () => {
+    const pass = Q.right >= 8;
+    if (pass) { store.set("re-rank", rank() + 1); paintTitle(); }
+    d.querySelector(".quiz-body").innerHTML = pass
+      ? `<div class="crowned"><span class="crown">👑</span><p class="label">${Q.right} out of 10</p><h2>All hail ${esc(Q.goal[1])}!</h2><p>Your new title is on the top right. ${nextTitle() ? `Visit ${Math.max(0, nextTitle()[0] - visitedCountries().size)} more countries to try for ${esc(nextTitle()[1])}.` : "You've conquered the whole Roamin' Empire."}</p><button class="btn go" type="button" data-close>Onwards</button></div>`
+      : `<div class="crowned"><span class="crown sad">🫠</span><p class="label">${Q.right} out of 10</p><h2>So close.</h2><p>You need 8 to become ${esc(Q.goal[1])}. Peek at your stamps, then try again whenever you like.</p><div class="actions"><button class="btn go" type="button" data-retry>Try again</button><button class="btn" type="button" data-close>Later</button></div></div>`;
+    const r = d.querySelector("[data-retry]"); if (r) r.onclick = () => { d.close(); startQuiz(); };
+  };
+  ask(); d.showModal();
+}
+$("quiz").addEventListener("click", (e) => { if (e.target.closest("[data-close]") || e.target.id === "quiz") $("quiz").close(); });
+$("upgrade").onclick = startQuiz;
 
 function setStatus(t) { $("status").textContent = t; }
 document.addEventListener("keydown", (e) => { if (e.key === " " && e.target === document.body) { e.preventDefault(); trip(); } });

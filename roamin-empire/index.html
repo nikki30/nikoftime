@@ -16,7 +16,10 @@
 <header class="bar">
   <a class="home" href="../">← <span class="lbl">More apps</span></a>
   <div class="brand"><span class="mark" aria-hidden="true">🏛️</span><span>My <em>Roamin'</em> Empire</span></div>
-  <button class="passport-btn" id="passport-btn" type="button"><span aria-hidden="true">👑</span> <b id="title">Wanderer</b></button>
+  <div class="bar-right">
+    <button class="upgrade" id="upgrade" type="button" hidden>👑 Title upgrade?</button>
+    <button class="passport-btn" id="passport-btn" type="button"><span aria-hidden="true">🏛️</span> <b id="title">Wanderer</b></button>
+  </div>
 </header>
 
 <main class="stage">
@@ -53,11 +56,17 @@
 <dialog class="pic loading" id="pic" aria-labelledby="pic-title">
   <button class="x" type="button" data-close aria-label="Close">×</button>
   <div class="frame"><img id="pic-img" alt="" hidden><span class="spin" aria-hidden="true">🎈</span><span class="none">No picture for this one, sorry. Imagine something lovely.</span></div>
-  <div class="cap"><span class="label" id="pic-kind"></span><h2 id="pic-title"></h2><p id="pic-text"></p><a class="src" id="pic-src" target="_blank" rel="noopener" hidden>Photo and more on Wikipedia ↗</a></div>
+  <p class="pic-cap" id="pic-cap"></p>
+  <div class="cap"><span class="label" id="pic-kind"></span><h2 id="pic-title"></h2><p class="pic-sub" id="pic-sub"></p><p id="pic-text"></p><div id="pic-extra"></div><a class="src" id="pic-src" target="_blank" rel="noopener" hidden>Photo and more on Wikipedia ↗</a></div>
+</dialog>
+
+<dialog class="quiz" id="quiz" aria-label="Title upgrade quiz">
+  <button class="x" type="button" data-close aria-label="Close">×</button>
+  <div class="quiz-body"></div>
 </dialog>
 
 <audio id="audio" preload="none"></audio>
-<footer class="credit" id="credit">Charts and previews from Apple Music · facts from Wikipedia · made by <a href="../">Nikita</a></footer>
+<footer class="credit" id="credit">Charts from Apple Music · news from Google News · leaders from Wikidata · photos from Wikipedia · made by <a href="../">Nikita</a></footer>
 <script type="module" src="app.js"></script>
 </body>
 </html>

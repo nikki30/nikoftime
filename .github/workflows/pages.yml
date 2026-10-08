@@ -5,7 +5,7 @@ on:
     branches: [main]
   workflow_dispatch:
   schedule:
-    - cron: "17 5 * * *" # daily, so My Roamin' Empire plays this week's hits
+    - cron: "17 5 * * *" # daily, so My Roamin' Empire has this week's hits and today's news
 
 permissions:
   contents: read
@@ -27,8 +27,12 @@ jobs:
       - uses: actions/configure-pages@v5
       - name: Fetch this week's top songs for My Roamin' Empire
         continue-on-error: true
-        timeout-minutes: 4
+        timeout-minutes: 8
         run: node tools/charts.mjs
+      - name: Fetch today's headlines for My Roamin' Empire
+        continue-on-error: true
+        timeout-minutes: 6
+        run: node tools/news.mjs
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .
