@@ -3,6 +3,8 @@ import { artistFacts, flag as flagOf, firstSentences } from "../radio-roam/data.
 import { PLACES } from "./places.js";
 import { COUNTRY, EXTRA } from "./extras.js";
 import { WORLD } from "./world.js";
+import { NAMES } from "./names.js";
+import { LANGS } from "./langs.js";
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -39,7 +41,7 @@ function info(p) {
   return {
     w, capital: c.capital || w.capital, capitalWiki: w.capitalWiki || c.capital || w.capital, note: c.note, money: c.money || w.money, drive: c.drive || w.drive,
     tz: x.tz || w.tz, hello: x.hello || w.hello, visit: x.visit || w.visit, only: x.only || w.only, book: w.book, politics: w.politics,
-    dish: p.dish || w.food,
+    dish: p.dish || w.food, names: NAMES[p.cc],
   };
 }
 
@@ -161,7 +163,7 @@ function showRing(p) {
   ];
   const right = [
     I.only ? fc("only", "✨", "Only here", `<p>${esc(I.only)}</p>`, 4, true) : "",
-    I.hello ? fc("hello", "💬", "Say hello", `<div class="hello-row"><b class="huge">${esc(I.hello.word)}</b>${speakBtn("hello", I.hello.word)}</div>${I.hello.script ? `<p class="script">${esc(I.hello.script)}</p>` : ""}<p><i>${esc(I.hello.say)}</i> · ${esc(I.hello.lang)}</p>`, 5) : "",
+    I.hello ? fc("hello", "💬", "Say hello", `<div class="hello-row"><b class="huge">${esc(I.hello.word)}</b>${speakBtn("hello", I.hello.word)}</div>${I.hello.script ? `<p class="script">${esc(I.hello.script)}</p>` : ""}<p><i>${esc(I.hello.say)}</i> · ${esc(I.hello.lang)}</p>${langOf(I.hello.lang) ? `<p class="soft small">Tap to see where ${esc(langName(I.hello.lang))} comes from</p>` : ""}`, 5, !!langOf(I.hello.lang)) : "",
     I.politics ? fc("politics", "⚖️", "Who runs it", `<p class="sys">${esc(I.politics.system)}</p><div id="leaders" class="leaders"><span class="soft small">Looking up who's in charge…</span></div>`, 6, true) : "",
     fc("know", "🏛️", "Good to know", `<p class="kv"><span>Capital</span><b>${esc(I.capital || "")}</b></p>${inCapital ? `<p class="hl">You're standing in it!</p>` : I.note ? `<p class="soft small">${esc(I.note[0].toUpperCase() + I.note.slice(1))}.</p>` : ""}<p class="kv"><span>Money</span><b>${esc(I.money || "")}</b></p><p class="kv"><span>Driving</span><b>on the ${esc(I.drive || "?")}${I.drive === "left" ? " (look right first!)" : ""}</b></p>`, 7, true),
   ];
@@ -169,7 +171,7 @@ function showRing(p) {
     <header class="ring-head"><span class="flag">${flag(p.cc)}</span><div><h2>${esc(p.name)}</h2><p>${p.name.split(",")[0].trim() !== p.country ? `${esc(p.country)} · ` : ""}${km != null ? `${km.toLocaleString()} km floated` : "your first stop"}${fresh ? ` · <b>new to your empire!</b>` : ""}</p>
       <p class="now-line"><span>🕰️ <b id="clock">--:--</b> <span id="offset"></span></span><span id="wx"></span></p></div></header>
     <div class="col left">${left.join("")}</div><div class="col right">${right.join("")}</div>
-    <div class="col bottom" id="news-slot"></div>`;
+    <div class="col bottom"><div id="names-slot">${I.names ? namesCard(I.names) : ""}</div><div id="news-slot"></div></div>`;
   $("ring").hidden = false; $("ring").scrollTop = 0;
   requestAnimationFrame(() => $("ring").classList.add("in"));
   $("zoom").hidden = false; $("zoom").disabled = false; $("dock").hidden = false;
@@ -182,6 +184,8 @@ function showRing(p) {
     only: { kind: "✨ Only here", title: p.name, text: I.only, find: () => wikiPic({ exact: p.capitalStop ? I.capitalWiki : p.wiki, search: p.name }) },
     know: { kind: `🏛️ Capital of ${p.country}`, title: I.capital, text: inCapital ? "You're standing in it!" : I.note ? `${I.note[0].toUpperCase() + I.note.slice(1)}.` : "", find: () => wikiPic({ exact: I.capitalWiki, search: `${I.capital} city` }) },
     book: I.book && { kind: "📚 Read its history", title: I.book.title, sub: `${I.book.author}${I.book.year ? `, ${I.book.year}` : ""}${I.book.original && I.book.original !== "English" ? ` · translated from ${I.book.original}` : ""}`, text: I.book.about, cover: true, find: () => bookCover(I.book) },
+    hello: I.hello && langOf(I.hello.lang) && { kind: `💬 Where ${langName(I.hello.lang)} comes from`, title: langName(I.hello.lang), sub: langOf(I.hello.lang).family, text: langOf(I.hello.lang).about, plain: true, extra: () => mixHTML(langOf(I.hello.lang).mix) },
+    names: I.names && { kind: `👶 Typical names in ${p.country}`, title: `${I.names.girl.first} ${I.names.girl.last} & ${I.names.boy.first} ${I.names.boy.last}`, text: I.names.about, plain: true, extra: () => `<div class="kids big-kids">${kid(I.names.girl, "girl", I.names.tone)}${kid(I.names.boy, "boy", I.names.tone)}</div>` },
     politics: I.politics && { kind: `⚖️ Who runs ${p.country}`, title: I.politics.system, text: I.politics.about, find: () => leaders(p.cc).then((L) => L.photo ? { src: L.photo, url: L.url, caption: L.photoOf, linkText: "More on Wikidata ↗" } : null), extra: () => leadersHTML(S.leaders) },
   };
   for (const el of $("ring").querySelectorAll("[data-pic]")) {
@@ -189,12 +193,8 @@ function showRing(p) {
     el.addEventListener("click", open);
     el.addEventListener("keydown", (e) => { if (e.target === el && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); open(e); } });
   }
-  for (const b of $("ring").querySelectorAll("[data-say]")) b.onclick = () => {
-    b.classList.add("talking");
-    const done = () => b.classList.remove("talking");
-    if (b.dataset.say === "hello") speak(I.hello.script || I.hello.word, I.hello.bcp47, I.hello.say, done);
-    else speak(d.name, I.hello?.script ? "" : (d.bcp47 || I.hello?.bcp47), d.say, done);
-  };
+  S.sayCtx = { I, d };
+  wireSay($("ring"));
   paintSong();
   tickClock(I.tz); weather(p); if (d) foodPhoto(d, p, $("food-photo"));
   if (I.politics) leaders(p.cc).then((L) => { if (S.here === p && $("leaders")) $("leaders").innerHTML = leadersHTML(L) || `<span class="soft small">Couldn't look that up right now.</span>`; });
@@ -235,7 +235,7 @@ async function foodPhoto(d, p, img) {
   try {
     const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(d.wiki.replace(/ /g, "_"))}`);
     const j = r.ok ? await r.json() : null, src = j?.thumbnail?.source;
-    if (src && img && S.here === p) { img.onerror = () => img.remove(); img.src = src.replace(/\/\d+px-/, "/320px-"); img.hidden = false; }
+    if (src && img && S.here === p) { img.onerror = () => img.remove(); img.src = src; img.hidden = false; }
   } catch {}
 }
 
@@ -244,17 +244,18 @@ const picCache = new Map();
 async function wikiPic({ exact, search }) {
   const key = exact || search;
   if (picCache.has(key)) return picCache.get(key);
-  const big = (u) => u?.replace(/\/\d+px-/, "/1024px-");
+  // Wikimedia only serves thumbnails at standard widths (330, 500, 960…) and never wider than the original.
+  const big = (j) => (j.originalimage && j.originalimage.width <= 1280 ? j.originalimage.source : j.originalimage && j.thumbnail ? j.thumbnail.source.replace(/\/\d+px-/, "/960px-") : j.thumbnail?.source);
   let out = null;
   if (exact) {
     try {
       const j = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(exact.replace(/ /g, "_"))}`).then((r) => (r.ok ? r.json() : null));
-      if (j?.thumbnail?.source && j.type !== "disambiguation") out = { src: big(j.thumbnail.source), url: j.content_urls?.desktop?.page };
+      if (j?.thumbnail?.source && j.type !== "disambiguation") out = { src: big(j), url: j.content_urls?.desktop?.page };
     } catch {}
   }
   if (!out && search) {
     try {
-      const j = await fetch(`https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(search)}&gsrlimit=3&prop=pageimages|info&piprop=thumbnail&pithumbsize=1024&inprop=url&format=json&origin=*`).then((r) => r.json());
+      const j = await fetch(`https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(search)}&gsrlimit=3&prop=pageimages|info&piprop=thumbnail&pithumbsize=960&inprop=url&format=json&origin=*`).then((r) => r.json());
       const pages = Object.values(j?.query?.pages || {}).sort((a, b) => a.index - b.index);
       const hit = pages.find((pg) => pg.thumbnail?.source);
       if (hit) out = { src: hit.thumbnail.source, url: hit.fullurl };
@@ -269,13 +270,14 @@ async function showPic(pic) {
   $("pic-kind").textContent = pic.kind; $("pic-title").textContent = pic.title; $("pic-sub").textContent = pic.sub || ""; $("pic-text").textContent = pic.text || "";
   $("pic-extra").innerHTML = pic.extra ? pic.extra() || "" : ""; $("pic-cap").textContent = "";
   $("pic-src").hidden = true; img.hidden = true; img.removeAttribute("src");
-  d.classList.toggle("cover", !!pic.cover); d.classList.toggle("clip", !!pic.clip);
+  d.classList.toggle("cover", !!pic.cover); d.classList.toggle("clip", !!pic.clip); d.classList.toggle("plain", !!pic.plain);
   d.classList.add("loading"); d.classList.remove("nopic");
   if (!d.open) d.showModal();
   if (pic.link) { $("pic-src").href = pic.link.url; $("pic-src").textContent = pic.link.text; $("pic-src").hidden = false; }
   const found = pic.find ? await pic.find().catch(() => null) : null;
   if ($("pic-title").textContent !== pic.title) return;
   if (pic.extra) $("pic-extra").innerHTML = pic.extra() || "";
+  if (pic.plain) { d.classList.remove("loading"); wireSay($("pic-extra")); return; }
   if (!found) { d.classList.remove("loading"); d.classList.add("nopic"); return; }
   img.onload = () => { d.classList.remove("loading"); img.hidden = false; };
   img.onerror = () => { d.classList.remove("loading"); d.classList.add("nopic"); };
@@ -309,7 +311,7 @@ function leaders(cc) {
       const rows = j.results.bindings.map((b) => ({ role: b.role.value, name: b.pLabel?.value, office: b.officeLabel?.value, img: b.img?.value, start: b.start?.value || "", id: b.p.value.split("/").pop() }));
       const latest = (role) => rows.filter((r) => r.role === role && !/^Q\d+$/.test(r.name)).sort((a, b) => b.start.localeCompare(a.start))[0];
       const state = latest("state"), gov = latest("gov"), face = (gov?.img && gov) || (state?.img && state);
-      const L = { state, gov, photo: face ? `${face.img.replace(/^http:/, "https:")}?width=800` : null, photoOf: face ? `${face.name}${face.office ? `, ${face.office}` : ""}` : "", url: face ? `https://www.wikidata.org/wiki/${face.id}` : null };
+      const L = { state, gov, photo: face ? `${face.img.replace(/^http:/, "https:")}?width=960` : null, photoOf: face ? `${face.name}${face.office ? `, ${face.office}` : ""}` : "", url: face ? `https://www.wikidata.org/wiki/${face.id}` : null };
       S.leaders = L; return L;
     }).catch(() => ({}));
   leaderCache.set(cc, job);
@@ -320,6 +322,49 @@ function leadersHTML(L) {
   const same = L.state && L.gov && L.state.name === L.gov.name;
   const row = (icon, label, x) => x ? `<p class="kv"><span>${icon} ${label}</span><b>${esc(x.name)}</b>${x.office ? `<em>${esc(x.office)}</em>` : ""}</p>` : "";
   return same ? row("👤", "Leader", L.state) : row("👑", "Head of state", L.state) + row("🏛️", "Government", L.gov);
+}
+
+// 🔊 buttons: greetings, dish names and children's names, in the ring or in the picture dialog.
+function wireSay(root) {
+  const { I, d } = S.sayCtx || {}; if (!I) return;
+  for (const b of root.querySelectorAll("[data-say]")) b.onclick = (e) => {
+    e.stopPropagation();
+    b.classList.add("talking");
+    const done = () => b.classList.remove("talking");
+    if (b.dataset.say === "hello") speak(I.hello.script || I.hello.word, I.hello.bcp47, I.hello.say, done);
+    else if (b.dataset.say === "girl" || b.dataset.say === "boy") { const n = I.names[b.dataset.say]; speak(`${n.first} ${n.last}`, I.hello?.script ? "" : I.hello?.bcp47, n.say, done); }
+    else speak(d.name, I.hello?.script ? "" : (d.bcp47 || I.hello?.bcp47), d.say, done);
+  };
+}
+
+/* ---------------- typical names ---------------- */
+const TONES = ["#f6d9c4", "#e9b994", "#c98e64", "#9a6440", "#6b4428"];
+function kid(n, who, tone = 3) {
+  const skin = TONES[Math.min(5, Math.max(1, tone || 3)) - 1];
+  const hair = who === "girl"
+    ? `<path d="M14 30c-2-14 6-22 18-22s20 8 18 22c-4-6-10-9-18-9s-14 3-18 9z" fill="#2a1a12"/><circle cx="12" cy="30" r="6" fill="#2a1a12"/><circle cx="52" cy="30" r="6" fill="#2a1a12"/><path d="M24 12l8-6 8 6-8 3z" fill="#ff5d8f"/>`
+    : `<path d="M15 28c-1-12 7-19 17-19s18 7 17 19c-3-5-9-8-17-8s-14 3-17 8z" fill="#2a1a12"/>`;
+  return `<figure class="kid kid-${who}"><svg viewBox="0 0 64 70" aria-hidden="true">
+      <path d="M12 70c2-12 10-18 20-18s18 6 20 18z" fill="${who === "girl" ? "#ffb347" : "#2bb3a3"}"/>
+      <circle cx="32" cy="32" r="18" fill="${skin}"/>${hair}
+      <circle cx="26" cy="33" r="2" fill="#2a1a12"/><circle cx="38" cy="33" r="2" fill="#2a1a12"/>
+      <path d="M26 40q6 5 12 0" fill="none" stroke="#2a1a12" stroke-width="1.8" stroke-linecap="round"/>
+      <circle cx="22" cy="38" r="2.6" fill="#ff8a80" opacity=".45"/><circle cx="42" cy="38" r="2.6" fill="#ff8a80" opacity=".45"/>
+    </svg><figcaption><b>${esc(n.first)}</b> ${esc(n.last)} <button class="say-btn mini" type="button" data-say="${who}" aria-label="Hear ${esc(n.first)} ${esc(n.last)}">🔊</button><i>${esc(n.say || "")}</i></figcaption></figure>`;
+}
+function namesCard(N) {
+  return `<article class="fc fc-names has-pic" data-pic="names" tabindex="0" role="button" aria-label="Typical names: tap for where they come from" style="--r:1deg;--i:8"><span class="ic" aria-hidden="true">👶</span><span class="tap" aria-hidden="true">💡</span><h3>Typical names</h3><div class="kids">${kid(N.girl, "girl", N.tone)}${kid(N.boy, "boy", N.tone)}</div></article>`;
+}
+
+/* ---------------- where the language comes from ---------------- */
+const langName = (l) => l.replace(/\s*\(.*\)\s*$/, "").split(",")[0].trim();
+const langOf = (l) => l && (LANGS[l] || LANGS[langName(l)]);
+const MIX = ["#ffd166", "#ff7a59", "#6fd6ff", "#5fd38d", "#b69bff", "#ff7ac6", "#9fb4ff"];
+function mixHTML(mix) {
+  if (!mix?.length) return "";
+  return `<h4 class="mix-h">Where its words come from <span>(roughly)</span></h4>
+    <div class="mix-bar">${mix.map(([src, pct], i) => `<span style="flex:${pct};background:${MIX[i % MIX.length]}" title="${esc(src)}: ${pct}%"></span>`).join("")}</div>
+    <ul class="mix-key">${mix.map(([src, pct], i) => `<li><i style="background:${MIX[i % MIX.length]}"></i>${esc(src)} <b>${pct}%</b></li>`).join("")}</ul>`;
 }
 
 /* ---------------- today's news ---------------- */
@@ -346,7 +391,7 @@ function speak(text, tag, say, done) {
   const voices = synth.getVoices(), t = (tag || "").toLowerCase(), base = t.split("-")[0];
   const voice = t && (voices.find((v) => v.lang.toLowerCase().replace("_", "-") === t) || voices.find((v) => v.lang.toLowerCase().split(/[-_]/)[0] === base));
   // No voice for this language on your device: read the pronunciation guide in English instead.
-  const u = new SpeechSynthesisUtterance(voice ? text : (say || text).replace(/-/g, " "));
+  const u = new SpeechSynthesisUtterance(voice ? text : (say || text).replace(/-/g, " ").toLowerCase());
   if (voice) { u.voice = voice; u.lang = voice.lang; } else u.lang = "en-US";
   u.rate = 0.8;
   const vol = audio.volume; audio.volume = Math.min(vol, 0.15);
@@ -492,7 +537,7 @@ async function showFood(p) {
   try {
     const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(d.wiki.replace(/ /g, "_"))}`);
     const j = r.ok ? await r.json() : null;
-    const thumb = j?.thumbnail?.source, src = thumb ? thumb.replace(/\/\d+px-/, "/640px-") : j?.originalimage?.source;
+    const thumb = j?.thumbnail?.source, src = j?.originalimage && j.originalimage.width > 500 && thumb ? thumb.replace(/\/\d+px-/, "/500px-") : j?.originalimage?.source || thumb;
     const img = $("dish-photo");
     if (src && img && S.view === "food") { img.onerror = () => { if (thumb && img.src !== thumb) img.src = thumb; else img.remove(); }; img.src = src; img.hidden = false; }
   } catch {}
@@ -550,11 +595,12 @@ function makeQuiz() {
     (p, I) => I.book && { q: `Which novel would teach you the history of ${p.country}?`, a: I.book.title, o: opts(I.book.title, others(p.cc).map((w) => w.book?.title)) },
     (p, I) => I.only && { q: `Only here: "${I.only.replace(new RegExp(p.country.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"), "____")}" Where is here?`, a: p.country, o: opts(p.country, others(p.cc).map((w) => w.name)) },
   ];
+  // Questions only come from the cards of places you've flown to, spread across all of them.
   const qs = [], used = new Set();
-  for (let round = 0; qs.length < 10 && round < 40; round++) {
+  for (let round = 0; qs.length < 10 && round < 80; round++) {
     const p = mine[round % mine.length], I = info(p), m = makers[Math.floor(Math.random() * makers.length)];
     const q = m(p, I); if (!q || q.o.length < 2 || used.has(q.q)) continue;
-    used.add(q.q); qs.push(q);
+    used.add(q.q); q.from = p.name.split(",")[0]; q.cc = p.cc; qs.push(q);
   }
   return qs;
 }
@@ -569,6 +615,7 @@ function startQuiz() {
     d.querySelector(".quiz-body").innerHTML = `
       <p class="label">Question ${Q.i + 1} of 10 · to become ${esc(Q.goal[1])}</p>
       <div class="dots">${Q.qs.map((_, i) => `<i class="${i < Q.i ? (Q.qs[i].ok ? "ok" : "no") : i === Q.i ? "on" : ""}"></i>`).join("")}</div>
+      <p class="from">${flag(q.cc)} From your stop in ${esc(q.from)}</p>
       <h2>${esc(q.q)}</h2>
       <div class="choices">${q.o.map((o) => `<button type="button" class="choice" data-a="${esc(o)}">${esc(o)}</button>`).join("")}</div>
       <p class="verdict" id="verdict"></p>`;
