@@ -6,7 +6,7 @@ A shelf of little apps you can use right now, in the spirit of [neal.fun](https:
 
 | Tile | What it is |
 |---|---|
-| [**Do Not Fret**](do-not-fret/) | A guitar practice app: a daily routine with a metronome, fretboards that light up each note on the beat, theory lessons, songs with tab play-along, and charts of your clean tempo. [README](do-not-fret/README.md) |
+| [**Do Not Fret**](do-not-fret/) | Born from a plateau in my own guitar learning: practice with structure and focus, even if it's just 20 minutes a day. A daily routine with a metronome, fretboards that light up each note on the beat, theory lessons, songs with tab play-along, and charts of your clean tempo. [README](do-not-fret/README.md) |
 | [**Story So Far**](story-so-far/) | Spoiler-free recaps of the book you're reading, up to your exact page, drawn as a timeline, journey map, lab notebook, case file or scrapbook. [README](story-so-far/README.md) |
 | [**My Roamin' Empire**](roamin-empire/) | Float to any of 196 countries. Cards pop up around the globe: the #1 song, how to say hello (and where the language comes from), a must-eat vegetarian dish, a must-visit spot, an "only here" fact, today's headline, a historical novel, typical names, who runs the country, and the local time and weather. Zoom in for a tour of the streets, then pass a quiz to earn your next title. [README](roamin-empire/README.md) |
 | [**Radio Roam**](radio-roam/) | Inspired by [radio.garden](https://radio.garden). Float to a random place on Earth in a hot-air balloon and hear its radio live, with what's playing, a fact about the artist, a one-tap "Save to YouTube Music" for songs you love, and a passport of the countries you've visited. [README](radio-roam/README.md) |

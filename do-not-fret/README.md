@@ -2,6 +2,8 @@
 
 **A free guitar practice app that runs in your browser.** It gives you a short daily routine with a metronome, play-along fretboards that light up the note you should be playing, theory lessons from "what are the notes?" up to improvising, songs with tab that scrolls with the beat, and a progress page that shows your clean tempo going up over time.
 
+> I made this when I hit a plateau learning guitar. I was practising, but without a plan, so I wasn't getting better. Do Not Fret gives every session a structure and a focus, so even 20 minutes a day moves you forward.
+
 No account, no install, no ads. Your practice log stays on your device.
 
 **▶ Open the app: https://nikki30.github.io/nikoftime/do-not-fret/**
