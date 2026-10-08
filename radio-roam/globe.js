@@ -7,7 +7,7 @@ export function createGlobe(canvas) {
   const proj = geoOrthographic().clipAngle(90).precision(0.6);
   const path = geoPath(proj, ctx);
   const grat = geoGraticule10();
-  const G = { land: null, dots: [], here: null, trail: [], rider: null, rot: [-10, -20, 0], zoom: 1, oy: 0, oyTarget: 0, dragging: false, idle: true, w: 0, h: 0, dpr: 1 };
+  const G = { land: null, dots: [], here: null, trail: [], rider: null, rot: [-10, -20, 0], zoom: 1, zTarget: 1, oy: 0, oyTarget: 0, dragging: false, idle: true, w: 0, h: 0, dpr: 1 };
 
   (window.__WORLD ? Promise.resolve(window.__WORLD) : fetch(new URL("../vendor/countries-110m.json", import.meta.url)).then((r) => r.json())).then((topo) => { G.land = feature(topo, topo.objects.countries); draw(); });
 
@@ -71,6 +71,7 @@ export function createGlobe(canvas) {
     const dt = Math.min(64, now - last); last = now;
     if (G.idle && !G.dragging && !G.here) G.rot[0] += dt * 0.006;
     G.oy += (G.oyTarget - G.oy) * Math.min(1, dt / 160);
+    if (!G.rider) G.zoom += (G.zTarget - G.zoom) * Math.min(1, dt / 200);
     draw(); requestAnimationFrame(loop);
   })(last);
 
@@ -88,6 +89,10 @@ export function createGlobe(canvas) {
     setStations(list) { G.dots = list; },
     // Slide the globe up so the landing spot stays visible above a bottom sheet.
     lift(fraction) { G.oyTarget = -fraction; },
+    // Shrink or grow the globe (1 = normal), e.g. to make room for cards around it.
+    scale(k) { G.zTarget = k; },
+    // Where a place is on screen right now, in CSS pixels (null if it's round the back).
+    point(lon, lat) { return geoDistance([lon, lat], [-G.rot[0], -G.rot[1]]) < 1.5 ? proj([lon, lat]) : null; },
     // Fly from where we are to the new station. Resolves when the balloon lands.
     ride(to) {
       const from = G.here ? [G.here.lon, G.here.lat] : [-G.rot[0], -G.rot[1]];

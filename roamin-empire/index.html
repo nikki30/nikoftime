@@ -23,6 +23,7 @@
   <canvas id="globe" aria-label="A globe. Each dot is a place in your future empire."></canvas>
   <div id="map" class="map" hidden></div>
   <div class="map-tools" id="map-tools" hidden>
+    <button type="button" class="chip" id="globe-back">🌍 Back to the globe</button>
     <button type="button" class="chip" id="sat" aria-pressed="false">🛰️ Satellite</button>
   </div>
 
@@ -31,10 +32,15 @@
     <p>Float somewhere new, hear what the country is playing, zoom in to see why it looks the way it does, then have a taste.</p>
   </section>
 
+  <svg class="leads" id="leads" aria-hidden="true"></svg>
+  <section class="ring" id="ring" hidden aria-live="polite"></section>
   <section class="card" id="card" hidden aria-live="polite"></section>
 
   <div class="dock" id="dock">
-    <button class="ride" id="ride" type="button"><span aria-hidden="true">🎈</span> <span id="ride-label">Take a trip</span></button>
+    <div class="dock-row">
+      <button class="ride zoom" id="zoom" type="button" hidden><span aria-hidden="true">🔍</span> Zoom in</button>
+      <button class="ride" id="ride" type="button"><span aria-hidden="true">🎈</span> <span id="ride-label">Take a trip</span></button>
+    </div>
     <p class="status" id="status" role="status"></p>
   </div>
 </main>
