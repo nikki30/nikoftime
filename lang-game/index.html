@@ -4,44 +4,24 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Playing the Lang Game</title>
-<meta name="description" content="Learn to speak Malayalam and Telugu through the languages you already know: Tamil, Hindi and English. Twenty minutes a day.">
-<meta name="theme-color" content="#fbf6ec">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='6' y='6' width='52' height='52' rx='10' fill='%23f3d9a4' stroke='%232a2233' stroke-width='4'/%3E%3Ctext x='30' y='45' font-family='Georgia' font-size='34' font-weight='700' text-anchor='middle' fill='%232a2233'%3EL%3C/text%3E%3Ctext x='48' y='52' font-family='Georgia' font-size='11' fill='%232a2233'%3E1%3C/text%3E%3C/svg%3E">
+<meta name="description" content="Learn to speak Malayalam and Telugu through the languages you already know. Three short rounds a day: warm-up words, sentence ladders and conversation practice.">
+<meta name="theme-color" content="#1f1147">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='6' y='6' width='52' height='52' rx='12' fill='%23ffcf5c' stroke='%231f1147' stroke-width='4'/%3E%3Ctext x='30' y='45' font-family='Georgia' font-size='34' font-weight='700' text-anchor='middle' fill='%231f1147'%3EL%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&family=Noto+Sans+Malayalam:wght@400;600&family=Noto+Sans+Telugu:wght@400;600&family=Noto+Sans+Tamil:wght@400;600&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300..800&family=Geist+Mono:wght@400;500&family=Noto+Sans+Malayalam:wght@400;600&family=Noto+Sans+Telugu:wght@400;600&family=Noto+Sans+Tamil:wght@400;600&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+<div class="blobs" aria-hidden="true"><i></i><i></i><i></i></div>
 <header class="top">
-  <a class="home" href="../">← <span class="lbl">More apps</span></a>
-  <h1 class="logo" aria-label="Playing the Lang Game">
-    <span class="t" style="--r:-4deg">L<i>1</i></span><span class="t" style="--r:3deg">A<i>1</i></span><span class="t" style="--r:-2deg">N<i>1</i></span><span class="t" style="--r:4deg">G<i>2</i></span>
+  <a class="home" href="../" aria-label="More apps">←</a>
+  <a class="logo" href="#home" aria-label="Playing the Lang Game, home">
+    <span class="t" style="--r:-6deg;--c:#ff8a5b">L</span><span class="t" style="--r:4deg;--c:#ffcf5c">A</span><span class="t" style="--r:-3deg;--c:#36d1dc">N</span><span class="t" style="--r:5deg;--c:#ff5e9c">G</span>
     <span class="word">Playing the <em>Lang</em> Game</span>
-  </h1>
-  <div class="lang-pick" role="radiogroup" aria-label="Language you're learning">
-    <button type="button" role="radio" data-lang="ml">Malayalam</button>
-    <button type="button" role="radio" data-lang="te">Telugu</button>
-  </div>
+  </a>
+  <button class="me" id="me" type="button"></button>
 </header>
-
-<nav class="tabs" aria-label="Sections">
-  <a href="#today" data-tab="today">☀️ Today</a>
-  <a href="#phrases" data-tab="phrases">💬 Phrases</a>
-  <a href="#talk" data-tab="talk">🗣️ Talk</a>
-  <a href="#words" data-tab="words">🌉 Words</a>
-  <a href="#ladders" data-tab="ladders">🪜 Sentences</a>
-  <a href="#tricks" data-tab="tricks">💡 Shortcuts</a>
-  <a href="#script" data-tab="script">✍️ Script</a>
-  <a href="#progress" data-tab="progress">📈 Progress</a>
-</nav>
-
 <main id="main" class="wrap" aria-live="polite"></main>
-
-<footer class="foot wrap">
-  <span>Learn new languages through the ones you already know.</span>
-  <label class="toggle"><input type="checkbox" id="show-script"> Show the native script</label>
-  <span>Made by <a href="../">Nikita</a></span>
-</footer>
 <script type="module" src="app.js"></script>
 </body>
 </html>

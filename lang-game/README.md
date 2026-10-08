@@ -10,22 +10,23 @@ Learn to *speak* Malayalam and Telugu through the languages you already know: Ta
 
 **▶ Open it: https://nikki30.github.io/nikoftime/lang-game/**
 
-## What's inside
+## How it works
 
-| Section | What you do |
+**One setup screen.** Pick the languages you already speak (Tamil, Hindi, English) and the one you want to learn (Malayalam or Telugu). Every word is then linked only to the languages *you* know.
+
+**Three rounds a day, about 15 minutes:**
+
+| Round | What you do |
 |---|---|
-| ☀️ **Today** | A 20-minute routine: warm-up phrases → 8 word bridges → a sentence ladder → a mini conversation → an ear test. Builds a daily streak. |
-| 💬 **Phrases** | 60 survival phrases (greetings, getting around, shopping, food, when you're stuck) |
-| 🗣️ **Talk** | 8 everyday conversations (tea shop, vegetables, an auto, meeting family…). Play them, then hide your lines and say them yourself. |
-| 🌉 **Words** | ~300 everyday words per language, each shown next to its Tamil and Hindi relatives, with the link that helps it stick. False friends are flagged. |
-| 🪜 **Sentences** | 40 sentences in the new language, Tamil, Hindi and English, colour-matched word by word |
-| 💡 **Shortcuts** | Grammar you already know from Tamil and Hindi |
-| ✍️ **Script** | Optional. The letters line up with Devanagari letter for letter, so there's a table and a "type Hindi or Tamil, see Malayalam/Telugu" box. |
-| 📈 **Progress** | Streak, minutes, words known per language |
+| 🔥 **Warm-up** | 8 everyday words. Guess out loud, flip the card, and see how it relates to your languages: 🌿 like Tamil, 🪷 like Hindi, ⚠️ false friend, or ✨ brand new. |
+| 🪜 **Sentence ladder** | 3 sentences in the new language and yours, colour-matched word by word so you can see the order line up. Tap any word to hear it. |
+| 🗣️ **Conversation** | A real situation (tea shop, vegetables, meeting a friend's family…). They speak; on your turn you get the English, say it into the mic, and the conversation moves on. |
 
-**Spoken first.** Words are shown as they sound (*na-MAS-kaa-rum*) with a romanised spelling; the native script is hidden unless you turn it on. 🔊 uses your device's voice (Chrome on Android usually has Malayalam and Telugu; if not, it reads the pronunciation guide). 🎤 listens and tells you how close you were (Chrome).
+Every phrase you might say has **🔊 hear it** and **🎤 say it**: the mic listens (Chrome, or Safari on iPhone) and tells you if you nailed it.
 
-**Remembering.** Words come back on a spaced schedule (1, 2, 4, 8… days). A word counts as known once you've got it right three times in a row. Everything is saved in your browser.
+**Also:** a 💬 phrasebook (60 phrases), 🌉 all ~300 words per language with filters and false friends, 💡 grammar shortcuts, an optional ✍️ script page, and 📈 progress (streak, minutes, words known).
+
+**Spoken first.** Words are shown as they sound (*na-MAS-kaa-rum*) with a romanised spelling; the new script is hidden unless you turn it on. Words you know come back on a spaced schedule (1, 2, 4, 8… days). Everything is saved in your browser.
 
 ## Files
 
