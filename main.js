@@ -28,3 +28,20 @@ document.querySelectorAll("[data-pluck]").forEach((el) => el.addEventListener("c
   NOTES.forEach((f, i) => pluck(f, now + i * 0.085));
   el.classList.remove("played"); void el.offsetWidth; el.classList.add("played");
 }));
+
+// Her eyes follow your cursor (or finger), and drift back to the middle when you leave.
+(() => {
+  const svg = document.querySelector(".me svg"), pupils = [...document.querySelectorAll(".me .pupil")];
+  if (!svg || !pupils.length || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const look = (x, y) => {
+    const m = svg.getScreenCTM(); if (!m) return;
+    const inv = m.inverse(), pt = new DOMPoint(x, y).matrixTransform(inv);
+    for (const p of pupils) {
+      const dx = pt.x - +p.dataset.cx, dy = pt.y - +p.dataset.cy, d = Math.hypot(dx, dy) || 1, k = Math.min(1, d / 120);
+      p.style.transform = `translate(${(dx / d) * 5 * k}px, ${(dy / d) * 2.6 * k}px)`;
+    }
+  };
+  addEventListener("pointermove", (e) => look(e.clientX, e.clientY), { passive: true });
+  document.addEventListener("pointerleave", () => pupils.forEach((p) => (p.style.transform = "")));
+  for (const p of pupils) p.style.transition = "transform .12s ease-out";
+})();
