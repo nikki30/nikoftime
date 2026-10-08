@@ -332,3 +332,10 @@ body.landed .intro { display: none; }
 .mix-key i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: middle; }
 .mix-key b { color: var(--soft); font-weight: 500; }
 @media (max-width: 900px) { .col.bottom { flex-direction: column; align-items: stretch; } }
+.col.bottom { align-items: stretch; }
+.col.bottom .fc-names { height: 100%; }
+.col.left, .col.right { gap: 12px; }
+.fc { padding: 12px 15px; }
+.col.bottom { flex-direction: row; justify-content: center; }
+.col.bottom > div:empty { display: none; }
+@media (max-width: 900px) { .col.bottom { flex-direction: column; } }

@@ -176,7 +176,7 @@ function showRing(p) {
   requestAnimationFrame(() => $("ring").classList.add("in"));
   $("zoom").hidden = false; $("zoom").disabled = false; $("dock").hidden = false;
   document.body.classList.add("landed");
-  globe.lift(phone() ? 0.3 : 0.04); globe.scale(phone() ? 0.9 : 0.6);
+  globe.lift(phone() ? 0.3 : 0.08); globe.scale(phone() ? 0.9 : 0.5);
   const city = p.name.split(",")[0].trim();
   const pics = {
     food: d && { kind: "🌱 Must-eat veg", title: d.name, text: d.what, find: () => wikiPic({ exact: d.wiki, search: `${d.name} food` }) },
