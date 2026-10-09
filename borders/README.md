@@ -8,6 +8,7 @@ A world map with a year slider: 54 snapshots from 123,000 BC (early humans) to 2
 - **On the map:** what grew is outlined in green, new states in gold, and what was lost is drawn as a dashed red outline from the previous map.
 - **🇮🇳 Meanwhile in India:** every era says what was happening in the Indian subcontinent.
 - **👣 How we got here:** the early maps have a 🌳 human family tree (Homo erectus, heidelbergensis, Neanderthals, Denisovans and us, and who came from whom) and an animated **Out of Africa** journey with dates. From 3000 BC to AD 1000 there's an animated **Bantu expansion**, which explains why the Khoisan's lands shrink.
+- **🚶 People on the move:** every map shows coloured arrows for the migrations since the previous map, from Out of Africa to the steppe herders and Indus peoples who shaped North and South India, the Romani, Parsis, Indian indenture to Trinidad and Fiji, and the Gulf. Each says who moved and who they became; tap one in the panel to zoom to it.
 - **Tap anything:** any shape tells you its name, what it was part of, its size compared with India, and a short Wikipedia summary. Drag to pan, scroll or use +/− to zoom.
 
 **▶ Open it: https://nikki30.github.io/nikoftime/borders/**
@@ -21,5 +22,6 @@ index.html, styles.css, app.js   the app
 maps/                            the 54 snapshots (TopoJSON, simplified)
 snapshots.js                     years, files, and the measured changes between maps
 human.js                         the family tree and the Out of Africa / Bantu journeys
+moves.js                         people on the move: who went where and who they became
 stories.js                       the written history: era titles, overviews, India, why each change happened
 ```

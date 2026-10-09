@@ -1,6 +1,7 @@
 import { geoEqualEarth, geoPath, geoGraticule10, geoArea, feature } from "../vendor/geo.mjs";
 import { SNAPSHOTS } from "./snapshots.js";
 import { JOURNEYS, TREE, TREE_NOTES } from "./human.js";
+import { MOVES } from "./moves.js";
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -69,15 +70,16 @@ const svg = $("map");
 const S = { i: 0, playing: null, view: { k: 1, x: 0, y: 0 }, focus: null, selected: null, feats: [] };
 let proj, path, W = 0, H = 0;
 const root = document.createElementNS(NS, "g"); svg.append(root);
-const gSea = document.createElementNS(NS, "g"), gLand = document.createElementNS(NS, "g"), gGhost = document.createElementNS(NS, "g"), gLabel = document.createElementNS(NS, "g"), gMark = document.createElementNS(NS, "g");
+const gSea = document.createElementNS(NS, "g"), gLand = document.createElementNS(NS, "g"), gGhost = document.createElementNS(NS, "g"), gLabel = document.createElementNS(NS, "g"), gMove = document.createElementNS(NS, "g"), gMark = document.createElementNS(NS, "g");
 gLabel.setAttribute("class", "plabels");
-root.append(gSea, gLand, gGhost, gLabel, gMark);
+root.append(gSea, gLand, gGhost, gLabel, gMove, gMark);
 
 function size() {
   const r = svg.getBoundingClientRect(); W = r.width; H = r.height;
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   proj = geoEqualEarth().fitExtent([[10, 10], [W - 10, H - 10]], { type: "Sphere" });
   path = geoPath(proj);
+  drawMoves();
   gSea.innerHTML = `<path class="sphere" d="${path({ type: "Sphere" })}"/><path class="grat" d="${path(geoGraticule10())}"/>`;
   draw(false);
 }
@@ -177,12 +179,50 @@ function paintPanel() {
     ${st?.india ? `<div class="india"><span>🇮🇳 Meanwhile in India</span><p>${esc(st.india)}</p></div>` : ""}
     ${ch.length ? `<h3>What changed since ${prev ? yearLabel(prev.year) : "before"}</h3>
       <ul class="changes">${ch.map((c) => `<li><button type="button" class="ch k-${c.kind}" data-focus="${esc(c.name)}"><span class="ic">${ICON[c.kind] || "•"}</span><span class="t"><b>${esc(c.name)}</b> ${WORD[c.kind] || ""}${c.after && c.kind !== "vanished" ? ` <small>${kmLabel(c.after)}</small>` : ""}${c.why ? `<em>${esc(c.why)}</em>` : ""}</span></button></li>`).join("")}</ul>` : i > 0 ? `<p class="soft">Hardly any borders moved between these two maps.</p>` : ""}
+    ${movesCard(i)}
     ${st?.spotlight?.length ? `<h3>Also worth a look</h3><ul class="spot">${st.spotlight.map((s) => `<li><button type="button" data-focus="${esc(s.name)}"><b>${esc(s.name)}</b><span>${esc(s.fact)}</span></button></li>`).join("")}</ul>` : ""}
     ${journeyCard(snap.year)}
     <p class="hint soft">Tap any shape on the map to learn about it.</p>`;
   $("panel").querySelectorAll("[data-focus]").forEach((b) => b.onclick = () => focusOn(b.dataset.focus));
+  $("panel").querySelectorAll("button[data-move]").forEach((b) => b.onclick = () => focusMove(+b.dataset.move));
   $("panel").querySelectorAll("[data-journey]").forEach((b) => b.onclick = () => playJourney(b.dataset.journey));
   const t = $("panel").querySelector("[data-tree]"); if (t) t.onclick = () => { $("tree").showModal(); $("tree").scrollTop = 0; $("tree").querySelector("h2").focus(); };
+}
+
+/* ---------------- people on the move ---------------- */
+// Each map shows the movements that happened since the previous map: who moved, and who they became.
+const MCOL = ["#b5361d", "#1f6f8b", "#6b3fa0", "#2e7d32", "#c27c0e", "#b0306a"];
+const mcol = (n) => MCOL[n % MCOL.length];
+const span = (m) => (m.from === m.to ? yearLabel(m.from) : `${yearLabel(m.from)} to ${yearLabel(m.to)}`);
+function movesFor(i) {
+  const cur = SNAPSHOTS[i].year, prev = i ? SNAPSHOTS[i - 1].year : -Infinity;
+  return MOVES.map((m, n) => ({ ...m, n })).filter((m) => m.from <= cur && m.to > prev);
+}
+function drawMoves() {
+  if (!path) return;
+  gMove.innerHTML = `<defs>${MCOL.map((c, j) => `<marker id="mv${j}" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="4.5" markerHeight="4.5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="${c}"/></marker>`).join("")}</defs>`
+    + movesFor(S.i).map((m) => {
+      const j = m.n % MCOL.length;
+      const lines = m.paths.map((p) => { const d = path({ type: "LineString", coordinates: p }); return d ? `<path class="mv-halo" d="${d}"/><path class="mv" d="${d}" stroke="${MCOL[j]}" marker-end="url(#mv${j})"/>` : ""; }).join("");
+      // The name goes at the end of the main arrow, on whichever side has room.
+      const e = proj(m.paths[0][m.paths[0].length - 1]), left = e && (m.side === "left" || (m.side !== "right" && e[0] > W * 0.72));
+      const lab = e ? `<g class="mv-l${left ? " left" : ""}" style="--x:${e[0].toFixed(1)}px;--y:${e[1].toFixed(1)}px;--c:${MCOL[j]}"><text x="${left ? -8 : 8}" y="${-2 + (m.dy || 0)}">${esc(m.tag || m.became)}</text><text class="d" x="${left ? -8 : 8}" y="${10 + (m.dy || 0)}">${esc(span(m))}</text></g>` : "";
+      return `<g class="move${S.move != null && S.move !== m.n ? " dim" : ""}" data-move="${m.n}">${lines}${lab}</g>`;
+    }).join("");
+}
+function movesCard(i) {
+  const ms = movesFor(i); if (!ms.length) return "";
+  return `<h3>People on the move</h3><ul class="moves">${ms.map((m) => `<li><button type="button" data-move="${m.n}" style="--c:${mcol(m.n)}"${S.move === m.n ? ` class="on"` : ""}><span class="t"><b>${esc(m.who)}</b> <span class="arr">→</span> <b class="became">${esc(m.became)}</b><small>${esc(span(m))}</small><em>${esc(m.note)}</em></span></button></li>`).join("")}</ul>`;
+}
+// Tap a movement to zoom to it and fade the others; tap again to see them all.
+function focusMove(n) {
+  S.move = S.move === n ? null : n; drawMoves();
+  $("panel").querySelectorAll("button[data-move]").forEach((b) => b.classList.toggle("on", +b.dataset.move === S.move));
+  if (S.move == null) { S.view = { k: 1, x: 0, y: 0 }; applyView(); return; }
+  const [[x0, y0], [x1, y1]] = path.bounds({ type: "MultiLineString", coordinates: MOVES[n].paths });
+  const k = Math.max(1, Math.min(5, 0.6 / Math.max((x1 - x0) / W, (y1 - y0) / H, 0.02)));
+  S.view = k > 1.05 ? { k, x: W / 2 - k * (x0 + x1) / 2, y: H / 2 - k * (y0 + y1) / 2 } : { k: 1, x: 0, y: 0 }; applyView();
+  if (matchMedia("(max-width: 860px)").matches) document.querySelector(".mapwrap").scrollIntoView({ behavior: "smooth" });
 }
 
 /* ---------------- how we got here ---------------- */
@@ -200,10 +240,10 @@ function journeyCard(year) {
 let jTimers = [];
 function clearJourney() {
   jTimers.forEach(clearTimeout); jTimers = [];
-  gMark.innerHTML = ""; document.querySelectorAll(".j-story").forEach((e) => e.remove());
+  gMark.innerHTML = ""; gMove.style.display = ""; document.querySelectorAll(".j-story").forEach((e) => e.remove());
 }
 function playJourney(key) {
-  const J = JOURNEYS[key]; stop(); clearJourney();
+  const J = JOURNEYS[key]; stop(); clearJourney(); gMove.style.display = "none";
   // Fit the view to the journey: the whole world for Out of Africa, close in for Africa-only stories.
   const pts = [...J.marks.map((m) => m.at), ...J.routes.flatMap((r) => r.pts)].map((c) => proj(c)).filter(Boolean);
   const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]), x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
@@ -275,10 +315,10 @@ const slider = $("slider");
 const TICKS = [0, 4, 7, 10, 16, 21, 26, 32, 37, 43, 49, 53];
 $("ticks").innerHTML = TICKS.map((i) => `<span style="left:${(i / (SNAPSHOTS.length - 1)) * 100}%">${yearLabel(SNAPSHOTS[i].year).replace(",000 BC", "k BC")}</span>`).join("");
 function go(i) {
-  S.i = Math.max(0, Math.min(SNAPSHOTS.length - 1, i)); S.selected = null; S.focus = null; clearJourney();
+  S.i = Math.max(0, Math.min(SNAPSHOTS.length - 1, i)); S.selected = null; S.focus = null; S.move = null; clearJourney();
   slider.value = S.i; $("tl-year").textContent = yearLabel(SNAPSHOTS[S.i].year);
   slider.style.setProperty("--p", `${(S.i / (SNAPSHOTS.length - 1)) * 100}%`);
-  draw(); paintPanel(); load(S.i + 1);
+  draw(); drawMoves(); paintPanel(); load(S.i + 1);
   try { history.replaceState(null, "", `#${SNAPSHOTS[S.i].year}`); } catch {}
 }
 slider.oninput = () => { stop(); go(+slider.value); };
