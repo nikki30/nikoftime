@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Borders Through Time</title>
+<meta name="description" content="Slide through 125,000 years of world history and watch empires rise and fall, with the story of why each one grew or shrank.">
+<meta name="theme-color" content="#efe4cc">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%2389b3b0' stroke='%233a2a1a' stroke-width='3'/%3E%3Cpath d='M14 30c8-10 16-4 20-12 6 6 14 2 16 10-8 4-6 14-16 14-6-6-14 2-20-12z' fill='%23d9a441' stroke='%233a2a1a' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="top">
+  <a class="home" href="../">← <span class="lbl">More apps</span></a>
+  <h1 class="title">Borders <em>Through</em> Time</h1>
+  <button class="chip" id="about-btn" type="button" aria-label="About the map">ⓘ <span class="lbl">About the map</span></button>
+</header>
+
+<main class="layout">
+  <section class="mapwrap" aria-label="World map">
+    <svg id="map" role="img" aria-label="World map for the chosen year"></svg>
+    <div class="zoom"><button type="button" id="zin" aria-label="Zoom in">+</button><button type="button" id="zout" aria-label="Zoom out">−</button><button type="button" id="zreset" aria-label="Reset view">⟲</button></div>
+    <div class="tip" id="tip" hidden></div>
+    <div class="legend"><span><i class="lg-grew"></i>grew</span><span><i class="lg-shrank"></i>shrank</span><span><i class="lg-new"></i>new</span></div>
+  </section>
+
+  <aside class="panel" id="panel" aria-live="polite"></aside>
+</main>
+
+<footer class="timeline">
+  <div class="tl-controls">
+    <button type="button" class="tl-btn" id="prev" aria-label="Previous map">◀</button>
+    <button type="button" class="tl-btn play" id="play" aria-label="Play through time">▶</button>
+    <button type="button" class="tl-btn" id="next" aria-label="Next map">▶▶</button>
+    <b class="tl-year" id="tl-year"></b>
+  </div>
+  <div class="tl-track">
+    <input type="range" id="slider" min="0" max="53" step="1" value="0" aria-label="Year">
+    <div class="tl-ticks" id="ticks"></div>
+  </div>
+</footer>
+
+<dialog class="about" id="about">
+  <h2>About the map</h2>
+  <p>Borders come from <a href="https://github.com/aourednik/historical-basemaps" target="_blank" rel="noopener">historical-basemaps</a> by André Ourednik and contributors (GPL-3.0): 54 snapshots of the world from 123,000 BC to 2010. Borders before modern times are approximate, and for most of history huge areas weren't ruled by any state at all.</p>
+  <p>"What changed" is measured from the borders themselves (which shapes grew, shrank, appeared or vanished since the previous map) and explained in plain English. Sometimes a change is just the dataset renaming a state, and we say so.</p>
+  <button type="button" class="btn" data-close>Got it</button>
+</dialog>
+<script type="module" src="app.js"></script>
+</body>
+</html>
