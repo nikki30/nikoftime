@@ -143,8 +143,14 @@ function journeyCard(year) {
     <div class="j-btns">${early ? `<button type="button" class="btn" data-tree>🌳 Family tree</button><button type="button" class="btn" data-journey="outOfAfrica">▶ Out of Africa</button>` : ""}${bantu ? `<button type="button" class="btn" data-journey="bantu">▶ The Bantu expansion</button>` : ""}</div>
   </div>`;
 }
+// Cancels any arrows still waiting to be drawn, and removes the ones already on the map.
+let jTimers = [];
+function clearJourney() {
+  jTimers.forEach(clearTimeout); jTimers = [];
+  gMark.innerHTML = ""; document.querySelectorAll(".j-story").forEach((e) => e.remove());
+}
 function playJourney(key) {
-  const J = JOURNEYS[key]; stop();
+  const J = JOURNEYS[key]; stop(); clearJourney();
   // Fit the view to the journey: the whole world for Out of Africa, close in for Africa-only stories.
   const pts = [...J.marks.map((m) => m.at), ...J.routes.flatMap((r) => r.pts)].map((c) => proj(c)).filter(Boolean);
   const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]), x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
@@ -153,19 +159,19 @@ function playJourney(key) {
   gMark.innerHTML = `<defs><marker id="arrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#8a3b1e"/></marker></defs>`;
   const card = $("panel").querySelector(".journey");
   if (card) card.insertAdjacentHTML("beforeend", `<div class="j-story"><b>${esc(J.title)}</b><p>${esc(J.intro)}</p><ol id="j-steps"></ol><button type="button" class="btn ghost" id="j-clear">Clear arrows</button></div>`);
-  $("j-clear")?.addEventListener("click", () => { gMark.innerHTML = ""; $("panel").querySelector(".j-story")?.remove(); });
+  $("j-clear")?.addEventListener("click", () => { clearJourney(); S.view = { k: 1, x: 0, y: 0 }; applyView(); });
   // Labels near the right edge go on the left of their dot so they aren't cut off.
   // Labels keep the same on-screen size at any zoom (scaled by 1/k), and flip left near the right edge.
   const label = (at, text, sub, cls, side) => { const p = proj(at); if (!p) return; const sx = S.view.k * p[0] + S.view.x;
     const left = side === "left" || (side !== "right" && sx > W * 0.7), x = left ? -9 : 9, anchor = left ? ` text-anchor="end"` : "";
     gMark.insertAdjacentHTML("beforeend", `<g class="mk ${cls}" transform="translate(${p[0]} ${p[1]}) scale(${1 / S.view.k})"><circle r="5"/><text class="mk-t" x="${x}" y="-2"${anchor}>${esc(text)}</text><text class="mk-d" x="${x}" y="11"${anchor}>${esc(sub)}</text></g>`); };
   J.marks.forEach((m) => label(m.at, m.t, m.d, m.cls, m.side));
-  J.routes.forEach((r, i) => setTimeout(() => {
+  J.routes.forEach((r, i) => jTimers.push(setTimeout(() => {
     const d = path({ type: "LineString", coordinates: r.pts }); if (!d) return;
     gMark.insertAdjacentHTML("beforeend", `<path class="route" d="${d}" marker-end="url(#arrow)" style="animation-delay:0s"/>`);
     const end = r.pts[r.pts.length - 1]; label(end, r.name, r.d, "step", r.side);
     $("j-steps")?.insertAdjacentHTML("beforeend", `<li><b>${esc(r.name)}</b> <span>${esc(r.d)}</span></li>`);
-  }, i * 1300));
+  }, i * 1300)));
   if (matchMedia("(max-width: 860px)").matches) document.querySelector(".mapwrap").scrollIntoView({ behavior: "smooth" });
 }
 
@@ -216,7 +222,7 @@ const slider = $("slider");
 const TICKS = [0, 4, 7, 10, 16, 21, 26, 32, 37, 43, 49, 53];
 $("ticks").innerHTML = TICKS.map((i) => `<span style="left:${(i / (SNAPSHOTS.length - 1)) * 100}%">${yearLabel(SNAPSHOTS[i].year).replace(",000 BC", "k BC")}</span>`).join("");
 function go(i) {
-  S.i = Math.max(0, Math.min(SNAPSHOTS.length - 1, i)); S.selected = null; S.focus = null; gMark.innerHTML = "";
+  S.i = Math.max(0, Math.min(SNAPSHOTS.length - 1, i)); S.selected = null; S.focus = null; clearJourney();
   slider.value = S.i; $("tl-year").textContent = yearLabel(SNAPSHOTS[S.i].year);
   slider.style.setProperty("--p", `${(S.i / (SNAPSHOTS.length - 1)) * 100}%`);
   draw(); paintPanel(); load(S.i + 1);
