@@ -60,6 +60,8 @@ async function draw(fade = true) {
   const story = STORIES[SNAPSHOTS[i].year], movers = changesFor(i);
   const kinds = Object.fromEntries(movers.map((m) => [m.name, m.kind]));
   gLand.innerHTML = feats.map((f, n) => { const k = keyOf(f.properties), kind = kinds[k] || kinds[f.properties.NAME];
+    // Land with no name in the data: nobody (no people or state) is recorded there on this map.
+    if (!k) return `<path class="land unnamed" data-n="${n}" d="${path(f)}"/>`;
     return `<path class="land${kind ? ` k-${kind}` : ""}${S.focus && (S.focus === k || S.focus === f.properties.NAME) ? " focus" : ""}" data-n="${n}" fill="${colourOf(k)}" d="${path(f)}"/>`; }).join("");
   if (fade) { gLand.classList.remove("in"); void gLand.getBoundingClientRect(); gLand.classList.add("in"); }
   // Ghosts: what shrank or vanished, drawn from the previous map as dashed outlines.
@@ -93,11 +95,12 @@ const tip = $("tip");
 svg.addEventListener("pointermove", (e) => {
   const el = e.target.closest?.(".land"); if (!el || drag?.moved) { tip.hidden = true; return; }
   const p = S.feats[+el.dataset.n].properties, k = keyOf(p);
-  tip.innerHTML = `<b>${esc(p.NAME)}</b>${k !== p.NAME ? `<span>part of ${esc(k)}</span>` : ""}`;
+  tip.innerHTML = !k ? `<span>No people or state recorded here on this map</span>`
+    : `<b>${esc(p.NAME || k)}</b>${p.NAME && k !== p.NAME ? `<span>ruled by ${esc(k)}</span>` : ""}`;
   const r = svg.getBoundingClientRect(); tip.style.left = `${e.clientX - r.left + 14}px`; tip.style.top = `${e.clientY - r.top + 14}px`; tip.hidden = false;
 });
 svg.addEventListener("pointerleave", () => (tip.hidden = true));
-svg.addEventListener("click", (e) => { if (drag?.moved) return; const el = e.target.closest?.(".land"); if (!el) return; const p = S.feats[+el.dataset.n].properties; select(keyOf(p), p.NAME); });
+svg.addEventListener("click", (e) => { if (drag?.moved) return; const el = e.target.closest?.(".land:not(.unnamed)"); if (!el) return; const p = S.feats[+el.dataset.n].properties; select(keyOf(p), p.NAME || keyOf(p)); });
 
 /* ---------------- what changed ---------------- */
 function changesFor(i) {
@@ -145,7 +148,7 @@ async function paintSelected() {
   const m = changesFor(S.i).find((c) => c.name === key);
   $("panel").innerHTML = `<button type="button" class="back" id="back">← ${yearLabel(snap.year)}</button>
     <p class="kicker">In ${yearLabel(snap.year)}</p><h2 class="year">${esc(name)}</h2>
-    ${key !== name ? `<p class="era">part of ${esc(key)}</p>` : ""}
+    ${key !== name ? `<p class="era">ruled by ${esc(key)}</p>` : ""}
     ${m?.after ? `<p class="soft">${kmLabel(m.after)} ${compare(m.after) ? `· ${compare(m.after)}` : ""}</p>` : ""}
     ${m?.why ? `<div class="india"><span>${ICON[m.kind]} Why it ${m.kind === "appeared" ? "appears" : m.kind === "vanished" ? "disappears" : m.kind} here</span><p>${esc(m.why)}</p></div>` : ""}
     <div id="wiki" class="wiki"><p class="soft">Looking it up…</p></div>
