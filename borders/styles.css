@@ -101,3 +101,36 @@ button { font: inherit; color: inherit; }
 .land.unnamed { fill: #ece0c4; stroke: rgba(47, 36, 24, .18); cursor: default; }
 .land.unnamed:hover { filter: none; stroke: rgba(47, 36, 24, .18); stroke-width: .5; }
 .lg-blank { display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #ece0c4; border: 1px solid #c9b78f; margin-right: 6px; vertical-align: -2px; }
+
+/* how we got here */
+.journey { margin: 18px 0 0; padding: 14px; border-radius: 14px; background: #eef4f2; border: 1px solid #b9d2cd; border-left: 5px solid #3c8a7e; }
+.journey > span { font: 600 .74rem var(--mono); text-transform: uppercase; letter-spacing: .08em; color: #2d6e64; }
+.journey p { margin: 6px 0 0; }
+.j-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.j-btns .btn { margin-top: 10px; background: #2d6e64; border-color: #2d6e64; }
+.btn.ghost { background: transparent; color: var(--ink); }
+.j-story { margin-top: 14px; padding-top: 12px; border-top: 1px dashed #b9d2cd; }
+.j-story ol { margin: 8px 0 0; padding-left: 20px; }
+.j-story li { margin: 4px 0; animation: fadein .5s ease both; } .j-story li span { color: var(--soft); font-size: .88rem; }
+.route { fill: none; stroke: #8a3b1e; stroke-width: 3; stroke-linecap: round; vector-effect: non-scaling-stroke; stroke-dasharray: 2000; stroke-dashoffset: 2000; animation: drawroute 1.4s ease forwards; }
+@keyframes drawroute { to { stroke-dashoffset: 0; } }
+.mk { animation: fadein .6s ease both; }
+.mk circle { fill: #8a3b1e; stroke: #fff; stroke-width: 1.5; }
+.mk.origin circle { fill: #d08a12; } .mk.cousin circle { fill: #6a5acd; } .mk.stay circle { fill: #2d6e64; } .mk.site circle { fill: #b25f12; }
+.mk text { paint-order: stroke; stroke: rgba(247, 239, 220, .95); stroke-width: 3px; stroke-linejoin: round; }
+.mk-t { font: 600 11px var(--sans); fill: var(--ink); }
+.mk-d { font: 500 9.5px var(--mono); fill: #6b4a2a; }
+.tree-dlg { max-width: 640px; max-height: 90vh; overflow: auto; }
+.tree { width: 100%; height: auto; margin: 6px 0 10px; }
+.tree .axis text { font: 500 10px var(--mono); fill: var(--soft); }
+.tree .trunk { fill: none; stroke: #8a3b1e; stroke-width: 3; }
+.tree .fade { fill: none; stroke: #b9a98a; stroke-width: 3; stroke-dasharray: 4 5; }
+.tree .mix { fill: none; stroke: #6a5acd; stroke-width: 2; stroke-dasharray: 3 4; }
+.tree .node rect { fill: #fffaf0; stroke: var(--ink); stroke-width: 1.5; }
+.tree .n-sa rect, .tree .n-us rect { fill: #e8f4ec; stroke: #2f8f5b; }
+.tree .node text { font: 600 13px var(--sans); fill: var(--ink); text-anchor: middle; }
+.tree .node text.s { font: 400 10.5px var(--sans); fill: var(--soft); }
+.tree .gone { font: italic 10.5px var(--sans); fill: var(--soft); text-anchor: middle; }
+.tree .mixlbl { font: 600 10.5px var(--sans); fill: #6a5acd; text-anchor: middle; }
+.tree-notes { margin: 0; padding-left: 18px; display: grid; gap: 8px; }
+.tree-dlg h2:focus { outline: none; }

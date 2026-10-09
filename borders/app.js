@@ -1,5 +1,6 @@
 import { geoEqualEarth, geoPath, geoGraticule10, geoArea, feature } from "../vendor/geo.mjs";
 import { SNAPSHOTS } from "./snapshots.js";
+import { JOURNEYS, TREE, TREE_NOTES } from "./human.js";
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -124,8 +125,48 @@ function paintPanel() {
     ${ch.length ? `<h3>What changed since ${prev ? yearLabel(prev.year) : "before"}</h3>
       <ul class="changes">${ch.map((c) => `<li><button type="button" class="ch k-${c.kind}" data-focus="${esc(c.name)}"><span class="ic">${ICON[c.kind] || "•"}</span><span class="t"><b>${esc(c.name)}</b> ${WORD[c.kind] || ""}${c.after && c.kind !== "vanished" ? ` <small>${kmLabel(c.after)}</small>` : ""}${c.why ? `<em>${esc(c.why)}</em>` : ""}</span></button></li>`).join("")}</ul>` : i > 0 ? `<p class="soft">Hardly any borders moved between these two maps.</p>` : ""}
     ${st?.spotlight?.length ? `<h3>Also worth a look</h3><ul class="spot">${st.spotlight.map((s) => `<li><button type="button" data-focus="${esc(s.name)}"><b>${esc(s.name)}</b><span>${esc(s.fact)}</span></button></li>`).join("")}</ul>` : ""}
+    ${journeyCard(snap.year)}
     <p class="hint soft">Tap any shape on the map to learn about it.</p>`;
   $("panel").querySelectorAll("[data-focus]").forEach((b) => b.onclick = () => focusOn(b.dataset.focus));
+  $("panel").querySelectorAll("[data-journey]").forEach((b) => b.onclick = () => playJourney(b.dataset.journey));
+  const t = $("panel").querySelector("[data-tree]"); if (t) t.onclick = () => { $("tree").showModal(); $("tree").scrollTop = 0; $("tree").querySelector("h2").focus(); };
+}
+
+/* ---------------- how we got here ---------------- */
+// Early maps get the family tree and the Out of Africa journey; 3000 BC to AD 1000 also get the Bantu expansion.
+function journeyCard(year) {
+  const early = year <= -3000, bantu = year >= -3000 && year <= 1000;
+  if (!early && !bantu) return "";
+  return `<div class="journey">
+    <span>👣 How we got here</span>
+    <p>${early ? "Confused by Neanderthals, Homo erectus and who came from whom? See the family tree, then watch humans spread out of Africa." : "Why did the Khoisan's lands shrink while Bantu-speaking peoples spread? Watch it happen."}</p>
+    <div class="j-btns">${early ? `<button type="button" class="btn" data-tree>🌳 Family tree</button><button type="button" class="btn" data-journey="outOfAfrica">▶ Out of Africa</button>` : ""}${bantu ? `<button type="button" class="btn" data-journey="bantu">▶ The Bantu expansion</button>` : ""}</div>
+  </div>`;
+}
+function playJourney(key) {
+  const J = JOURNEYS[key]; stop();
+  // Fit the view to the journey: the whole world for Out of Africa, close in for Africa-only stories.
+  const pts = [...J.marks.map((m) => m.at), ...J.routes.flatMap((r) => r.pts)].map((c) => proj(c)).filter(Boolean);
+  const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]), x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+  const k = Math.max(1, Math.min(3.2, 0.7 / Math.max((x1 - x0) / W, (y1 - y0) / H)));
+  S.view = k > 1.05 ? { k, x: W / 2 - k * (x0 + x1) / 2, y: H / 2 - k * (y0 + y1) / 2 } : { k: 1, x: 0, y: 0 }; applyView();
+  gMark.innerHTML = `<defs><marker id="arrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#8a3b1e"/></marker></defs>`;
+  const card = $("panel").querySelector(".journey");
+  if (card) card.insertAdjacentHTML("beforeend", `<div class="j-story"><b>${esc(J.title)}</b><p>${esc(J.intro)}</p><ol id="j-steps"></ol><button type="button" class="btn ghost" id="j-clear">Clear arrows</button></div>`);
+  $("j-clear")?.addEventListener("click", () => { gMark.innerHTML = ""; $("panel").querySelector(".j-story")?.remove(); });
+  // Labels near the right edge go on the left of their dot so they aren't cut off.
+  // Labels keep the same on-screen size at any zoom (scaled by 1/k), and flip left near the right edge.
+  const label = (at, text, sub, cls, side) => { const p = proj(at); if (!p) return; const sx = S.view.k * p[0] + S.view.x;
+    const left = side === "left" || (side !== "right" && sx > W * 0.7), x = left ? -9 : 9, anchor = left ? ` text-anchor="end"` : "";
+    gMark.insertAdjacentHTML("beforeend", `<g class="mk ${cls}" transform="translate(${p[0]} ${p[1]}) scale(${1 / S.view.k})"><circle r="5"/><text class="mk-t" x="${x}" y="-2"${anchor}>${esc(text)}</text><text class="mk-d" x="${x}" y="11"${anchor}>${esc(sub)}</text></g>`); };
+  J.marks.forEach((m) => label(m.at, m.t, m.d, m.cls, m.side));
+  J.routes.forEach((r, i) => setTimeout(() => {
+    const d = path({ type: "LineString", coordinates: r.pts }); if (!d) return;
+    gMark.insertAdjacentHTML("beforeend", `<path class="route" d="${d}" marker-end="url(#arrow)" style="animation-delay:0s"/>`);
+    const end = r.pts[r.pts.length - 1]; label(end, r.name, r.d, "step", r.side);
+    $("j-steps")?.insertAdjacentHTML("beforeend", `<li><b>${esc(r.name)}</b> <span>${esc(r.d)}</span></li>`);
+  }, i * 1300));
+  if (matchMedia("(max-width: 860px)").matches) document.querySelector(".mapwrap").scrollIntoView({ behavior: "smooth" });
 }
 
 function focusOn(name) {
@@ -175,7 +216,7 @@ const slider = $("slider");
 const TICKS = [0, 4, 7, 10, 16, 21, 26, 32, 37, 43, 49, 53];
 $("ticks").innerHTML = TICKS.map((i) => `<span style="left:${(i / (SNAPSHOTS.length - 1)) * 100}%">${yearLabel(SNAPSHOTS[i].year).replace(",000 BC", "k BC")}</span>`).join("");
 function go(i) {
-  S.i = Math.max(0, Math.min(SNAPSHOTS.length - 1, i)); S.selected = null; S.focus = null;
+  S.i = Math.max(0, Math.min(SNAPSHOTS.length - 1, i)); S.selected = null; S.focus = null; gMark.innerHTML = "";
   slider.value = S.i; $("tl-year").textContent = yearLabel(SNAPSHOTS[S.i].year);
   slider.style.setProperty("--p", `${(S.i / (SNAPSHOTS.length - 1)) * 100}%`);
   draw(); paintPanel(); load(S.i + 1);
@@ -193,6 +234,8 @@ $("play").onclick = () => {
 };
 addEventListener("keydown", (e) => { if (e.target.tagName === "INPUT" && e.target !== slider) return; if (e.key === "ArrowRight") { stop(); go(S.i + 1); } if (e.key === "ArrowLeft") { stop(); go(S.i - 1); } });
 $("about-btn").onclick = () => $("about").showModal();
+$("tree-body").innerHTML = `${TREE}<ul class="tree-notes">${TREE_NOTES.map(([a, b]) => `<li><b>${esc(a)}</b> ${esc(b)}</li>`).join("")}</ul>`;
+$("tree").addEventListener("click", (e) => { if (e.target.closest("[data-close]") || e.target.id === "tree") $("tree").close(); });
 $("about").addEventListener("click", (e) => { if (e.target.closest("[data-close]") || e.target.id === "about") $("about").close(); });
 
 // Links like borders/#1530 open on that year.

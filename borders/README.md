@@ -7,6 +7,7 @@ A world map with a year slider: 54 snapshots from 123,000 BC (early humans) to 2
 - **What changed:** for every map, the panel lists which states grew ▲, shrank ▼, appeared ✦ or disappeared ✝ since the previous map, measured from the borders themselves, with a plain-English **why** (a conquest, a collapse, a treaty, a migration).
 - **On the map:** what grew is outlined in green, new states in gold, and what was lost is drawn as a dashed red outline from the previous map.
 - **🇮🇳 Meanwhile in India:** every era says what was happening in the Indian subcontinent.
+- **👣 How we got here:** the early maps have a 🌳 human family tree (Homo erectus, heidelbergensis, Neanderthals, Denisovans and us, and who came from whom) and an animated **Out of Africa** journey with dates. From 3000 BC to AD 1000 there's an animated **Bantu expansion**, which explains why the Khoisan's lands shrink.
 - **Tap anything:** any shape tells you its name, what it was part of, its size compared with India, and a short Wikipedia summary. Drag to pan, scroll or use +/− to zoom.
 
 **▶ Open it: https://nikki30.github.io/nikoftime/borders/**
@@ -19,5 +20,6 @@ Borders come from [historical-basemaps](https://github.com/aourednik/historical-
 index.html, styles.css, app.js   the app
 maps/                            the 54 snapshots (TopoJSON, simplified)
 snapshots.js                     years, files, and the measured changes between maps
+human.js                         the family tree and the Out of Africa / Bantu journeys
 stories.js                       the written history: era titles, overviews, India, why each change happened
 ```
