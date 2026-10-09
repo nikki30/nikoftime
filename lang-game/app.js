@@ -7,18 +7,17 @@ const today = () => new Date().toISOString().slice(0, 10);
 // Languages you can already speak (the lessons have bridges for these) and languages you can learn.
 const KNOWN = [
   { c: "ta", n: "Tamil", nat: "தமிழ்" }, { c: "hi", n: "Hindi", nat: "हिन्दी" }, { c: "en", n: "English", nat: "English" },
-  { c: "kn", n: "Kannada", nat: "ಕನ್ನಡ", soon: true }, { c: "bn", n: "Bengali", nat: "বাংলা", soon: true }, { c: "mr", n: "Marathi", nat: "मराठी", soon: true },
 ];
 const TARGETS = {
   ml: { n: "Malayalam", nat: "മലയാളം", voice: "ml-IN", base: 0x0d00, hue: "#14b87a", hue2: "#0f8f9c", where: "Kerala" },
   te: { n: "Telugu", nat: "తెలుగు", voice: "te-IN", base: 0x0c00, hue: "#ff7a2f", hue2: "#e23d6b", where: "Andhra Pradesh and Telangana" },
+  es: { n: "Spanish", nat: "Español", voice: "es-ES", latin: true, hue: "#ff3d68", hue2: "#ffa62b", where: "Spain and Latin America" },
 };
-const SOON = [{ n: "Kannada", nat: "ಕನ್ನಡ" }, { n: "Spanish", nat: "Español" }];
 
 /* ---------------- saved progress ---------------- */
 const KEY = "lg-v2";
-const blank = () => ({ setup: false, known: ["ta", "hi", "en"], lang: "ml", showScript: false, boxes: { ml: {}, te: {} }, log: {}, rounds: {}, seen: { ml: 0, te: 0 } });
-let ST = (() => { try { return { ...blank(), ...JSON.parse(localStorage.getItem(KEY) || "{}") }; } catch { return blank(); } })();
+const blank = () => ({ setup: false, known: ["ta", "hi", "en"], lang: "ml", showScript: false, boxes: { ml: {}, te: {}, es: {} }, log: {}, rounds: {}, seen: { ml: 0, te: 0, es: 0 } });
+let ST = (() => { try { const b = blank(), s = { ...b, ...JSON.parse(localStorage.getItem(KEY) || "{}") }; s.boxes = { ...b.boxes, ...s.boxes }; s.seen = { ...b.seen, ...s.seen }; return s; } catch { return blank(); } })();
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(ST)); } catch {} };
 const T = () => TARGETS[ST.lang];
 const knows = (c) => ST.known.includes(c);
@@ -87,24 +86,27 @@ document.addEventListener("click", (e) => {
 });
 
 /* ---------------- small pieces ---------------- */
-const scriptOn = () => ST.showScript;
+const scriptOn = () => ST.showScript && !T().latin;
 function sayIt(t, size = "") {
-  return `<div class="sayit ${size}"><span class="s1">${esc(t.say || t.r)}</span><span class="s2">${esc(t.r || "")}</span>${scriptOn() ? `<span class="nat ${ST.lang}">${esc(t.w)}</span>` : ""}</div>`;
+  return `<div class="sayit ${size}"><span class="s1">${esc(t.say || t.r)}</span><span class="s2">${esc(T().latin ? t.w : t.r || "")}</span>${scriptOn() ? `<span class="nat ${ST.lang}">${esc(t.w)}</span>` : ""}</div>`;
 }
-const NAMES = { ta: "Tamil", hi: "Hindi" };
+const NAMES = { ta: "Tamil", hi: "Hindi", en: "English" };
+const bridges = (w) => new Set(w.bridge === "both" ? ["ta", "hi"] : w.bridge === "all" ? ["ta", "hi", "en"] : !w.bridge || w.bridge === "none" ? [] : w.bridge.split("+"));
 // How a word relates to the languages YOU know, if at all.
 function relation(w) {
-  const tags = [];
-  const ta = (w.bridge === "ta" || w.bridge === "both"), hi = (w.bridge === "hi" || w.bridge === "both");
-  if (ta && knows("ta")) tags.push(`<span class="rel ta">🌿 Like Tamil</span>`);
-  if (hi && knows("hi")) tags.push(`<span class="rel hi">🪷 Like Hindi</span>`);
+  const tags = [], B = bridges(w);
+  if (B.has("ta") && knows("ta")) tags.push(`<span class="rel ta">🌿 Like Tamil</span>`);
+  if (B.has("hi") && knows("hi")) tags.push(`<span class="rel hi">🪷 Like Hindi</span>`);
+  if (B.has("en") && knows("en")) tags.push(`<span class="rel en">🔤 Like English</span>`);
   if (w.falseFriend) tags.push(`<span class="rel ff">⚠️ False friend</span>`);
-  if (!tags.length) tags.push(`<span class="rel new">✨ ${ta || hi ? `New for you (it's related to ${ta ? "Tamil" : "Hindi"})` : "Brand-new word"}</span>`);
+  const other = [...B].find((c) => !knows(c));
+  if (!tags.length) tags.push(`<span class="rel new">✨ ${other ? `New for you (it's related to ${NAMES[other]})` : "Brand-new word"}</span>`);
   return `<div class="rels">${tags.join("")}</div>`;
 }
 function relatives(w) {
-  const row = (c) => w[c] && knows(c) ? `<div class="kin ${(w.bridge === c || w.bridge === "both") ? "hit" : ""}"><span class="k-lang">${NAMES[c]}</span><span class="nat ${c}">${esc(w[c].w)}</span><span class="k-r">${esc(w[c].r)}</span></div>` : "";
-  return `<div class="kins">${row("ta")}${row("hi")}</div>${w.link ? `<p class="why">${w.falseFriend ? "⚠️" : "💡"} ${esc(w.link)}</p>` : ""}`;
+  const B = bridges(w);
+  const row = (c, x) => x && knows(c) ? `<div class="kin ${B.has(c) ? "hit" : ""}"><span class="k-lang">${NAMES[c]}</span><span class="nat ${c}">${esc(x.w)}</span>${x.r ? `<span class="k-r">${esc(x.r)}</span>` : ""}</div>` : "";
+  return `<div class="kins">${row("ta", w.ta)}${row("hi", w.hi)}${w.enRel ? row("en", w.enRel) : ""}</div>${w.link ? `<p class="why">${w.falseFriend ? "⚠️" : "💡"} ${esc(w.link)}</p>` : ""}`;
 }
 
 /* ---------------- spaced repetition ---------------- */
@@ -152,16 +154,16 @@ SCREENS.setup = () => {
       <div class="setup-grid">
         <div class="pane">
           <h2>I can speak…</h2><p class="soft">Pick all that apply. We'll link every new word to these.</p>
-          <div class="chips-pick">${KNOWN.map((k) => `<button type="button" class="pk ${pick.has(k.c) ? "on" : ""}" data-k="${k.c}" ${k.soon ? "disabled" : ""}><span class="pk-nat">${esc(k.nat)}</span><span>${esc(k.n)}${k.soon ? " · soon" : ""}</span></button>`).join("")}</div>
+          <div class="chips-pick">${KNOWN.map((k) => `<button type="button" class="pk ${pick.has(k.c) ? "on" : ""}" data-k="${k.c}"><span class="pk-nat">${esc(k.nat)}</span><span>${esc(k.n)}</span></button>`).join("")}</div>
         </div>
         <div class="pane">
           <h2>I want to learn…</h2><p class="soft">Spoken, everyday, the way people actually talk.</p>
           <div class="targets">${Object.entries(TARGETS).map(([c, t]) => `<button type="button" class="tg ${c === target ? "on" : ""}" data-t="${c}" style="--h1:${t.hue};--h2:${t.hue2}"><span class="tg-nat">${esc(t.nat)}</span><b>${esc(t.n)}</b><span class="soft">${esc(t.where)}</span></button>`).join("")}
-            ${SOON.map((t) => `<button type="button" class="tg soon" disabled><span class="tg-nat">${esc(t.nat)}</span><b>${esc(t.n)}</b><span class="soft">coming soon</span></button>`).join("")}</div>
+</div>
         </div>
       </div>
       <button class="play" id="start">Start playing →</button>
-      <label class="toggle"><input type="checkbox" id="script" ${ST.showScript ? "checked" : ""}> Also show the ${"new language's"} script (you can turn this on later)</label>
+      <label class="toggle"><input type="checkbox" id="script" ${ST.showScript ? "checked" : ""}> Also show Malayalam or Telugu script (you can turn this on later)</label>
     </section>`;
   $("main").querySelectorAll("[data-k]").forEach((b) => b.onclick = () => { pick.has(b.dataset.k) ? pick.delete(b.dataset.k) : pick.add(b.dataset.k); b.classList.toggle("on"); });
   $("main").querySelectorAll("[data-t]").forEach((b) => b.onclick = () => { target = b.dataset.t; $("main").querySelectorAll("[data-t]").forEach((x) => x.classList.toggle("on", x === b)); });
@@ -188,7 +190,7 @@ SCREENS.home = () => {
     </section>
     <section class="rounds">${ROUNDS.map((x, i) => `<a class="round g-${x.g} ${r[x.k] ? "done" : ""}" href="#${x.k}" style="--i:${i}"><span class="r-n">${r[x.k] ? "✓" : i + 1}</span><span class="r-ic">${x.icon}</span><h2>${x.t}</h2><p>${x.d}</p><span class="r-go">${r[x.k] ? "Play again" : "Play"} →</span></a>`).join("")}</section>
     <section class="more">
-      <a href="#phrases">💬 Phrasebook</a><a href="#words">🌉 All words</a><a href="#tricks">💡 Shortcuts</a><a href="#script">✍️ Script</a><a href="#progress">📈 Progress</a>
+      <a href="#phrases">💬 Phrasebook</a><a href="#words">🌉 All words</a><a href="#tricks">💡 Shortcuts</a>${T().latin ? "" : `<a href="#script">✍️ Script</a>`}<a href="#progress">📈 Progress</a>
     </section>`;
 };
 function roundDone(k, min) { const r = roundsToday(); if (!r[k]) { r[k] = true; logMinutes(min); } save(); }
@@ -205,7 +207,7 @@ SCREENS.warm = () => {
       <article class="flash" data-say-host>
         <p class="theme">${esc(w.theme)}</p>
         <p class="ask">How do you say</p><h2 class="en">${esc(w.en)}</h2>
-        <p class="hint">${(w.bridge === "ta" && knows("ta")) || (w.bridge === "hi" && knows("hi")) || (w.bridge === "both" && (knows("ta") || knows("hi"))) ? `Hint: you might already know it 😉` : "Have a guess, then flip"}</p>
+        <p class="hint">${[...bridges(w)].some(knows) ? `Hint: you might already know it 😉` : "Have a guess, then flip"}</p>
         <div class="back-side" hidden>${sayIt(w.t, "xl")}${voice(w.t, { big: true })}${relation(w)}${relatives(w)}</div>
         <div class="acts"><button class="play" id="flip">Flip it</button></div>
       </article>`;
@@ -304,8 +306,8 @@ SCREENS.phrases = () => {
 };
 SCREENS.words = () => {
   const themes = [...new Set(D.words.map((w) => w.theme))];
-  const like = (c) => D.words.filter((w) => (w.bridge === c || w.bridge === "both")).length;
-  $("main").innerHTML = page("🌉", "All words", `${D.words.length} everyday words.${knows("ta") ? ` ${like("ta")} are like Tamil.` : ""}${knows("hi") ? ` ${like("hi")} are like Hindi.` : ""}`,
+  const like = (c) => D.words.filter((w) => bridges(w).has(c)).length;
+  $("main").innerHTML = page("🌉", "All words", `${D.words.length} everyday words.${knows("ta") ? ` ${like("ta")} are like Tamil.` : ""}${knows("hi") ? ` ${like("hi")} are like Hindi.` : ""}${knows("en") && like("en") ? ` ${like("en")} are like English.` : ""}`,
     `<div class="filters"><button class="fb on" data-th="">All</button>${themes.map((t) => `<button class="fb" data-th="${esc(t)}">${esc(t)}</button>`).join("")}<button class="fb" data-th="ff">⚠️ False friends</button></div><div class="wgrid" id="wg"></div>`);
   const paint = (th) => { REG.clear(); $("wg").innerHTML = D.words.filter((w) => !th || (th === "ff" ? w.falseFriend : w.theme === th)).map((w) => `<div class="wcard" data-say-host><p class="p-en">${esc(w.en)} ${box(w.id)?.b >= 3 ? `<span class="known">known</span>` : ""}</p>${sayIt(w.t)}${voice(w.t)}${relation(w)}${relatives(w)}</div>`).join(""); };
   paint("");
@@ -316,6 +318,7 @@ SCREENS.tricks = () => {
     D.grammar.map((g) => `<article class="trick"><h3>${esc(g.title)}</h3><p>${esc(g.body)}</p>${g.example ? `<div class="ex">${g.example.t ? `<p><b>${T().n}</b>${esc(g.example.t)}</p>` : ""}${g.example.ta && knows("ta") ? `<p><b>Tamil</b>${esc(g.example.ta)}</p>` : ""}${g.example.hi && knows("hi") ? `<p><b>Hindi</b>${esc(g.example.hi)}</p>` : ""}</div>` : ""}</article>`).join(""));
 };
 SCREENS.script = () => {
+  if (T().latin) return go("home");
   const B = T().base, un = /\p{Cn}/u, cell = (base, o) => { const ch = String.fromCodePoint(base + o); return un.test(ch) ? "" : ch; };
   const vowels = [0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0e, 0x0f, 0x10, 0x12, 0x13, 0x14], cons = []; for (let o = 0x15; o <= 0x39; o++) cons.push(o);
   const tile = (o) => { const t = cell(B, o); if (!t) return ""; return `<button class="lt" data-hear="${reg({ w: t })}"><span class="nat ${ST.lang}">${t}</span>${knows("hi") ? `<small class="nat hi">${cell(0x0900, o)}</small>` : ""}${knows("ta") ? `<small class="nat ta">${cell(0x0b80, o) || "·"}</small>` : ""}</button>`; };
