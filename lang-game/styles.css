@@ -118,7 +118,7 @@ button { font: inherit; color: inherit; }
 @keyframes flip { 40% { transform: rotateY(12deg) scale(.98); } }
 .theme { margin: 0; font: 500 .72rem var(--mono); text-transform: uppercase; letter-spacing: .14em; color: var(--card-soft); }
 .ask { margin: 12px 0 0; color: var(--card-soft); }
-.flash .en { margin: 0; font: 400 clamp(2.4rem, 7vw, 3.6rem)/1.05 var(--serif); }
+.flash h2.en { margin: 0; font: 400 clamp(2.4rem, 7vw, 3.6rem)/1.05 var(--serif); }
 .hint { margin: 10px 0 0; color: var(--card-soft); }
 .back-side { margin-top: 18px; display: grid; justify-items: center; gap: 14px; padding-top: 18px; border-top: 2px dashed #eadfcf; }
 .flash .acts { justify-content: center; }
@@ -251,8 +251,8 @@ textarea { width: 100%; margin-top: 8px; padding: 12px; border-radius: 14px; bor
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 /* setup: one tidy row per language */
-.pk, .tg { grid-template-columns: 56px 1fr; grid-template-rows: auto auto; align-items: center; column-gap: 14px; padding: 14px 18px; }
-.pk .pk-nat, .tg .tg-nat { grid-row: 1 / span 2; font-size: 1.6rem; text-align: center; }
+.pk, .tg { grid-template-columns: 118px 1fr; grid-template-rows: auto auto; align-items: center; column-gap: 14px; padding: 14px 18px; }
+.pk .pk-nat, .tg .tg-nat { grid-row: 1 / span 2; font-size: 1.45rem; text-align: left; white-space: nowrap; }
 .pk .pk-nat { font-size: 1.25rem; }
 .tg b { align-self: end; } .tg .soft { align-self: start; font-size: .85rem; }
 .pk > span:last-child { font-weight: 600; }

@@ -94,7 +94,8 @@ const NAMES = { ta: "Tamil", hi: "Hindi", en: "English" };
 const bridges = (w) => new Set(w.bridge === "both" ? ["ta", "hi"] : w.bridge === "all" ? ["ta", "hi", "en"] : !w.bridge || w.bridge === "none" ? [] : w.bridge.split("+"));
 // How a word relates to the languages YOU know, if at all.
 function relation(w) {
-  const tags = [], B = bridges(w);
+  // A false friend only *looks* related, so don't call it "like" anything.
+  const tags = [], B = w.falseFriend ? new Set() : bridges(w);
   if (B.has("ta") && knows("ta")) tags.push(`<span class="rel ta">🌿 Like Tamil</span>`);
   if (B.has("hi") && knows("hi")) tags.push(`<span class="rel hi">🪷 Like Hindi</span>`);
   if (B.has("en") && knows("en")) tags.push(`<span class="rel en">🔤 Like English</span>`);

@@ -2,7 +2,7 @@
 
 **Every language you know is a head start.**
 
-Learn to *speak* Malayalam and Telugu through the languages you already know: Tamil, Hindi and English. Most language apps teach you as if you know nothing. This one keeps pointing at what you already have:
+Learn to *speak* Malayalam, Telugu or Spanish through the languages you already know: Tamil, Hindi and English. Most language apps teach you as if you know nothing. This one keeps pointing at what you already have:
 
 - Malayalam *veḷḷam* (water) sounds like Tamil *veḷḷam*, which means **flood**. A false friend.
 - Telugu *pustakam* is Hindi *pustak*.
@@ -12,7 +12,7 @@ Learn to *speak* Malayalam and Telugu through the languages you already know: Ta
 
 ## How it works
 
-**One setup screen.** Pick the languages you already speak (Tamil, Hindi, English) and the one you want to learn (Malayalam or Telugu). Every word is then linked only to the languages *you* know.
+**One setup screen.** Pick the languages you already speak (Tamil, Hindi, English) and the one you want to learn (Malayalam, Telugu or Spanish). Spanish leans mostly on English cognates, with a few surprises: Portuguese traders left *mesa* (table) in Hindi as *mez* and in Tamil as *mēcai*. Every word is then linked only to the languages *you* know.
 
 **Three rounds a day, about 15 minutes:**
 
@@ -32,7 +32,7 @@ Every phrase you might say has **🔊 hear it** and **🎤 say it**: the mic lis
 
 ```
 index.html, styles.css, app.js   the app
-data/ml.js, data/te.js           the lessons: words, phrases, conversations, sentences, shortcuts
+data/ml.js, te.js, es.js         the lessons: words, phrases, conversations, sentences, shortcuts
 ```
 
 The lessons were written for this app with spoken, everyday forms. If you spot a word that's off, it's one line in the data file to fix.
