@@ -15,16 +15,44 @@ const kmLabel = (km) => (km >= 1e6 ? `${(km / 1e6).toFixed(1)} million km²` : `
 const INDIA = 3.287e6;
 const compare = (km) => km > 1.5 * INDIA ? `about ${(km / INDIA).toFixed(1)}× the size of India` : km > 0.6 * INDIA ? "about the size of India" : km > 0.2 * INDIA ? `about ${Math.round((km / INDIA) * 100)}% of India` : "";
 
-/* ---------------- colours: one per state, stable across years ---------------- */
-const PALETTE = ["#e6b86a", "#c98f73", "#a9c08a", "#d7a3b5", "#9fb7d6", "#e2c59a", "#b8a6d6", "#c7d48f", "#e7a98b", "#8fc2b5", "#d8b37c", "#b5c6a0", "#e0b7c8", "#a7c3cf", "#d3a76f"];
+/* ---------------- colours: neighbours always differ ---------------- */
+// Eight clearly different hues. Each state prefers the colour picked from its name (so it usually keeps it from
+// map to map), but takes the next free one if a neighbour already has it.
+const PALETTE = ["#e2b45e", "#d4876a", "#9fc07e", "#d99ab3", "#8db4de", "#b59fdc", "#74bfb1", "#c9cf6e"];
 const hash = (s) => { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) | 0; return Math.abs(h); };
-const colourOf = (k) => PALETTE[hash(k) % PALETTE.length];
+const polysOf = (g) => (g.type === "Polygon" ? [g.coordinates] : g.coordinates);
+// Two states are neighbours if their borders share a point.
+function neighbours(feats) {
+  const at = new Map(), nb = new Map();
+  const link = (a, b) => { if (!nb.has(a)) nb.set(a, new Set()); nb.get(a).add(b); };
+  for (const f of feats) {
+    const k = keyOf(f.properties); if (!k) continue;
+    for (const poly of polysOf(f.geometry)) for (const ring of poly) for (const c of ring) {
+      const id = `${c[0].toFixed(3)},${c[1].toFixed(3)}`, here = at.get(id);
+      if (!here) at.set(id, [k]);
+      else if (!here.includes(k)) { here.forEach((o) => { link(o, k); link(k, o); }); here.push(k); }
+    }
+  }
+  return nb;
+}
+function colourMap(feats) {
+  const nb = neighbours(feats), area = new Map(), out = new Map();
+  for (const f of feats) { const k = keyOf(f.properties); if (k) area.set(k, (area.get(k) || 0) + geoArea(f)); }
+  // Biggest first, so the large empires keep their usual colour.
+  for (const k of [...area.keys()].sort((a, b) => area.get(b) - area.get(a))) {
+    const taken = new Set([...(nb.get(k) || [])].map((n) => out.get(n)));
+    const h = hash(k); let c = h % PALETTE.length;
+    for (let t = 1; t < PALETTE.length && taken.has(c); t++) c = (h + t) % PALETTE.length;
+    out.set(k, PALETTE[c]);
+  }
+  return out;
+}
 const keyOf = (p) => (p.SUBJECTO || p.NAME || "").trim();
 
 /* ---------------- loading snapshots ---------------- */
 const cache = new Map();
 function load(i) {
-  if (!cache.has(i)) cache.set(i, fetch(`maps/${SNAPSHOTS[i].file}`).then((r) => r.json()).then((t) => feature(t, t.objects[Object.keys(t.objects)[0]]).features.filter((f) => f.geometry).map(rewind)));
+  if (!cache.has(i)) cache.set(i, fetch(`maps/${SNAPSHOTS[i].file}`).then((r) => r.json()).then((t) => feature(t, t.objects[Object.keys(t.objects)[0]]).features.filter((f) => f.geometry).map(rewind)).then((feats) => Object.assign(feats, { colours: colourMap(feats) })));
   return cache.get(i);
 }
 
@@ -41,8 +69,9 @@ const svg = $("map");
 const S = { i: 0, playing: null, view: { k: 1, x: 0, y: 0 }, focus: null, selected: null, feats: [] };
 let proj, path, W = 0, H = 0;
 const root = document.createElementNS(NS, "g"); svg.append(root);
-const gSea = document.createElementNS(NS, "g"), gLand = document.createElementNS(NS, "g"), gGhost = document.createElementNS(NS, "g"), gMark = document.createElementNS(NS, "g");
-root.append(gSea, gLand, gGhost, gMark);
+const gSea = document.createElementNS(NS, "g"), gLand = document.createElementNS(NS, "g"), gGhost = document.createElementNS(NS, "g"), gLabel = document.createElementNS(NS, "g"), gMark = document.createElementNS(NS, "g");
+gLabel.setAttribute("class", "plabels");
+root.append(gSea, gLand, gGhost, gLabel, gMark);
 
 function size() {
   const r = svg.getBoundingClientRect(); W = r.width; H = r.height;
@@ -63,7 +92,8 @@ async function draw(fade = true) {
   gLand.innerHTML = feats.map((f, n) => { const k = keyOf(f.properties), kind = kinds[k] || kinds[f.properties.NAME];
     // Land with no name in the data: nobody (no people or state) is recorded there on this map.
     if (!k) return `<path class="land unnamed" data-n="${n}" d="${path(f)}"/>`;
-    return `<path class="land${kind ? ` k-${kind}` : ""}${S.focus && (S.focus === k || S.focus === f.properties.NAME) ? " focus" : ""}" data-n="${n}" fill="${colourOf(k)}" d="${path(f)}"/>`; }).join("");
+    return `<path class="land${kind ? ` k-${kind}` : ""}${S.focus && (S.focus === k || S.focus === f.properties.NAME) ? " focus" : ""}" data-n="${n}" fill="${feats.colours.get(k)}" d="${path(f)}"/>`; }).join("");
+  drawLabels(feats);
   if (fade) { gLand.classList.remove("in"); void gLand.getBoundingClientRect(); gLand.classList.add("in"); }
   // Ghosts: what shrank or vanished, drawn from the previous map as dashed outlines.
   gGhost.innerHTML = "";
@@ -74,8 +104,31 @@ async function draw(fade = true) {
   applyView();
 }
 
+/* names on the map: one per state, on its biggest piece, shown only where it fits */
+function drawLabels(feats) {
+  const best = new Map();
+  for (const f of feats) {
+    const k = keyOf(f.properties); if (!k) continue;
+    for (const poly of polysOf(f.geometry)) {
+      const g = { type: "Polygon", coordinates: poly }, a = path.area(g);
+      if (a > (best.get(k)?.a || 0)) best.set(k, { a, g });
+    }
+  }
+  gLabel.innerHTML = [...best].map(([k, { g }]) => {
+    const [x, y] = path.centroid(g), [[x0, y0], [x1, y1]] = path.bounds(g);
+    if (!isFinite(x)) return "";
+    return `<text class="plabel" x="${x.toFixed(1)}" y="${y.toFixed(1)}" data-w="${(x1 - x0).toFixed(1)}" data-h="${(y1 - y0).toFixed(1)}" data-c="${k.length}">${esc(k)}</text>`;
+  }).join("");
+  fitLabels();
+}
+// A name shows only when its shape is wide and tall enough on screen to hold it.
+function fitLabels() {
+  const k = S.view.k;
+  for (const t of gLabel.children) t.style.display = +t.dataset.w * k > +t.dataset.c * 6.4 + 8 && +t.dataset.h * k > 16 ? "" : "none";
+}
+
 /* pan + zoom */
-function applyView() { const { k, x, y } = S.view; root.setAttribute("transform", `translate(${x} ${y}) scale(${k})`); svg.style.setProperty("--k", k); }
+function applyView() { const { k, x, y } = S.view; root.setAttribute("transform", `translate(${x} ${y}) scale(${k})`); svg.style.setProperty("--k", k); fitLabels(); }
 function zoomAt(f, cx = W / 2, cy = H / 2) { const v = S.view, k = Math.max(1, Math.min(14, v.k * f)); v.x = cx - ((cx - v.x) * k) / v.k; v.y = cy - ((cy - v.y) * k) / v.k; v.k = k; if (k === 1) v.x = v.y = 0; applyView(); }
 svg.addEventListener("wheel", (e) => { e.preventDefault(); const r = svg.getBoundingClientRect(); zoomAt(e.deltaY < 0 ? 1.25 : 0.8, e.clientX - r.left, e.clientY - r.top); }, { passive: false });
 let drag = null;
