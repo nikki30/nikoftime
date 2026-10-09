@@ -192,5 +192,7 @@ addEventListener("keydown", (e) => { if (e.target.tagName === "INPUT" && e.targe
 $("about-btn").onclick = () => $("about").showModal();
 $("about").addEventListener("click", (e) => { if (e.target.closest("[data-close]") || e.target.id === "about") $("about").close(); });
 
-const fromHash = SNAPSHOTS.findIndex((s) => String(s.year) === location.hash.slice(1));
-go(fromHash >= 0 ? fromHash : 0);
+// Links like borders/#1530 open on that year.
+const fromHash = () => SNAPSHOTS.findIndex((s) => String(s.year) === decodeURIComponent(location.hash.slice(1)));
+addEventListener("hashchange", () => { const i = fromHash(); if (i >= 0 && i !== S.i) { stop(); go(i); } });
+go(Math.max(0, fromHash()));
