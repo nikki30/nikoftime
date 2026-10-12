@@ -560,6 +560,7 @@ function rootFret6(note) { const pc = parseNote(note).pc; return (pc - 4 + 12) %
 function drillEx(d) {
   const ex = d.ex; if (!ex) return null;
   if (ex.type === "spider") return { title: (ex.muted ? "Muted spider crawl" : "Spider crawl") + ", positions 1–" + (ex.last || 9), root: "C", scale: "chromatic", seq: spiderSeq(ex.last || 9) };
+  if (ex.type === "seq") return { title: ex.title || d.name, root: ex.root || "C", scale: ex.scale || "chromatic", seq: ex.seq };
   let root = ex.root, scale = ex.scale, lo = ex.lo, hi = ex.hi;
   if (ex.rotate) {
     const k = keyOfDay(d);

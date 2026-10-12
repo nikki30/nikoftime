@@ -1590,7 +1590,7 @@
    "startBpm": 60
   },
   "rot-major": {
-   "active": true,
+   "active": false,
    "category": "scale",
    "ex": {
     "rotate": "major",
@@ -1606,7 +1606,7 @@
    "startBpm": 60
   },
   "rot-minor": {
-   "active": true,
+   "active": false,
    "category": "scale",
    "ex": {
     "rotate": "minor",
@@ -1688,6 +1688,97 @@
    "name": "A minor pentatonic (form 4), up and down",
    "order": 7,
    "startBpm": 60
+  },
+  "texas-rock": {
+   "active": true,
+   "category": "song",
+   "name": "Practice Texas Rock",
+   "order": 8,
+   "minutes": 8,
+   "startBpm": 60,
+   "linkType": "song",
+   "linkId": "texas-rock",
+   "ex": {
+    "type": "seq",
+    "title": "Texas Rock: the three riffs (E, A, walk-up to B)",
+    "root": "E",
+    "scale": "chromatic",
+    "seq": [
+     {
+      "s": 6,
+      "f": 0
+     },
+     {
+      "s": 6,
+      "f": 3
+     },
+     {
+      "s": 5,
+      "f": 0
+     },
+     {
+      "s": 5,
+      "f": 2
+     },
+     {
+      "s": 4,
+      "f": 0
+     },
+     {
+      "s": 4,
+      "f": 2
+     },
+     {
+      "s": 5,
+      "f": 0
+     },
+     {
+      "s": 5,
+      "f": 3
+     },
+     {
+      "s": 4,
+      "f": 0
+     },
+     {
+      "s": 4,
+      "f": 2
+     },
+     {
+      "s": 3,
+      "f": 0
+     },
+     {
+      "s": 3,
+      "f": 2
+     },
+     {
+      "s": 6,
+      "f": 0
+     },
+     {
+      "s": 6,
+      "f": 3
+     },
+     {
+      "s": 5,
+      "f": 0
+     },
+     {
+      "s": 5,
+      "f": 1
+     },
+     {
+      "s": 5,
+      "f": 2
+     },
+     {
+      "s": 4,
+      "f": 0
+     }
+    ]
+   },
+   "how": "12-bar blues in E. The notes you need:\n• Riff on E: E G A B D E (low E open, 3rd fret · A open, 2nd fret · D open, 2nd fret).\n• Riff on A: A C D E G A (A open, 3rd fret · D open, 2nd fret · G open, 2nd fret).\n• Walk-up to B: E G A A♯ B D (low E open, 3rd fret · A open, 1st, 2nd fret · D open).\n• E7 = 022130 (E B E G♯ D E), A7 = x02223 (A E A C♯ G), B7 = x21202 (B D♯ A B F♯).\nForm: pickup riff · E7 ×4 bars · A7 ×2 · E7 ×2 (ending in the walk-up) · B7 · A7 · E7 · E7 (back to the top, then end on E7). Play the riffs below along with the metronome, then open the song for the full tab with the chord stabs."
   }
  },
  "songs": {
@@ -1820,6 +1911,109 @@
     {
      "sec": 1,
      "label": "Line 2"
+    }
+   ]
+  },
+  "texas-rock": {
+   "title": "Texas Rock",
+   "artist": "Blues Guitar Unit 1 (class sheet)",
+   "key": "E",
+   "timeSig": "4/4",
+   "chords": [
+    "E7",
+    "A7",
+    "B7"
+   ],
+   "difficulty": "easy",
+   "status": "learning",
+   "styles": [
+    "chords",
+    "riffs"
+   ],
+   "techniques": [
+    "blues shuffle feel",
+    "chord stabs"
+   ],
+   "order": 50,
+   "transcribed": true,
+   "about": "A 12-bar blues in E (moderate blues/rock): a bass-string riff in eighth notes answered by short E7, A7 and B7 stabs.",
+   "intro": "Three chord grips and three riffs make the whole piece. Learn the E7 grip and the E riff first (bars 1–4), then the same idea on A (bars 5–6), the walk-up into B7, and the ending.",
+   "tips": [
+    "Riff on E: E G A B D E (6S 0-3, 5S 0-2, 4S 0-2).",
+    "Riff on A: A C D E G A (5S 0-3, 4S 0-2, 3S 0-2): the E riff moved over one string.",
+    "Walk-up to B: E G A A♯ B D (6S 0-3, 5S 0-1-2, 4S 0).",
+    "E7 = 022130: E B E G♯ D E. A7 = x02223: A E A C♯ G. B7 = x21202: B D♯ A B F♯.",
+    "Stabs: short and accented (the > and dot on the sheet); the half-note stab rings for beats 3–4."
+   ],
+   "map": [
+    {
+     "label": "Pickup",
+     "sec": 0
+    },
+    {
+     "label": "E7 ×4",
+     "sec": 1
+    },
+    {
+     "label": "A7 ×2",
+     "sec": 2
+    },
+    {
+     "label": "E7 + walk-up",
+     "sec": 3
+    },
+    {
+     "label": "B7 · A7 · E7 · end",
+     "sec": 4
+    }
+   ],
+   "sections": [
+    {
+     "name": "Pickup riff (before bar 1)",
+     "learnOrder": 1,
+     "difficulty": "easy",
+     "tab": "\"rest 1 beat, then\" 6:0 6:3 5:0 5:2 4:0 4:2",
+     "orig": "N.C. quarter rest, then eighths: 6S open, 6S3F, 5S open, 5S2F, 4S open, 4S2F",
+     "teach": "Notes: E G A B D E. These are E minor pentatonic notes (plus the octave E), climbing the bottom three strings: open, 3rd fret on the low E; open, 2nd fret on A; open, 2nd fret on D. Eighth notes, so two notes per click. Alternate picking, say each note."
+    },
+    {
+     "name": "Bars 1–4: E7 (bass, stab, stab · stab, riff)",
+     "learnOrder": 2,
+     "difficulty": "easy",
+     "tab": "\"bass\" 6:0 \"E7\" [6:0 5:2 4:2 3:1 2:3 1:0] \"E7 (hold)\" [6:0 5:2 4:2 3:1 2:3 1:0] | \"E7\" [6:0 5:2 4:2 3:1 2:3 1:0] \"riff: E G A B D E\" 6:0 6:3 5:0 5:2 4:0 4:2 | \"bass\" 6:0 \"E7\" [6:0 5:2 4:2 3:1 2:3 1:0] \"E7 (hold)\" [6:0 5:2 4:2 3:1 2:3 1:0] | \"E7\" [6:0 5:2 4:2 3:1 2:3 1:0] \"riff: E G A B D E\" 6:0 6:3 5:0 5:2 4:0 4:2",
+     "orig": "Bar: low E (quarter), E7 stab (quarter, short), E7 (half note, let it ring). Next bar: E7 stab (quarter), then the riff in eighths.",
+     "teach": "E7 grip from the sheet: 6S open, 5S2F, 4S2F, 3S1F, 2S3F, 1S open = E B E G♯ D E (an E major chord with the pinky adding D on the B string). Rhythm of a 'bass, stab, stab' bar: count 1 = low E, 2 = short stab, 3–4 = stab held. Your note on the sheet: '2S pinky'."
+    },
+    {
+     "name": "Bars 5–6: A7 (the same idea on A)",
+     "learnOrder": 3,
+     "difficulty": "easy",
+     "tab": "\"bass\" 5:0 \"A7\" [5:0 4:2 3:2 2:2 1:3] \"A7 (hold)\" [5:0 4:2 3:2 2:2 1:3] | \"A7\" [5:0 4:2 3:2 2:2 1:3] \"riff: A C D E G A\" 5:0 5:3 4:0 4:2 3:0 3:2",
+     "orig": "A string open (quarter), A7 stab, A7 held · A7 stab, then the riff moved up one string set: 5S open, 5S3F, 4S open, 4S2F, 3S open, 3S2F.",
+     "teach": "A7 grip: 5S open, 4S2F, 3S2F, 2S2F, 1S3F = A E A C♯ G. Your notes: barre the 2nd fret with one finger, leave the A string open, and the pinky on 1S3F rings. The A riff (A C D E G A) is exactly the E riff shape moved over one string."
+    },
+    {
+     "name": "Bars 7–8: E7, then walk up to B",
+     "learnOrder": 4,
+     "difficulty": "medium",
+     "tab": "\"bass\" 6:0 \"E7\" [6:0 5:2 4:2 3:1 2:3 1:0] \"E7 (hold)\" [6:0 5:2 4:2 3:1 2:3 1:0] | \"E7\" [6:0 5:2 4:2 3:1 2:3 1:0] \"walk-up: E G A A♯ B D\" 6:0 6:3 5:0 5:1 5:2 4:0",
+     "orig": "E7 bar as before · E7 stab, then 6S open, 6S3F, 5S open, 5S1F, 5S2F, 4S open.",
+     "teach": "The new bit is the walk-up: E G A A♯ B D. On the A string go open, 1st fret, 2nd fret (A, A♯, B) one fret at a time: that chromatic climb is what leads your ear into B7."
+    },
+    {
+     "name": "Bars 9–12: B7, A7, E7 and the endings",
+     "learnOrder": 5,
+     "difficulty": "medium",
+     "tab": "\"bass\" 5:2 \"B7\" [5:2 4:1 3:2 2:0 1:2] \"B7 (hold)\" [5:2 4:1 3:2 2:0 1:2] | \"A7\" [5:0 4:2 3:2 2:2 1:3] \"riff: E G A B D E\" 6:0 6:3 5:0 5:2 4:0 4:2 | \"bass\" 6:0 \"E7\" [6:0 5:2 4:2 3:1 2:3 1:0] \"E7 (hold)\" [6:0 5:2 4:2 3:1 2:3 1:0] | \"1st time\" \"E7\" [6:0 5:2 4:2 3:1 2:3 1:0] \"riff: E G A B D E\" 6:0 6:3 5:0 5:2 4:0 4:2 | \"2nd time: E7, let ring\" [6:0 5:2 4:2 3:1 2:3 1:0]",
+     "orig": "B (5S2F, quarter), B7 stab, B7 held · A7 stab, then the E riff · E7 bar · 1st ending: E7 stab + riff, back to bar 1 · 2nd ending: E7 whole note.",
+     "teach": "B7 grip: 5S2F, 4S1F, 3S2F, 2S open, 1S2F = B D♯ A B F♯. Your note: hold the B7 and let it ring. In bar 10 the A7 stab is followed by the E riff (bottom strings), which pulls you back home to E. First time through, the last bar's riff takes you back to the start; second time, end on one E7 and let it ring."
+    },
+    {
+     "name": "The whole piece (12 bars + ending)",
+     "learnOrder": 6,
+     "difficulty": "medium",
+     "tab": "\"pickup\" 6:0 6:3 5:0 5:2 4:0 4:2 | \"bass\" 6:0 \"E7\" [6:0 5:2 4:2 3:1 2:3 1:0] \"E7 (hold)\" [6:0 5:2 4:2 3:1 2:3 1:0] | \"E7\" [6:0 5:2 4:2 3:1 2:3 1:0] \"riff: E G A B D E\" 6:0 6:3 5:0 5:2 4:0 4:2 | \"bass\" 6:0 \"E7\" [6:0 5:2 4:2 3:1 2:3 1:0] \"E7 (hold)\" [6:0 5:2 4:2 3:1 2:3 1:0] | \"E7\" [6:0 5:2 4:2 3:1 2:3 1:0] \"riff: E G A B D E\" 6:0 6:3 5:0 5:2 4:0 4:2 | \"bass\" 5:0 [5:0 4:2 3:2 2:2 1:3] [5:0 4:2 3:2 2:2 1:3] | [5:0 4:2 3:2 2:2 1:3] 5:0 5:3 4:0 4:2 3:0 3:2 | \"bass\" 6:0 \"E7\" [6:0 5:2 4:2 3:1 2:3 1:0] \"E7 (hold)\" [6:0 5:2 4:2 3:1 2:3 1:0] | [6:0 5:2 4:2 3:1 2:3 1:0] 6:0 6:3 5:0 5:1 5:2 4:0 | \"bass\" 5:2 [5:2 4:1 3:2 2:0 1:2] [5:2 4:1 3:2 2:0 1:2] | [5:0 4:2 3:2 2:2 1:3] 6:0 6:3 5:0 5:2 4:0 4:2 | \"bass\" 6:0 \"E7\" [6:0 5:2 4:2 3:1 2:3 1:0] \"E7 (hold)\" [6:0 5:2 4:2 3:1 2:3 1:0] | \"to the top\" [6:0 5:2 4:2 3:1 2:3 1:0] 6:0 6:3 5:0 5:2 4:0 4:2 | \"end\" [6:0 5:2 4:2 3:1 2:3 1:0]",
+     "teach": "Play straight through: pickup, 12 bars, then the 2nd-ending E7. One click per note or chord; the riffs are eighth notes, so they move twice as fast as the stabs when you play it in time."
     }
    ]
   }
