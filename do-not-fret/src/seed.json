@@ -1547,9 +1547,10 @@
     "hi": 8,
     "lo": 5,
     "root": "A",
-    "scale": "minpent"
+    "scale": "minpent",
+    "rootToRoot": true
    },
-   "how": "Position 1, frets 5–8: A C D E G. Low E to high e and back. Same notes as C major pentatonic, different home. Say each note name.",
+   "how": "Frets 5–8. Start on A (low E string, 5th fret) and climb to the A on the high e string, 5th fret: A C D E G A C D E G A (6S 5-8, 5S 5-7, 4S 5-7, 3S 5-7, 2S 5-8, 1S 5). Play that top A again and come back down to the A you started on. Say each note.",
    "linkId": "minor-pent",
    "linkType": "theory",
    "minutes": 4,
@@ -1643,9 +1644,10 @@
     "hi": 10,
     "lo": 7,
     "root": "A",
-    "scale": "minpent"
+    "scale": "minpent",
+    "rootToRoot": true
    },
-   "how": "Frets 7–10, one box up from form 1. Start on C (low E string, 8th fret): C D · E G · A C · D E · G A · C D, then back down. Form 2’s lowest A is on the D string, 7th fret. Say each note.",
+   "how": "Frets 7–10. Start on A (D string, 7th fret) and climb to the A on the B string, 10th fret: A C D E G A (4S 7, 10 · 3S 7, 9 · 2S 8, 10). Play that top A again and come back down to the A you started on. Say each note.",
    "linkId": "minor-pent",
    "linkType": "theory",
    "minutes": 3,
@@ -1661,9 +1663,10 @@
     "hi": 13,
     "lo": 9,
     "root": "A",
-    "scale": "minpent"
+    "scale": "minpent",
+    "rootToRoot": true
    },
-   "how": "Frets 9–13. Start on D (low E string, 10th fret): D E · G A · C D · E G · A C · D E, then back down. The roots (A) are on the A string 12th fret and the B string 10th fret. Say each note.",
+   "how": "Frets 9–13. Start on A (A string, 12th fret) and climb to the A on the B string, 10th fret: A C D E G A (5S 12 · 4S 10, 12 · 3S 9, 12 · 2S 10). Play that top A again and come back down to the A you started on. Say each note.",
    "linkId": "minor-pent",
    "linkType": "theory",
    "minutes": 3,
@@ -1679,9 +1682,10 @@
     "hi": 15,
     "lo": 12,
     "root": "A",
-    "scale": "minpent"
+    "scale": "minpent",
+    "rootToRoot": true
    },
-   "how": "Frets 12–15, the octave-up twin of the open E shape. Start on E (low E string, 12th fret): E G · A C · D E · G A · C D · E G, then back down. The roots (A) are on the A string 12th fret and the G string 14th fret. Say each note.",
+   "how": "Frets 12–15. Start on A (A string, 12th fret) and climb to the A on the G string, 14th fret: A C D E G A (5S 12, 15 · 4S 12, 14 · 3S 12, 14). Play that top A again and come back down to the A you started on. Say each note.",
    "linkId": "minor-pent",
    "linkType": "theory",
    "minutes": 3,
