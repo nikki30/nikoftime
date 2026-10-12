@@ -510,7 +510,7 @@ function viewToday() {
     <div class="stat"><b>${doneMin}<span class="soft small"> / ${total} min</span></b><span>practised today</span></div>
     <div class="stat"><div class="week" aria-label="This week">${week.map((d) => `<i class="${practicedOn(dayKey(d)) ? "on" : ""} ${dayKey(d) === dayKey() ? "today" : ""}" title="${fmtDate(d, { weekday: "long" })}${practicedOn(dayKey(d)) ? `: practised${S.logs[dayKey(d)]?.minutes ? ` ${S.logs[dayKey(d)].minutes} min` : ""}` : ""}">${practicedOn(dayKey(d)) ? "✓" : fmtDate(d, { weekday: "narrow" })}</i>`).join("")}</div><span>this week</span></div></div></section>`;
   h += staff("Today's routine", `${total} minutes · 75% review, 25% new`);
-  h += `<div class="cleanrule"><b>What counts as a clean run</b><span>Alternate picking (down-up) the whole way · every note named out loud · not a single mistake. One clean run is enough: save the tempo as soon as you get one.</span></div>`;
+  h += `<div class="cleanrule"><b>What counts as a clean run</b><span>Alternate picking (down-up) the whole way · every note named out loud · not a single mistake. One clean run is enough: save the tempo as soon as you get one.${drills.some((d) => d.noNames) ? " The spider crawls don't need the notes named." : ""}</span></div>`;
   if (loading("drills")) h += `<div class="sheet empty">Loading your routine…</div>`;
   else if (!drills.length) h += `<div class="sheet empty"><b>No routine yet.</b>It'll be built from your songs, scales and skills.</div>`;
   else {
@@ -527,7 +527,7 @@ function viewToday() {
           <div class="btns"><button class="btn" data-settempo="${esc(d.id)}" data-bpm="${start}">Metronome to ♩=${start}</button></div>
           <div class="btns"><button class="btn primary" data-logbpm="${esc(d.id)}">Got a clean run: save ♩=<span data-live-bpm>${M.bpm}</span></button>
             <button class="btn" data-noclean="${esc(d.id)}">No clean run today</button>
-          <span class="small soft">Save only after a run with alternate picking, every note named and no mistakes. It saves the metronome's current tempo.</span></div>${link}</div>` : ""}</div>`;
+          <span class="small soft">Save only after a run with alternate picking${d.noNames ? "" : ", every note named"} and no mistakes. It saves the metronome's current tempo.</span></div>${link}</div>` : ""}</div>`;
     }).join("")}</div>`;
   }
   h += staff("How did it go?", "Practice note");

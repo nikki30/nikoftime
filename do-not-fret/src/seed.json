@@ -1584,11 +1584,12 @@
     "last": 9,
     "type": "spider"
    },
-   "how": "One finger per fret. Start on the thick low E string at frets 1–4: index → middle → ring → pinky, alternate picking, then move down string by string to the thin high e. Shift up one fret (2–5) and come back the other way, starting with the pinky: on the high e play A, G♯, G, F♯ (frets 5→2), then the B string E, D♯, D, C♯, and so on up to the low E. Shift up again and repeat. Say each note as you play it.",
+   "how": "One finger per fret. Start on the thick low E string at frets 1–4: index → middle → ring → pinky, alternate picking, then move down string by string to the thin high e. Shift up one fret (2–5) and come back the other way, starting with the pinky: on the high e play A, G♯, G, F♯ (frets 5→2), then the B string E, D♯, D, C♯, and so on up to the low E. Shift up again and repeat.",
    "minutes": 6,
    "name": "Spider crawl, 1-2-3-4",
    "order": 1,
-   "startBpm": 60
+   "startBpm": 60,
+   "noNames": true
   },
   "rot-major": {
    "active": false,
@@ -1630,11 +1631,12 @@
     "type": "spider",
     "muted": true
    },
-   "how": "The same 1-2-3-4 spider crawl, but palm muted: rest the fleshy edge of your picking hand lightly on the strings right where they meet the bridge, so every note comes out short and thuddy instead of ringing. Too far forward and the notes die completely; too far back and they ring. Keep alternate picking and one finger per fret, and say each note. It trains picking accuracy and keeps the strings you aren't playing quiet.",
+   "how": "The same 1-2-3-4 spider crawl, but palm muted: rest the fleshy edge of your picking hand lightly on the strings right where they meet the bridge, so every note comes out short and thuddy instead of ringing. Too far forward and the notes die completely; too far back and they ring. Keep alternate picking and one finger per fret. It trains picking accuracy and keeps the strings you aren't playing quiet.",
    "minutes": 4,
    "name": "Muted spider crawl, 1-2-3-4",
    "order": 2,
-   "startBpm": 60
+   "startBpm": 60,
+   "noNames": true
   },
   "a-minor-pent-f2": {
    "active": true,
