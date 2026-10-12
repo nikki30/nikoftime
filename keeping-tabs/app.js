@@ -1,67 +1,91 @@
 import { TOPICS, REGIONS } from "./topics.js";
 import { SKILLS } from "./skills.js";
+import { ai, explain, brief, conversation, md } from "./ai.js";
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const safeUrl = (u) => (/^https?:\/\//i.test(u || "") ? u : "#");
+const DAY = 864e5, today = new Date().toISOString().slice(0, 10), dayNo = Math.floor(Date.now() / DAY);
 
 /* ---------------- saved state (this browser only) ---------------- */
 const KEY = "kt-v1";
-const ST = Object.assign({ tab: "feminism", region: {}, saved: {}, done: {}, seen: {}, blogKind: "all", uni: {}, open: "design" }, (() => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } })());
+const ST = Object.assign({ tab: "feminism", region: {}, saved: {}, done: {}, seen: {}, blogKind: "all", uni: {}, open: "design", place: {}, lessons: {}, notes: {}, days: [] },
+  (() => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } })());
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(ST)); } catch {} };
-// What counts as "new": anything newer than your previous visit to that tab.
-const LAST = { ...ST.seen };
+const LAST = { ...ST.seen }; // "new" = newer than your previous visit to that tab
+if (!ST.days.includes(today)) { ST.days = [...ST.days, today].slice(-400); save(); }
+const streak = () => { let n = 0; for (let d = dayNo; ST.days.includes(new Date(d * DAY).toISOString().slice(0, 10)); d--) n++; return n; };
 
-/* ---------------- the feed ---------------- */
+/* ---------------- data ---------------- */
 let FEED = null;
-const feedReady = fetch("feed.json", { cache: "no-cache" }).then((r) => (r.ok ? r.json() : null)).catch(() => null).then((f) => { FEED = f; });
+const TRACKS = {};
+const ready = Promise.all([
+  fetch("feed.json", { cache: "no-cache" }).then((r) => (r.ok ? r.json() : null)).catch(() => null).then((f) => { FEED = f; }),
+  ...["feminism", "lgbtq", "eng"].map((id) => import(`./learn/${id}.js`).then((m) => { TRACKS[id] = m.TRACK; }).catch(() => {})),
+]);
+// Which learning track goes with which tab.
+const TRACK_FOR = { feminism: "feminism", lgbtq: "lgbtq", eng: "eng", skills: "eng" };
 
 /* ---------------- helpers ---------------- */
-const DAY = 864e5;
 function ago(d) {
-  if (!d) return "";
-  const t = new Date(d), days = Math.floor((Date.now() - t) / DAY);
-  if (isNaN(t)) return "";
+  if (!d) return ""; const t = new Date(d); if (isNaN(t)) return "";
+  const days = Math.floor((Date.now() - t) / DAY);
   if (days < 1) return "today"; if (days < 2) return "yesterday"; if (days < 14) return `${days} days ago`;
   return t.toLocaleDateString(undefined, { day: "numeric", month: "short", year: t.getFullYear() === new Date().getFullYear() ? undefined : "numeric" });
 }
 const isNew = (tab, d) => LAST[tab] && d && new Date(d) > new Date(LAST[tab]);
-const star = (item, kind) => `<button type="button" class="star${ST.saved[item.url] ? " on" : ""}" data-save="${esc(item.url)}" data-type="${kind}" aria-label="${ST.saved[item.url] ? "Remove from saved" : "Save for later"}" aria-pressed="${!!ST.saved[item.url]}">${ST.saved[item.url] ? "★" : "☆"}</button>`;
-// Every item on the page, by url, so the star button can save a copy of it.
+const pick = (arr, n = 0) => (arr?.length ? arr[(((dayNo + n) % arr.length) + arr.length) % arr.length] : null);
 const ITEMS = new Map();
 const remember = (item, kind) => { ITEMS.set(item.url, { ...item, kind }); return item; };
+const star = (url) => `<button type="button" class="star${ST.saved[url] ? " on" : ""}" data-save="${esc(url)}" aria-label="${ST.saved[url] ? "Remove from saved" : "Save for later"}" aria-pressed="${!!ST.saved[url]}">${ST.saved[url] ? "★" : "☆"}</button>`;
 
-function newsItem(n, tab) {
-  remember(n, "news");
-  return `<article class="item${isNew(tab, n.date) ? " fresh" : ""}">
-    <a href="${esc(safeUrl(n.url))}" target="_blank" rel="noopener"><h4>${esc(n.title)}</h4></a>
-    <p class="meta">${n.source ? `<b>${esc(n.source)}</b> · ` : ""}${esc(ago(n.date))}</p>${star(n, "news")}</article>`;
+// Glossary terms that appear in a piece of text.
+function termsIn(track, text) {
+  if (!track?.glossary) return [];
+  const t = ` ${text.toLowerCase()} `;
+  return track.glossary.filter((g) => [g.term, ...(g.aliases || [])].some((w) => new RegExp(`[^a-z]${w.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}[^a-z]`).test(t))).slice(0, 3);
 }
-function paperItem(p, tab) {
-  remember(p, "paper");
-  return `<article class="item paper${isNew(tab, p.date) ? " fresh" : ""}">
-    ${p.unis?.length ? `<p class="unis">${p.unis.slice(0, 3).map((u) => `<span>${esc(u)}</span>`).join("")}</p>` : ""}
-    <a href="${esc(safeUrl(p.url))}" target="_blank" rel="noopener"><h4>${esc(p.title)}</h4></a>
-    <p class="meta">${esc(p.authors || "")}${p.venue ? ` · <i>${esc(p.venue)}</i>` : ""} · ${esc(ago(p.date))}</p>
-    ${p.abstract ? `<details><summary>What it's about</summary><p>${esc(p.abstract)}</p></details>` : ""}
-    <p class="links"><a href="${esc(safeUrl(p.url))}" target="_blank" rel="noopener">Read →</a>${p.free ? `<a class="free" href="${esc(safeUrl(p.free))}" target="_blank" rel="noopener">Free to read ↗</a>` : ""}</p>
-    ${star(p, "paper")}</article>`;
+// Lessons that mention any of those terms (or share the item's key words).
+function lessonsFor(track, text) {
+  if (!track?.lessons) return [];
+  const terms = termsIn(track, text).map((g) => g.term.toLowerCase());
+  const words = new Set(text.toLowerCase().match(/[a-z]{6,}/g) || []);
+  return track.lessons.map((l) => {
+    const body = `${l.title} ${l.body.join(" ")}`.toLowerCase();
+    const score = terms.filter((w) => body.includes(w)).length * 3 + [...words].filter((w) => body.includes(w)).length;
+    return { l, score };
+  }).filter((x) => x.score >= 3).sort((a, b) => b.score - a.score).slice(0, 2).map((x) => x.l);
 }
-const empty = (msg) => `<p class="empty">${msg}</p>`;
-const noFeed = () => empty(FEED ? "Nothing here today. Check back tomorrow morning." : "The feed is refreshed every morning when the site rebuilds. If this is the very first build, it'll appear after the next update.");
+
+/* ---------------- learning: placement, plan, lessons ---------------- */
+const LEVELS = ["New to this", "Know the basics", "Confident"];
+function plan(track) {
+  const p = ST.place[track.id]; if (!p) return null;
+  const known = (topic) => p.scores[topic] ?? 0;
+  const order = track.lessons.map((l, i) => ({ l, i }))
+    .filter(({ l }) => !(l.level === 1 && known(l.topic) === 2)) // you already know these basics
+    .sort((a, b) => known(a.l.topic) - known(b.l.topic) || a.l.level - b.l.level || a.i - b.i).map((x) => x.l);
+  const weeks = []; for (let i = 0; i < order.length; i += 3) weeks.push(order.slice(i, i + 3));
+  return { order, weeks, next: order.find((l) => !ST.lessons[l.id]?.done) };
+}
+const doneCount = (track) => track.lessons.filter((l) => ST.lessons[l.id]?.done).length;
+function knowSummary(track) {
+  const p = ST.place[track?.id]; if (!p || !track) return "";
+  const by = (n) => track.topics.filter((t) => (p.scores[t.id] ?? 0) === n).map((t) => t.title);
+  return [by(2).length && `confident on ${by(2).join(", ")}`, by(1).length && `knows the basics of ${by(1).join(", ")}`, by(0).length && `new to ${by(0).join(", ")}`].filter(Boolean).join("; ");
+}
 
 /* ---------------- tabs ---------------- */
 const TABS = [
-  ...TOPICS.map((t) => ({ id: t.id, label: `${t.icon} ${t.label}`, cls: `t-${t.id}` })),
-  { id: "eng", label: "💻 Engineering", cls: "t-eng" },
-  { id: "skills", label: "📈 Senior → Staff", cls: "t-skills" },
-  { id: "saved", label: "★ Saved", cls: "t-saved" },
+  ...TOPICS.map((t) => ({ id: t.id, label: `${t.icon} ${t.label}` })),
+  { id: "eng", label: "💻 Engineering" },
+  { id: "skills", label: "📈 Senior → Staff" },
+  { id: "saved", label: "★ Saved" },
 ];
 function paintTabs() {
   const count = Object.keys(ST.saved).length;
-  $("tabs").innerHTML = TABS.map((t) => `<button type="button" role="tab" class="tab ${t.cls}${ST.tab === t.id ? " on" : ""}" aria-selected="${ST.tab === t.id}" data-tab="${t.id}">${esc(t.label)}${t.id === "saved" && count ? ` <small>${count}</small>` : ""}</button>`).join("");
+  $("tabs").innerHTML = TABS.map((t) => `<button type="button" role="tab" class="tab t-${t.id}${ST.tab === t.id ? " on" : ""}" aria-selected="${ST.tab === t.id}" data-tab="${t.id}">${esc(t.label)}${t.id === "saved" && count ? ` <small>${count}</small>` : ""}</button>`).join("");
   $("tabs").querySelectorAll("[data-tab]").forEach((b) => (b.onclick = () => go(b.dataset.tab)));
-  // On a phone the tab row scrolls sideways: keep the chosen tab in view.
   const on = $("tabs").querySelector(".on"); if (on) $("tabs").scrollLeft = on.offsetLeft - 16;
 }
 function go(tab) {
@@ -75,38 +99,98 @@ function paint() {
   document.body.dataset.tab = ST.tab;
   const t = TOPICS.find((x) => x.id === ST.tab);
   $("main").innerHTML = t ? topicView(t) : ST.tab === "eng" ? engView() : ST.tab === "skills" ? skillsView() : savedView();
-  wire();
+  wire($("main"));
 }
 
-/* ---------------- a topic: news by region + research ---------------- */
+/* ---------------- shared blocks ---------------- */
+function hero(track, title, icon) {
+  if (!track) return `<section class="hero"><div class="hero-t"><span class="kicker">${icon}</span><h2>${esc(title)}</h2></div></section>`;
+  const p = plan(track), done = doneCount(track), total = p ? p.order.length : track.lessons.length, s = streak();
+  const pct = total ? Math.round((Math.min(done, total) / total) * 100) : 0;
+  return `<section class="hero">
+    <div class="hero-t">
+      <span class="kicker">${icon} ${esc(title)}${s > 1 ? ` · 🔥 ${s}-day streak` : ""}</span>
+      <h2>${p ? (p.next ? `Next up: <em>${esc(p.next.title)}</em>` : "You've finished your plan 🎉") : "What do you already know?"}</h2>
+      <p>${p ? (p.next ? esc(p.next.hook) : "Revisit any lesson, or retake the quiz to build a deeper plan.") : esc(track.intro) + " Take a 10-question quiz and I'll build you a plan that skips what you know."}</p>
+      <div class="hero-b">${p
+        ? `${p.next ? `<button type="button" class="btn big" data-lesson="${p.next.id}" data-track="${track.id}">Start lesson · ${p.next.minutes} min →</button>` : ""}<button type="button" class="btn ghost" data-place="${track.id}">Retake the quiz</button>`
+        : `<button type="button" class="btn big" data-place="${track.id}">Find my level · 3 min →</button>`}</div>
+    </div>
+    <div class="hero-r">${p ? `<div class="ring big" style="--p:${pct}%"><b>${pct}%<small>of your plan</small></b></div>
+      <ul class="lv-list">${track.topics.map((t) => `<li><span>${t.icon} ${esc(t.title)}</span><i class="lv lv${ST.place[track.id].scores[t.id] ?? 0}">${LEVELS[ST.place[track.id].scores[t.id] ?? 0]}</i></li>`).join("")}</ul>`
+      : `<div class="hero-art" aria-hidden="true">${track.topics.map((t) => `<span>${t.icon}</span>`).join("")}</div>`}</div>
+  </section>`;
+}
+
+function dailyCards(track) {
+  if (!track) return "";
+  const f = pick(track.facts, ST.factN || 0), w = pick(track.glossary, 3), who = pick(track.people, 7);
+  return `<section class="daily">
+    ${f ? `<article class="dcard d-fact"><span class="dk">💡 Did you know?</span><p>${esc(f.fact)}</p><small>${esc(f.source)}</small><button type="button" class="link" data-morefact>Another one →</button></article>` : ""}
+    ${w ? `<article class="dcard d-word"><span class="dk">📖 Word of the day</span><h4>${esc(w.term)}</h4><p>${esc(w.def)}</p></article>` : ""}
+    ${who ? `<article class="dcard d-person"><span class="dk">👤 Someone to know</span><h4>${esc(who.name)} <small>${esc(who.years || "")}${who.where ? ` · ${esc(who.where)}` : ""}</small></h4><p>${esc(who.why)}</p></article>` : ""}
+  </section>`;
+}
+
+function planSection(track) {
+  const p = track && plan(track); if (!p) return "";
+  return `<section class="sec"><header class="sec-h"><h3>Your plan</h3><p>Three short lessons a week, starting where you're newest. ${p.order.length} lessons · ${doneCount(track)} done</p></header>
+    <div class="weeks">${p.weeks.map((wk, i) => `<div class="week${wk.every((l) => ST.lessons[l.id]?.done) ? " done" : wk.includes(p.next) ? " now" : ""}"><span class="wk">Week ${i + 1}</span>${wk.map((l) => lessonChip(track, l, l === p.next)).join("")}</div>`).join("")}</div></section>`;
+}
+const lessonChip = (track, l, now) => `<button type="button" class="lchip${ST.lessons[l.id]?.done ? " done" : ""}${now ? " now" : ""}" data-lesson="${l.id}" data-track="${track.id}"><span class="ck">${ST.lessons[l.id]?.done ? "✓" : now ? "▶" : track.topics.find((t) => t.id === l.topic)?.icon || "•"}</span><span class="lt">${esc(l.title)}</span><small>${l.minutes} min</small></button>`;
+
+function library(track) {
+  if (!track) return "";
+  return `<section class="sec"><header class="sec-h"><h3>All lessons</h3><p>Dip into anything. Each one ends with a quick check and a question to think about.</p></header>
+    <div class="lib">${track.topics.map((t) => `<div class="lib-t"><h4>${t.icon} ${esc(t.title)}</h4><p>${esc(t.blurb || "")}</p>${track.lessons.filter((l) => l.topic === t.id).sort((a, b) => a.level - b.level).map((l) => lessonChip(track, l, false)).join("")}</div>`).join("")}</div></section>`;
+}
+
+/* ---------------- items ---------------- */
+function newsCard(n, tab, track) {
+  remember(n, "news");
+  const terms = termsIn(track, n.title);
+  return `<article class="item${isNew(tab, n.date) ? " fresh" : ""}">
+    <button type="button" class="open" data-item="${esc(n.url)}"><h4>${esc(n.title)}</h4></button>
+    <p class="meta">${n.source ? `<b>${esc(n.source)}</b> · ` : ""}${esc(ago(n.date))}</p>
+    <div class="acts"><button type="button" class="pill ai" data-item="${esc(n.url)}">✨ Explain this</button>${terms.map((g) => `<button type="button" class="pill term" data-term="${esc(g.term)}" data-track="${track.id}">📖 ${esc(g.term)}</button>`).join("")}</div>
+    ${star(n.url)}</article>`;
+}
+function paperCard(p, tab) {
+  remember(p, "paper");
+  return `<article class="item paper${isNew(tab, p.date) ? " fresh" : ""}">
+    ${p.unis?.length ? `<p class="unis">${p.unis.slice(0, 3).map((u) => `<span>${esc(u)}</span>`).join("")}</p>` : ""}
+    <button type="button" class="open" data-item="${esc(p.url)}"><h4>${esc(p.title)}</h4></button>
+    <p class="meta">${esc(p.authors || "")}${p.venue ? ` · <i>${esc(p.venue)}</i>` : ""} · ${esc(ago(p.date))}</p>
+    ${p.abstract ? `<p class="sum">${esc(p.abstract.length > 180 ? `${p.abstract.slice(0, 180).replace(/\s+\S*$/, "")}…` : p.abstract)}</p>` : ""}
+    <div class="acts"><button type="button" class="pill ai" data-item="${esc(p.url)}">✨ Explain simply</button>${p.free ? `<a class="pill free" href="${esc(safeUrl(p.free))}" target="_blank" rel="noopener">Free to read ↗</a>` : ""}</div>
+    ${star(p.url)}</article>`;
+}
+const empty = (msg) => `<p class="empty">${msg}</p>`;
+const noFeed = () => empty(FEED ? "Nothing here today. Check back tomorrow morning." : "The feed is refreshed every morning when the site rebuilds. If this is the very first build, it'll appear after the next update.");
+
+/* ---------------- a topic tab ---------------- */
 function topicView(t) {
+  const track = TRACKS[TRACK_FOR[t.id]];
   const region = ST.region[t.id] || "world", news = FEED?.news?.[t.id]?.[region] || [];
   const papers = FEED?.papers?.[t.id] || [], uni = ST.uni[t.id] || "all";
   const uniList = [...new Set(papers.flatMap((p) => p.unis || []))].sort();
   const shown = uni === "all" ? papers : papers.filter((p) => p.unis?.includes(uni));
-  return `<section class="intro"><h2>${t.icon} ${esc(t.label)}</h2><p>${esc(t.blurb)}, around the world, plus the newest research from leading universities.</p></section>
-  <div class="cols">
-    <section class="col">
-      <header class="col-h"><h3>In the news <span>this week</span></h3></header>
-      <div class="chips" role="group" aria-label="Region">${REGIONS.map((r) => `<button type="button" class="chip${r.id === region ? " on" : ""}" data-region="${r.id}">${esc(r.label)}${FEED?.news?.[t.id]?.[r.id]?.some((n) => isNew(t.id, n.date)) ? `<i class="dot" aria-label="new"></i>` : ""}</button>`).join("")}</div>
-      <div class="list">${news.length ? news.map((n) => newsItem(n, t.id)).join("") : noFeed()}</div>
-    </section>
-    <section class="col">
-      <header class="col-h"><h3>New research <span>from leading universities</span></h3></header>
-      ${uniList.length > 1 ? `<label class="pick">From <select id="uni"><option value="all">all ${uniList.length} universities</option>${uniList.map((u) => `<option${u === uni ? " selected" : ""}>${esc(u)}</option>`).join("")}</select></label>` : ""}
-      <div class="list">${shown.length ? shown.map((p) => paperItem(p, t.id)).join("") : noFeed()}</div>
-      ${searchBox(t)}
-    </section>
-  </div>`;
+  return `${hero(track, t.label, t.icon)}${dailyCards(track)}${planSection(track)}
+  <section class="sec"><header class="sec-h"><h3>This week in the news</h3><p>Tap any story and I'll explain it, with the background you need.</p></header>
+    <div class="chips" role="group" aria-label="Region">${REGIONS.map((r) => `<button type="button" class="chip${r.id === region ? " on" : ""}" data-region="${r.id}">${esc(r.label)}${FEED?.news?.[t.id]?.[r.id]?.some((n) => isNew(t.id, n.date)) ? `<i class="dot" aria-label="new"></i>` : ""}</button>`).join("")}</div>
+    ${news.length ? `<button type="button" class="brief" data-brief="${t.id}"><span>✨</span><b>Brief me on this week</b><small>The big threads in ${esc(REGIONS.find((r) => r.id === region)?.label.replace(/^\S+\s/, "") || "the world")}, and the one thing that makes them make sense</small></button>` : ""}
+    <div class="grid">${news.length ? news.map((n) => newsCard(n, t.id, track)).join("") : noFeed()}</div></section>
+  <section class="sec"><header class="sec-h"><h3>New research</h3><p>From leading universities. Tap one for a plain-English explanation.</p></header>
+    ${uniList.length > 1 ? `<label class="pickuni">From <select id="uni"><option value="all">all ${uniList.length} universities</option>${uniList.map((u) => `<option${u === uni ? " selected" : ""}>${esc(u)}</option>`).join("")}</select></label>` : ""}
+    <div class="grid">${shown.length ? shown.slice(0, 12).map((p) => paperCard(p, t.id)).join("") : noFeed()}</div>
+    ${searchBox()}</section>
+  ${library(track)}`;
 }
 
-/* live research search (OpenAlex works from any browser) */
-function searchBox(t) {
-  return `<form class="search" id="search" data-topic="${t.id}">
-    <h4>🔎 Dig deeper</h4><p>Search research on anything, e.g. <i>women in tech</i>, <i>Section 377</i>, <i>care work India</i>.</p>
+function searchBox() {
+  return `<form class="search" id="search"><h4>🔎 Dig deeper</h4><p>Search research on anything, e.g. <i>women in tech</i>, <i>Section 377</i>, <i>care work India</i>.</p>
     <div class="row"><input id="q" type="search" placeholder="Search research…" aria-label="Search research" autocomplete="off"><button type="submit" class="btn">Search</button></div>
-    <label class="only"><input type="checkbox" id="only" checked> Only leading universities</label>
-    <div id="results" class="list"></div></form>`;
+    <label class="only"><input type="checkbox" id="only" checked> Only leading universities</label><div id="results" class="grid"></div></form>`;
 }
 async function runSearch(e) {
   e.preventDefault();
@@ -116,7 +200,7 @@ async function runSearch(e) {
   const filters = [`from_publication_date:${new Date(Date.now() - 3 * 365 * DAY).toISOString().slice(0, 10)}`, "type:article|preprint|book-chapter|review"];
   if ($("only").checked && ids.length) filters.push(`authorships.institutions.lineage:${ids.join("|")}`);
   try {
-    const r = await fetch(`https://api.openalex.org/works?search=${encodeURIComponent(q)}&filter=${filters.join(",")}&sort=relevance_score:desc&per_page=15&select=id,title,publication_date,doi,primary_location,authorships,abstract_inverted_index,open_access`).then((x) => x.json());
+    const r = await fetch(`https://api.openalex.org/works?search=${encodeURIComponent(q)}&filter=${filters.join(",")}&sort=relevance_score:desc&per_page=12&select=id,title,publication_date,doi,primary_location,authorships,abstract_inverted_index,open_access`).then((x) => x.json());
     const items = (r.results || []).filter((w) => w.title).map((w) => {
       const words = []; for (const [k, ps] of Object.entries(w.abstract_inverted_index || {})) for (const p of ps) words[p] = k;
       const ab = words.join(" ").replace(/\s+/g, " ").trim();
@@ -124,93 +208,250 @@ async function runSearch(e) {
         title: w.title.replace(/<[^>]+>/g, ""), date: w.publication_date, url: w.doi || w.primary_location?.landing_page_url || w.id, free: w.open_access?.oa_url,
         venue: w.primary_location?.source?.display_name || "", authors: w.authorships.slice(0, 3).map((a) => a.author.display_name).join(", ") + (w.authorships.length > 3 ? ", et al." : ""),
         unis: [...new Set(w.authorships.flatMap((a) => a.institutions.map((i) => unis[i.id?.split("/").pop()] || (ids.length ? null : i.display_name))).filter(Boolean))],
-        abstract: ab.length > 320 ? `${ab.slice(0, 320).replace(/\s+\S*$/, "")}…` : ab,
+        abstract: ab.length > 600 ? `${ab.slice(0, 600).replace(/\s+\S*$/, "")}…` : ab,
       };
     });
-    out.innerHTML = items.length ? items.map((p) => paperItem(p, "")).join("") : `<p class="empty">No research found for “${esc(q)}”. Try fewer or broader words${$("only").checked ? ", or untick “Only leading universities”" : ""}.</p>`;
-    wireStars(out);
+    out.innerHTML = items.length ? items.map((p) => paperCard(p, "")).join("") : `<p class="empty">No research found for “${esc(q)}”. Try fewer or broader words${$("only").checked ? ", or untick “Only leading universities”" : ""}.</p>`;
+    wire(out);
   } catch { out.innerHTML = `<p class="empty">Couldn't reach OpenAlex just now. Try again in a moment.</p>`; }
 }
 
-/* ---------------- engineering ---------------- */
+/* ---------------- engineering reading ---------------- */
 const KINDS = [["all", "All"], ["staff", "Staff+"], ["career", "Career"], ["systems", "Systems"], ["craft", "Craft"], ["ops", "Reliability"], ["ai", "AI"]];
 function engView() {
-  const e = FEED?.eng || {}, kind = ST.blogKind;
+  const e = FEED?.eng || {}, kind = ST.blogKind, track = TRACKS.eng;
   const blogs = (e.blogs || []).filter((b) => kind === "all" || b.kind === kind);
-  return `<section class="intro"><h2>💻 Engineering</h2><p>Fresh writing from engineers worth learning from, what engineers are discussing, and new research in software engineering.</p></section>
+  const blogCard = (b) => { remember(b, "blog"); const terms = termsIn(track, `${b.title} ${b.summary || ""}`);
+    return `<article class="item${isNew("eng", b.date) ? " fresh" : ""}"><button type="button" class="open" data-item="${esc(b.url)}"><h4>${esc(b.title)}</h4></button><p class="meta"><b>${esc(b.source)}</b> · ${esc(ago(b.date))}</p>${b.summary ? `<p class="sum">${esc(b.summary)}</p>` : ""}<div class="acts"><button type="button" class="pill ai" data-item="${esc(b.url)}">✨ Key ideas</button>${terms.map((g) => `<button type="button" class="pill term" data-term="${esc(g.term)}" data-track="eng">📖 ${esc(g.term)}</button>`).join("")}</div>${star(b.url)}</article>`; };
+  const hnCard = (h) => { remember(h, "discussion");
+    return `<article class="item hn${isNew("eng", h.date) ? " fresh" : ""}"><span class="pts">${h.points}<small>points</small></span><div><button type="button" class="open" data-item="${esc(h.url)}"><h4>${esc(h.title)}</h4></button><p class="meta"><a href="${esc(safeUrl(h.discuss))}" target="_blank" rel="noopener">${h.comments} comments</a> · ${esc(ago(h.date))}</p><div class="acts"><button type="button" class="pill ai" data-item="${esc(h.url)}">✨ What's this about?</button></div></div>${star(h.url)}</article>`; };
+  return `<section class="hero slim"><div class="hero-t"><span class="kicker">💻 Engineering</span><h2>Today's reading, <em>explained</em></h2><p>Fresh writing from engineers worth learning from, what engineers are arguing about, and new research. Tap anything for the key ideas and how you could use them at work.</p>
+    <div class="hero-b"><button type="button" class="btn ghost" data-go="skills">📈 Your senior → staff plan</button></div></div></section>
+  ${dailyCards(track)}
   <div class="cols three">
-    <section class="col">
-      <header class="col-h"><h3>From the blogs</h3></header>
+    <section class="col"><header class="col-h"><h3>From the blogs</h3></header>
       <div class="chips">${KINDS.map(([k, l]) => `<button type="button" class="chip${k === kind ? " on" : ""}" data-kind="${k}">${l}</button>`).join("")}</div>
-      <div class="list">${blogs.length ? blogs.map((b) => { remember(b, "blog"); return `<article class="item${isNew("eng", b.date) ? " fresh" : ""}"><a href="${esc(safeUrl(b.url))}" target="_blank" rel="noopener"><h4>${esc(b.title)}</h4></a><p class="meta"><b>${esc(b.source)}</b> · ${esc(ago(b.date))}</p>${b.summary ? `<p class="sum">${esc(b.summary)}</p>` : ""}${star(b, "blog")}</article>`; }).join("") : noFeed()}</div>
-    </section>
-    <section class="col">
-      <header class="col-h"><h3>Most discussed <span>on Hacker News, last 2 weeks</span></h3></header>
-      <div class="list">${(e.hn || []).length ? e.hn.map((h) => { remember(h, "discussion"); return `<article class="item hn${isNew("eng", h.date) ? " fresh" : ""}"><span class="pts">${h.points}<small>points</small></span><div><a href="${esc(safeUrl(h.url))}" target="_blank" rel="noopener"><h4>${esc(h.title)}</h4></a><p class="meta"><a href="${esc(safeUrl(h.discuss))}" target="_blank" rel="noopener">${h.comments} comments</a> · ${esc(ago(h.date))}</p></div>${star(h, "discussion")}</article>`; }).join("") : noFeed()}</div>
-    </section>
-    <section class="col">
-      <header class="col-h"><h3>New research <span>arXiv, software engineering</span></h3></header>
-      <div class="list">${(e.papers || []).length ? e.papers.slice(0, 15).map((p) => paperItem(p, "eng")).join("") : noFeed()}</div>
-    </section>
+      <div class="list">${blogs.length ? blogs.map(blogCard).join("") : noFeed()}</div></section>
+    <section class="col"><header class="col-h"><h3>Most discussed <span>Hacker News, 2 weeks</span></h3></header><div class="list">${(e.hn || []).length ? e.hn.map(hnCard).join("") : noFeed()}</div></section>
+    <section class="col"><header class="col-h"><h3>New research <span>arXiv</span></h3></header><div class="list">${(e.papers || []).length ? e.papers.slice(0, 12).map((p) => paperCard(p, "eng")).join("") : noFeed()}</div></section>
   </div>`;
 }
 
-/* ---------------- senior → staff skills ---------------- */
-const week = Math.floor(Date.now() / (7 * DAY));
+/* ---------------- senior → staff ---------------- */
 const itemKey = (s, lvl, i) => `${s.id}.${lvl}.${i}`;
 function skillsView() {
+  const track = TRACKS.eng;
   const tally = (lvl) => SKILLS.reduce((a, s) => [a[0] + s[lvl].filter((_, i) => ST.done[itemKey(s, lvl, i)]).length, a[1] + s[lvl].length], [0, 0]);
   const [sd, st] = tally("senior"), [fd, ft] = tally("staff");
-  return `<section class="intro"><h2>📈 Senior → Staff</h2><p>What good looks like at each level, one small practice per area for this week, and the best things to read. Tick things off as you grow.</p>
-    <div class="bars"><div class="bar"><span>Senior</span><i style="--p:${(sd / st) * 100}%"></i><b>${sd}/${st}</b></div><div class="bar staff"><span>Staff</span><i style="--p:${(fd / ft) * 100}%"></i><b>${fd}/${ft}</b></div></div></section>
-  <div class="skills">${SKILLS.map((s) => {
-    const n = s.senior.length + s.staff.length, d = ["senior", "staff"].reduce((a, l) => a + s[l].filter((_, i) => ST.done[itemKey(s, l, i)]).length, 0), open = ST.open === s.id;
-    const list = (lvl) => `<ul class="checks">${s[lvl].map((t, i) => `<li><label><input type="checkbox" data-done="${itemKey(s, lvl, i)}"${ST.done[itemKey(s, lvl, i)] ? " checked" : ""}><span>${esc(t)}</span></label></li>`).join("")}</ul>`;
-    return `<article class="skill${open ? " open" : ""}" id="sk-${s.id}">
-      <button type="button" class="sk-h" data-open="${s.id}" aria-expanded="${open}"><span class="ic">${s.icon}</span><span class="nm">${esc(s.title)}</span><span class="ring" style="--p:${(d / n) * 100}%"><b>${d}/${n}</b></span></button>
-      ${open ? `<div class="sk-b">
-        <p class="why">${esc(s.why)}</p>
-        <div class="practice"><span>This week's practice</span><p>${esc(s.practice[week % s.practice.length])}</p></div>
-        <div class="lv"><div><h4>Senior</h4>${list("senior")}</div><div><h4>Staff</h4>${list("staff")}</div></div>
-        <h4>Read</h4><ul class="reads">${s.read.map((r) => `<li><a href="${esc(r.url)}" target="_blank" rel="noopener"><b>${esc(r.t)}</b></a> <span>${esc(r.by)} · ${esc(r.kind)}</span></li>`).join("")}</ul>
-      </div>` : ""}</article>`;
-  }).join("")}</div>`;
+  return `${hero(track, "Senior → Staff", "📈")}${dailyCards(track)}${planSection(track)}
+  <section class="sec"><header class="sec-h"><h3>Where you are</h3><p>Tick what's true today. One small practice per area, changing every week.</p></header>
+    <div class="bars"><div class="bar"><span>Senior</span><i style="--p:${(sd / st) * 100}%"></i><b>${sd}/${st}</b></div><div class="bar staff"><span>Staff</span><i style="--p:${(fd / ft) * 100}%"></i><b>${fd}/${ft}</b></div></div>
+    <div class="skills">${SKILLS.map((s) => {
+      const n = s.senior.length + s.staff.length, d = ["senior", "staff"].reduce((a, l) => a + s[l].filter((_, i) => ST.done[itemKey(s, l, i)]).length, 0), open = ST.open === s.id;
+      const list = (lvl) => `<ul class="checks">${s[lvl].map((t, i) => `<li><label><input type="checkbox" data-done="${itemKey(s, lvl, i)}"${ST.done[itemKey(s, lvl, i)] ? " checked" : ""}><span>${esc(t)}</span></label></li>`).join("")}</ul>`;
+      const lessons = track?.lessons.filter((l) => l.topic === s.id) || [];
+      return `<article class="skill${open ? " open" : ""}" id="sk-${s.id}">
+        <button type="button" class="sk-h" data-open="${s.id}" aria-expanded="${open}"><span class="ic">${s.icon}</span><span class="nm">${esc(s.title)}</span><span class="ring" style="--p:${(d / n) * 100}%"><b>${d}/${n}</b></span></button>
+        ${open ? `<div class="sk-b"><p class="why">${esc(s.why)}</p>
+          <div class="practice"><span>This week's practice</span><p>${esc(s.practice[Math.floor(dayNo / 7) % s.practice.length])}</p></div>
+          <div class="lv2"><div><h4>Senior</h4>${list("senior")}</div><div><h4>Staff</h4>${list("staff")}</div></div>
+          ${lessons.length ? `<h4>Lessons</h4><div class="lrow">${lessons.map((l) => lessonChip(track, l, false)).join("")}</div>` : ""}
+          <h4>Read</h4><ul class="reads">${s.read.map((r) => `<li><a href="${esc(r.url)}" target="_blank" rel="noopener"><b>${esc(r.t)}</b></a> <span>${esc(r.by)} · ${esc(r.kind)}</span></li>`).join("")}</ul></div>` : ""}</article>`;
+    }).join("")}</div></section>
+  ${library(track)}`;
 }
 
 /* ---------------- saved ---------------- */
 function savedView() {
   const items = Object.values(ST.saved).sort((a, b) => new Date(b.savedAt) - new Date(a.savedAt));
-  const group = (k, title) => { const g = items.filter((i) => i.kind === k); return g.length ? `<h3 class="grp">${title}</h3><div class="list">${g.map((i) => (k === "paper" ? paperItem(i, "") : newsItem(i, ""))).join("")}</div>` : ""; };
-  return `<section class="intro"><h2>★ Saved</h2><p>Things you starred to come back to.</p></section>
-  ${items.length ? `<div class="saved">${group("news", "News")}${group("paper", "Research")}${group("blog", "Blog posts")}${group("discussion", "Discussions")}</div>` : empty("Nothing saved yet. Tap ☆ on anything to keep it here.")}`;
+  const notes = Object.entries(ST.notes).filter(([, v]) => v?.trim());
+  const group = (k, title) => { const g = items.filter((i) => i.kind === k); return g.length ? `<h3 class="grp">${title}</h3><div class="grid">${g.map((i) => (k === "paper" ? paperCard(i, "") : newsCard(i, "", TRACKS[TRACK_FOR[i.tab]] || TRACKS.feminism))).join("")}</div>` : ""; };
+  const lessonOf = (id) => Object.values(TRACKS).flatMap((t) => t.lessons.map((l) => ({ l, t }))).find((x) => x.l.id === id);
+  return `<section class="hero slim"><div class="hero-t"><span class="kicker">★ Saved</span><h2>Things to come back to</h2><p>Stories you starred, and your own thoughts from lessons.</p></div></section>
+  ${items.length || notes.length ? `<div class="saved">${group("news", "News")}${group("paper", "Research")}${group("blog", "Blog posts")}${group("discussion", "Discussions")}
+    ${notes.length ? `<h3 class="grp">Your reflections</h3><div class="grid">${notes.map(([id, v]) => { const x = lessonOf(id); return x ? `<article class="item note"><button type="button" class="open" data-lesson="${id}" data-track="${x.t.id}"><h4>${esc(x.l.title)}</h4></button><p class="q">${esc(x.l.think)}</p><p class="sum">${esc(v)}</p></article>` : ""; }).join("")}</div>` : ""}</div>`
+    : empty("Nothing saved yet. Tap ☆ on any story to keep it here.")}`;
+}
+
+/* ---------------- the sheet: lessons, quizzes and explanations ---------------- */
+const sheet = $("sheet"), body = $("sheet-body");
+function openSheet(html, cls = "") { body.innerHTML = html; sheet.className = `sheet ${cls}`; if (!sheet.open) sheet.showModal(); body.scrollTop = 0; sheet.querySelector(".sheet-in").scrollTop = 0; wire(body); }
+$("sheet-close").onclick = () => sheet.close();
+sheet.addEventListener("click", (e) => { if (e.target === sheet) sheet.close(); });
+sheet.addEventListener("close", () => { CURRENT?.abort?.abort(); paint(); });
+let CURRENT = null; // the conversation open in the sheet
+
+/* placement quiz */
+function startPlacement(trackId) {
+  const track = TRACKS[trackId]; if (!track) return;
+  const Q = { track, i: 0, picks: [] };
+  const step = () => {
+    const q = track.placement[Q.i], picked = Q.picks[Q.i];
+    openSheet(`<div class="quiz">
+      <span class="kicker">Find your level · ${Q.i + 1} of ${track.placement.length}</span>
+      <div class="dots">${track.placement.map((_, j) => `<i class="${j < Q.i ? (Q.picks[j] === track.placement[j].answer ? "ok" : "no") : j === Q.i ? "on" : ""}"></i>`).join("")}</div>
+      <p class="qtopic">${esc(track.topics.find((t) => t.id === q.topic)?.icon || "")} ${esc(track.topics.find((t) => t.id === q.topic)?.title || "")}</p>
+      <h3>${esc(q.q)}</h3>
+      <div class="opts">${q.options.map((o, j) => `<button type="button" class="opt${picked != null ? (j === q.answer ? " right" : j === picked ? " wrong" : "") : ""}" data-opt="${j}"${picked != null ? " disabled" : ""}>${esc(o)}</button>`).join("")}
+        <button type="button" class="opt idk" data-opt="-1"${picked != null ? " disabled" : ""}>I don't know yet</button></div>
+      ${picked != null ? `<div class="explain ${picked === q.answer ? "good" : ""}"><b>${picked === q.answer ? "Yes! " : picked === -1 ? "Here's the answer: " : "Not quite. "}</b>${esc(q.explain)}</div>
+        <button type="button" class="btn big" data-next>${Q.i + 1 < track.placement.length ? "Next question →" : "See my plan →"}</button>` : ""}
+    </div>`, "s-quiz");
+    body.querySelectorAll("[data-opt]").forEach((b) => (b.onclick = () => { Q.picks[Q.i] = +b.dataset.opt; step(); }));
+    const n = body.querySelector("[data-next]"); if (n) n.onclick = () => { if (++Q.i < track.placement.length) step(); else finish(); };
+  };
+  const finish = () => {
+    const scores = {}; track.topics.forEach((t) => (scores[t.id] = 0));
+    track.placement.forEach((q, j) => { if (Q.picks[j] === q.answer) scores[q.topic] = Math.min(2, (scores[q.topic] || 0) + 1); });
+    ST.place[track.id] = { scores, date: today }; save();
+    const right = track.placement.filter((q, j) => Q.picks[j] === q.answer).length, p = plan(track);
+    openSheet(`<div class="quiz done">
+      <span class="kicker">Your results</span><h3>${right} of ${track.placement.length}: ${right >= track.placement.length * 0.8 ? "you know a lot already!" : right >= track.placement.length * 0.5 ? "a solid start." : "lots of good things to discover."}</h3>
+      <ul class="lv-list wide">${track.topics.map((t) => `<li><span>${t.icon} ${esc(t.title)}</span><i class="lv lv${scores[t.id]}">${LEVELS[scores[t.id]]}</i></li>`).join("")}</ul>
+      <div class="explain good"><b>Your plan:</b> ${p.order.length} lessons over ${p.weeks.length} weeks, starting with ${esc(track.topics.find((t) => t.id === p.order[0]?.topic)?.title || "the basics")}${p.order.length < track.lessons.length ? `. I skipped ${track.lessons.length - p.order.length} basics you already know (they're still in All lessons)` : ""}.</div>
+      ${p.next ? `<button type="button" class="btn big" data-lesson="${p.next.id}" data-track="${track.id}">Start: ${esc(p.next.title)} →</button>` : ""}
+    </div>`, "s-quiz");
+  };
+  step();
+}
+
+/* a lesson */
+function openLesson(trackId, id) {
+  const track = TRACKS[trackId], l = track?.lessons.find((x) => x.id === id); if (!l) return;
+  const topic = track.topics.find((t) => t.id === l.topic), state = ST.lessons[l.id] || {}, answers = state.answers || [];
+  const p = plan(track), seq = p ? p.order : track.lessons, nextL = seq[seq.indexOf(l) + 1] || p?.next;
+  openSheet(`<article class="lesson">
+    <span class="kicker">${topic?.icon || ""} ${esc(topic?.title || "")} · ${l.minutes} min · ${["", "Basics", "Going deeper", "Deep dive"][l.level] || ""}</span>
+    <h2>${esc(l.title)}</h2><p class="hook">${esc(l.hook)}</p>
+    ${l.body.map((para) => `<p>${esc(para)}</p>`).join("")}
+    <div class="takeaways"><h4>Remember</h4><ul>${l.points.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>
+    ${l.india ? `<div class="angle a-india"><span>🇮🇳 In India and South Asia</span><p>${esc(l.india)}</p></div>` : ""}
+    ${l.world ? `<div class="angle a-world"><span>🌍 Elsewhere</span><p>${esc(l.world)}</p></div>` : ""}
+    ${l.example ? `<div class="angle a-world"><span>🏢 In the real world</span><p>${esc(l.example)}</p></div>` : ""}
+    <h3 class="chk">Check yourself</h3>
+    ${l.quiz.map((q, qi) => `<div class="lq" data-q="${qi}"><p class="lqq">${esc(q.q)}</p><div class="opts">${q.options.map((o, j) => `<button type="button" class="opt${answers[qi] != null ? (j === q.answer ? " right" : j === answers[qi] ? " wrong" : "") : ""}" data-lq="${qi}" data-opt="${j}"${answers[qi] != null ? " disabled" : ""}>${esc(o)}</button>`).join("")}</div>
+      ${answers[qi] != null ? `<div class="explain ${answers[qi] === q.answer ? "good" : ""}"><b>${answers[qi] === q.answer ? "Right! " : "Not quite. "}</b>${esc(q.explain)}</div>` : ""}</div>`).join("")}
+    ${l.think ? `<div class="think"><h4>🤔 Think about it</h4><p>${esc(l.think)}</p><textarea id="note" rows="3" placeholder="Jot down your thoughts (saved in this browser)…">${esc(ST.notes[l.id] || "")}</textarea></div>` : ""}
+    ${l.deeper?.length ? `<div class="deeper"><h4>Go deeper</h4>${l.deeper.map((d) => `<a href="${esc(safeUrl(d.url))}" target="_blank" rel="noopener">${esc(d.t)} ↗</a>`).join("")}</div>` : ""}
+    ${aiBox(`lesson:${l.id}`, ["Explain it more simply", "Give me a real example", trackId === "eng" ? "How would I use this at work?" : "What's happening with this today?", "What do critics say?"])}
+    <div class="lesson-f">${state.done ? `<span class="donebadge">✓ Lesson done</span>` : `<span class="soft">Answer both questions to finish this lesson</span>`}${nextL && nextL !== l ? `<button type="button" class="btn" data-lesson="${nextL.id}" data-track="${track.id}">Next: ${esc(nextL.title)} →</button>` : ""}</div>
+  </article>`, "s-lesson");
+  body.querySelectorAll("[data-lq]").forEach((b) => (b.onclick = () => {
+    const s = ST.lessons[l.id] ||= {}; (s.answers ||= [])[+b.dataset.lq] = +b.dataset.opt;
+    if (l.quiz.every((_, i) => s.answers[i] != null)) { s.done = true; s.score = l.quiz.filter((q, i) => s.answers[i] === q.answer).length; s.at = today; }
+    save(); const y = sheet.querySelector(".sheet-in").scrollTop; openLesson(trackId, id); sheet.querySelector(".sheet-in").scrollTop = y;
+  }));
+  const note = $("note"); if (note) note.oninput = () => { ST.notes[l.id] = note.value; save(); };
+  wireAI(`lesson:${l.id}`, () => conversation(`I'm reading this lesson in my learning app. Teach me more when I ask.\n\nLesson: ${l.title}\n${l.body.join("\n\n")}\n\nKey points: ${l.points.join("; ")}\n\nStart by saying in one or two sentences what the single most important idea is, and offer two directions we could go next.`, { web: true }), false);
+}
+
+/* an article, paper or post */
+function openItem(url) {
+  const it = ITEMS.get(url) || ST.saved[url]; if (!it) return;
+  const track = TRACKS[TRACK_FOR[ST.tab]] || TRACKS.feminism, text = `${it.title} ${it.summary || ""} ${it.abstract || ""}`;
+  const terms = termsIn(track, text), lessons = lessonsFor(track, text);
+  const sugg = it.kind === "paper" ? ["What's the evidence like?", "How does this compare to other studies?", "Explain the method simply"]
+    : it.kind === "blog" || it.kind === "discussion" ? ["Give me a concrete example", "What would a staff engineer do here?", "What are the trade-offs?"]
+      : ["What's the history behind this?", "What does this mean for India?", "What are the different views?", "Explain like I'm new to this"];
+  openSheet(`<article class="reader">
+    <span class="kicker">${{ news: "📰 News", paper: "🎓 Research", blog: "✍️ Blog post", discussion: "💬 Discussion" }[it.kind] || ""}${it.source ? ` · ${esc(it.source)}` : ""}${it.date ? ` · ${esc(ago(it.date))}` : ""}</span>
+    <h2>${esc(it.title)}</h2>
+    ${it.unis?.length ? `<p class="unis">${it.unis.map((u) => `<span>${esc(u)}</span>`).join("")}</p>` : ""}
+    ${it.abstract ? `<details class="abs"><summary>The abstract</summary><p>${esc(it.abstract)}</p></details>` : ""}
+    <p class="orig"><a class="btn ghost" href="${esc(safeUrl(it.url))}" target="_blank" rel="noopener">Read the original ↗</a>${star(it.url)}</p>
+    ${aiBox(`item:${url}`, sugg)}
+    ${terms.length ? `<div class="terms"><h4>📖 Words in this story</h4>${terms.map((g) => `<p><b>${esc(g.term)}:</b> ${esc(g.def)}</p>`).join("")}</div>` : ""}
+    ${lessons.length ? `<div class="related"><h4>Learn the background</h4>${lessons.map((l) => lessonChip(track, l, false)).join("")}</div>` : ""}
+  </article>`, "s-reader");
+  wireAI(`item:${url}`, () => explain({ ...it, context: knowSummary(track) }), true);
+}
+
+/* this week's briefing */
+function openBrief(topicId) {
+  const t = TOPICS.find((x) => x.id === topicId), region = ST.region[topicId] || "world", r = REGIONS.find((x) => x.id === region);
+  const items = FEED?.news?.[topicId]?.[region] || [], track = TRACKS[TRACK_FOR[topicId]];
+  openSheet(`<article class="reader"><span class="kicker">✨ Your briefing · ${esc(r?.label || "")}</span><h2>${esc(t.label)} this week</h2>
+    ${aiBox(`brief:${topicId}:${region}`, ["Go deeper on the first thread", "What's the history behind this?", "What should I read next?"])}
+    <div class="related"><h4>The headlines</h4>${items.map((n) => `<button type="button" class="lchip" data-item="${esc(n.url)}"><span class="ck">📰</span><span class="lt">${esc(n.title)}</span></button>`).join("")}</div></article>`, "s-reader");
+  wireAI(`brief:${topicId}:${region}`, () => brief(`${t.label} (${r?.label.replace(/^\S+\s/, "")})`, items, knowSummary(track)), true);
+}
+
+/* ---------------- Claude, inside the sheet ---------------- */
+const CHATS = new Map(); // key -> { conv, turns: [{q, html}] }
+function aiBox(key, suggestions) {
+  return `<section class="aibox" id="aibox" data-key="${esc(key)}">
+    <div id="ai-out" class="ai-out"></div>
+    <div id="ai-ask" class="ai-ask" hidden>
+      <div class="sugg">${suggestions.map((s) => `<button type="button" class="pill" data-ask="${esc(s)}">${esc(s)}</button>`).join("")}</div>
+      <form id="ai-form" class="row"><input id="ai-q" placeholder="Ask a follow-up…" autocomplete="off" aria-label="Ask a follow-up"><button type="submit" class="btn">Ask</button></form>
+      <p class="keynote">Using your Claude key, saved in this browser · <button type="button" class="link" id="ai-forget">Disconnect</button></p>
+    </div></section>`;
+}
+function connectBox() {
+  return `<div class="connect"><h4>✨ Let Claude explain it</h4>
+    <p>Connect your Claude API key and every story, paper and lesson gets a plain-English explanation, the background you need, and a tutor you can ask follow-ups. It's the same key Story So Far uses: saved only in this browser, sent only to Anthropic.</p>
+    <form id="key-form" class="row"><input id="key-in" type="password" placeholder="sk-ant-…" autocomplete="off" aria-label="Claude API key"><button type="submit" class="btn">Connect</button></form>
+    <p class="soft">No key yet? Create one at <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a>. Each explanation costs a few cents.</p></div>`;
+}
+function wireAI(key, start, autoStart) {
+  const out = $("ai-out"), ask = $("ai-ask");
+  if (!ai.key) {
+    out.innerHTML = connectBox();
+    $("key-form").onsubmit = (e) => { e.preventDefault(); const k = $("key-in").value.trim(); if (!k) return; ai.setKey(k); wireAI(key, start, autoStart); };
+    return;
+  }
+  let chat = CHATS.get(key);
+  const paintChat = () => { out.innerHTML = chat.turns.map((t) => `${t.q ? `<p class="you">${esc(t.q)}</p>` : ""}<div class="ans">${t.html}</div>`).join(""); ask.hidden = false; };
+  const send = async (q) => {
+    CURRENT = { abort: new AbortController() };
+    chat.turns.push({ q, html: `<p class="thinking"><i></i><i></i><i></i> ${q ? "Thinking" : "Reading and thinking"}…</p>` }); paintChat();
+    const turn = chat.turns[chat.turns.length - 1];
+    try { turn.html = md(q ? await chat.conv.ask(q, CURRENT.abort.signal) : await chat.conv.run(CURRENT.abort.signal)); }
+    catch (e) { if (e.cancelled) { chat.turns.pop(); if (!chat.turns.length) CHATS.delete(key); return; } turn.html = `<p class="err">${esc(e.message)}</p>`; if (!q) { CHATS.delete(key); } }
+    if ($("aibox")?.dataset.key === key) { paintChat(); if (q) out.lastElementChild?.scrollIntoView({ block: "start", behavior: "smooth" }); }
+  };
+  $("ai-form").onsubmit = (e) => { e.preventDefault(); const q = $("ai-q").value.trim(); if (!q || !chat) return; $("ai-q").value = ""; send(q); };
+  $("ai-forget").onclick = () => { ai.forget(); CHATS.clear(); ask.hidden = true; wireAI(key, start, autoStart); };
+  ask.querySelectorAll("[data-ask]").forEach((b) => (b.onclick = () => chat && send(b.dataset.ask)));
+  if (chat) return paintChat();
+  const begin = () => { chat = { conv: start(), turns: [] }; CHATS.set(key, chat); send(null); };
+  if (autoStart) begin();
+  else { out.innerHTML = `<button type="button" class="brief small" id="ai-start"><span>✨</span><b>Ask Claude about this lesson</b><small>Go deeper, get examples, or ask anything</small></button>`; $("ai-start").onclick = begin; }
 }
 
 /* ---------------- wiring ---------------- */
-function wireStars(root = $("main")) {
-  root.querySelectorAll("[data-save]").forEach((b) => (b.onclick = () => {
+function wire(root) {
+  root.querySelectorAll("[data-save]").forEach((b) => (b.onclick = (e) => {
+    e.stopPropagation();
     const url = b.dataset.save;
     if (ST.saved[url]) delete ST.saved[url];
-    else { const it = ITEMS.get(url); if (!it) return; ST.saved[url] = { ...it, savedAt: new Date().toISOString() }; }
+    else { const it = ITEMS.get(url); if (!it) return; ST.saved[url] = { ...it, tab: ST.tab, savedAt: new Date().toISOString() }; }
     save(); paintTabs();
-    if (ST.tab === "saved") return paint();
     const on = !!ST.saved[url];
-    document.querySelectorAll(`[data-save="${CSS.escape(url)}"]`).forEach((s) => { s.classList.toggle("on", on); s.textContent = on ? "★" : "☆"; s.setAttribute("aria-pressed", on); s.setAttribute("aria-label", on ? "Remove from saved" : "Save for later"); });
+    document.querySelectorAll(`[data-save="${CSS.escape(url)}"]`).forEach((s) => { s.classList.toggle("on", on); s.textContent = on ? "★" : "☆"; s.setAttribute("aria-pressed", on); });
   }));
-}
-function wire() {
-  const m = $("main");
-  m.querySelectorAll("[data-region]").forEach((b) => (b.onclick = () => { ST.region[ST.tab] = b.dataset.region; save(); paint(); }));
-  m.querySelectorAll("[data-kind]").forEach((b) => (b.onclick = () => { ST.blogKind = b.dataset.kind; save(); paint(); }));
-  const uni = $("uni"); if (uni) uni.onchange = () => { ST.uni[ST.tab] = uni.value; save(); paint(); };
-  const f = $("search"); if (f) f.onsubmit = runSearch;
-  m.querySelectorAll("[data-open]").forEach((b) => (b.onclick = () => { ST.open = ST.open === b.dataset.open ? null : b.dataset.open; save(); paint(); $(`sk-${b.dataset.open}`)?.scrollIntoView({ block: "nearest", behavior: "smooth" }); }));
-  m.querySelectorAll("[data-done]").forEach((c) => (c.onchange = () => { if (c.checked) ST.done[c.dataset.done] = true; else delete ST.done[c.dataset.done]; save(); const y = scrollY; paint(); scrollTo(0, y); }));
-  wireStars(m);
+  root.querySelectorAll("[data-item]").forEach((b) => (b.onclick = () => openItem(b.dataset.item)));
+  root.querySelectorAll("[data-lesson]").forEach((b) => (b.onclick = () => openLesson(b.dataset.track, b.dataset.lesson)));
+  root.querySelectorAll("[data-place]").forEach((b) => (b.onclick = () => startPlacement(b.dataset.place)));
+  root.querySelectorAll("[data-brief]").forEach((b) => (b.onclick = () => openBrief(b.dataset.brief)));
+  root.querySelectorAll("[data-go]").forEach((b) => (b.onclick = () => go(b.dataset.go)));
+  root.querySelectorAll("[data-term]").forEach((b) => (b.onclick = () => {
+    const card = b.closest(".item"), g = TRACKS[b.dataset.track]?.glossary.find((x) => x.term === b.dataset.term); if (!card || !g) return;
+    const old = card.querySelector(".def"); if (old && old.dataset.term === g.term) return old.remove(); old?.remove();
+    card.insertAdjacentHTML("beforeend", `<p class="def" data-term="${esc(g.term)}"><b>${esc(g.term)}:</b> ${esc(g.def)}</p>`);
+  }));
+  root.querySelectorAll("[data-morefact]").forEach((b) => (b.onclick = () => { ST.factN = (ST.factN || 0) + 1; paint(); }));
+  root.querySelectorAll("[data-region]").forEach((b) => (b.onclick = () => { ST.region[ST.tab] = b.dataset.region; save(); paint(); }));
+  root.querySelectorAll("[data-kind]").forEach((b) => (b.onclick = () => { ST.blogKind = b.dataset.kind; save(); paint(); }));
+  const uni = root.querySelector("#uni"); if (uni) uni.onchange = () => { ST.uni[ST.tab] = uni.value; save(); paint(); };
+  const f = root.querySelector("#search"); if (f) f.onsubmit = runSearch;
+  root.querySelectorAll("[data-open]").forEach((b) => (b.onclick = () => { ST.open = ST.open === b.dataset.open ? null : b.dataset.open; save(); paint(); $(`sk-${b.dataset.open}`)?.scrollIntoView({ block: "nearest", behavior: "smooth" }); }));
+  root.querySelectorAll("[data-done]").forEach((c) => (c.onchange = () => { if (c.checked) ST.done[c.dataset.done] = true; else delete ST.done[c.dataset.done]; save(); const y = scrollY; paint(); scrollTo(0, y); }));
 }
 
 /* ---------------- start ---------------- */
 paintTabs(); paint();
-feedReady.then(() => {
+ready.then(() => {
   if (FEED?.updated) $("updated").textContent = `Updated ${new Date(FEED.updated).toLocaleString(undefined, { weekday: "long", day: "numeric", month: "long", hour: "numeric", minute: "2-digit" })}`;
   paint();
 });

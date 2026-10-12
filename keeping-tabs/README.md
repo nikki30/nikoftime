@@ -1,39 +1,54 @@
 # Keeping Tabs
 
-A daily catch-up on the things I care about, in one place.
+A daily learning habit about the things I care about: feminism and women's rights, LGBTQIA+ rights, and growing from senior to staff engineer. It teaches as well as points to news.
 
-## Tabs
+## How it teaches
 
-- **♀ Feminism** and **🏳️‍🌈 LGBTQIA+**
-  - **In the news:** this week's headlines, in 10 regions (World, India, USA, UK, Caribbean, Africa, Latin America, East & SE Asia, Middle East, Australia & NZ).
-  - **New research:** the newest papers from 32 leading universities, including Harvard, Oxford, LSE, JNU, TISS, the University of the West Indies and Wits. You can filter by university, open the abstract, and follow "Free to read" links.
-  - **🔎 Dig deeper:** a live search of research on any subject, from those universities or from anywhere.
-- **💻 Engineering**
-  - posts from engineering blogs worth reading (Will Larson, Martin Fowler, The Pragmatic Engineer, Charity Majors, Netflix, Cloudflare and more), filtered by Staff+, career, systems, craft, reliability and AI
-  - the most-discussed Hacker News posts of the last two weeks on growing as an engineer
-  - new software engineering papers on arXiv
-- **📈 Senior → Staff:** eight skill areas (system design, code and craft, reliability, delivery, writing, influence, product sense, engineering with AI). Each has:
-  - what "good" looks like at senior and staff level, as a checklist
-  - one small practice for this week
-  - the best books and articles
-  - progress bars and rings, which stay in your browser
-- **★ Saved:** anything you star.
+- **Find my level:** a 10-question quiz (16 for engineering).
+  - Each answer is explained.
+  - It rates you per subtopic: *New to this*, *Know the basics* or *Confident*.
+- **Your plan:** three short lessons a week, starting where you're newest. It skips the basics you already know.
+- **Lessons.** Each one has:
+  - a hook
+  - a short readable explainer
+  - "Remember" takeaways
+  - an India and South Asia angle and a world angle (real industry examples for engineering)
+  - two check-yourself questions
+  - a "Think about it" reflection that's saved to your notes
+  - "Go deeper" links
 
-A **new** badge marks anything that arrived since your last visit to that tab.
+  Answering both questions completes the lesson.
+- **Every day:** a "Did you know?" fact, a word of the day and someone to know.
+- **🔥 Streak** and progress rings.
 
-## How it works
+## Keeping up
 
-- `tools/feeds.mjs` runs in the daily Pages build and writes `feed.json`.
-- It gets its data from these sources:
-  - Google News RSS
-  - [OpenAlex](https://openalex.org), for research filtered to the universities in `topics.js`
-  - the arXiv API
-  - blog RSS/Atom feeds
-  - the Hacker News search API
-- If a source fails, yesterday's copy is kept.
-- The live research search calls OpenAlex directly from the browser.
+- **News** on each topic in 10 regions. Words from the glossary are highlighted, and you can tap one for its meaning.
+- **New research** from 32 leading universities, plus a live research search.
+- **Engineering reading:** blogs, the most-discussed Hacker News posts and arXiv papers.
 
-## Changing what it follows
+## Claude explanations (optional, with your own key)
 
-- Edit `topics.js` to change the topics and their search words, the regions, the universities, the blogs and the Hacker News searches.
-- Edit `skills.js` to change the skills, practices and reading list.
+Tap any story, paper or post and Claude:
+- reads it (web fetch and web search)
+- explains it in plain English, with the background you need and why it matters
+- asks you a question
+- answers follow-ups
+
+You can also:
+- tap **Brief me on this week** to have the week's headlines grouped into threads, with a mini-lesson
+- ask Claude about any lesson
+
+Explanations take into account what the placement quiz says you already know.
+
+The key is the same one Story So Far uses. It's saved only in this browser and sent only to Anthropic. Everything else works without a key.
+
+## Files
+
+- `learn/feminism.js`, `learn/lgbtq.js`, `learn/eng.js`: the learning tracks (placement questions, lessons, glossary, facts, people)
+- `skills.js`: the senior and staff checklist, weekly practices and reading
+- `topics.js`: the topics, regions, universities, blogs and Hacker News searches the daily feed follows
+- `ai.js`: the Claude calls (Claude Opus 5.5, with server-side fallback)
+- `tools/feeds.mjs` (at the repo root): builds `feed.json` in the daily Pages run
+
+The lesson content was written by Claude from general knowledge. Dates and numbers are rounded, contested points are marked as such, and the links point mostly to Wikipedia.

@@ -14,7 +14,7 @@
 <body>
 <header class="top">
   <a class="home" href="../">← <span class="lbl">More apps</span></a>
-  <div class="brand"><h1>Keeping <em>Tabs</em></h1><p id="updated">On what matters to me</p></div>
+  <div class="brand"><h1>Keeping <em>Tabs</em></h1><p id="updated">Learn a little every day about what matters to me</p></div>
   <span class="spacer"></span>
 </header>
 
@@ -22,8 +22,11 @@
 <main id="main" class="main"></main>
 
 <footer class="foot">
-  News from Google News, research from <a href="https://openalex.org" target="_blank" rel="noopener">OpenAlex</a> and <a href="https://arxiv.org" target="_blank" rel="noopener">arXiv</a>, discussions from <a href="https://news.ycombinator.com" target="_blank" rel="noopener">Hacker News</a>. Refreshed every morning. Saved items and progress stay in this browser.
+  News from Google News, research from <a href="https://openalex.org" target="_blank" rel="noopener">OpenAlex</a> and <a href="https://arxiv.org" target="_blank" rel="noopener">arXiv</a>, discussions from <a href="https://news.ycombinator.com" target="_blank" rel="noopener">Hacker News</a>. Refreshed every morning. Explanations by Claude, with your own key. Saved items, progress and notes stay in this browser.
 </footer>
+<dialog class="sheet" id="sheet" aria-label="Reader">
+  <div class="sheet-in"><button type="button" class="x" id="sheet-close" aria-label="Close">✕</button><div id="sheet-body"></div></div>
+</dialog>
 <script type="module" src="app.js"></script>
 </body>
 </html>
