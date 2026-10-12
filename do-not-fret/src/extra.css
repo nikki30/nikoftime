@@ -175,3 +175,4 @@
 .wl-note { margin: 16px 22px 0; font-size: .82rem; color: var(--ink-soft); }
 .wl-btns { margin: 18px 22px 0; }
 @media (prefers-reduced-motion: reduce) { .wl-art span, .welcome[open] { animation: none; } }
+.lastclean { margin: 0; padding: 8px 12px; border-radius: 10px; background: color-mix(in srgb, var(--good) 14%, var(--paper)); font-size: .9rem; } .lastclean b { color: var(--rose); font-family: var(--mono); } .lastclean.none { background: var(--paper); color: var(--ink-soft); }

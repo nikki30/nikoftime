@@ -361,6 +361,12 @@ const loading = (c) => S.dbState === "on" && !S.loaded.has(c);
 /* ================= derived ================= */
 const todayLog = () => S.logs[dayKey()] || { date: dayKey(), items: {}, note: "" };
 const series = (id) => Object.keys(S.logs).sort().map((k) => ({ k, bpm: S.logs[k].items?.[id]?.bpm })).filter((p) => p.bpm);
+// The most recent clean run of a drill, and its best ever.
+function lastCleanHTML(id) {
+  const pts = series(id), last = pts.at(-1); if (!last) return `<p class="lastclean none">No clean run saved yet</p>`;
+  const best = Math.max(...pts.map((p) => p.bpm)), when = last.k === dayKey() ? "today" : fmtDate(fromKey(last.k), { weekday: "short", day: "numeric", month: "short" });
+  return `<p class="lastclean">Last clean run: <b>♩=${last.bpm}</b> <span class="soft">${when}</span>${best > last.bpm ? ` · best <b>♩=${best}</b>` : ""}</p>`;
+}
 const practicedOn = (k) => { const l = S.logs[k]; return !!l && (Object.keys(l.items || {}).length > 0 || !!l.note || (l.minutes || 0) > 0); };
 function streak() { let d = new Date(), n = 0; if (!practicedOn(dayKey(d))) d.setDate(d.getDate() - 1); while (practicedOn(dayKey(d))) { n++; d.setDate(d.getDate() - 1); } return n; }
 function weekNo(d = new Date()) { const st = settings(), s = fromKey(st.firstClass || st.startedOn || dayKey()); s.setHours(0, 0, 0, 0); return Math.max(1, Math.floor((d - s) / 864e5 / 7) + 1); }
@@ -516,7 +522,7 @@ function viewToday() {
         <span class="check ${done ? (done.noClean ? "part" : "on") : ""}" aria-label="${done ? "Logged today" : "Not logged yet"}">✓</span>
         <span class="t">${esc(drillName(d))}<br><span class="meta">${done?.noClean ? `Practised today, no clean run${done.note ? ` · “${esc(done.note)}”` : ""}` : done ? `Clean at ♩=${done.bpm} today` : last ? `Last clean ♩=${last.bpm}${best > last.bpm ? ` · best ${best}` : ""}` : `Start around ♩=${d.startBpm || 60}`}</span></span>
         <span class="pill cat-${esc(d.category || "scale")}">${d.minutes || 0} min</span></button>
-        ${open ? `<div class="item-body">${d.how ? `<p class="howto">${esc(d.how)}</p>` : ""}
+        ${open ? `<div class="item-body">${lastCleanHTML(d.id)}${d.how ? `<p class="howto">${esc(d.how)}</p>` : ""}
           ${(() => { const ex = drillEx(d); return ex ? exerciseBlock("drill-" + d.id, ex, `data-playdrill="${esc(d.id)}"`) : ""; })()}
           <div class="btns"><button class="btn" data-settempo="${esc(d.id)}" data-bpm="${start}">Metronome to ♩=${start}</button></div>
           <div class="btns"><button class="btn primary" data-logbpm="${esc(d.id)}">Got a clean run: save ♩=<span data-live-bpm>${M.bpm}</span></button>
@@ -729,7 +735,7 @@ function viewSong(s) {
   const secs = s.sections || [];
   let h = `<div class="btns" style="margin-top:14px"><button class="btn" data-backsongs>← All songs</button></div>`;
   h += `<section class="hero"><div class="eyebrow">${esc(s.artist || "")}</div><h1>${esc(s.title)}</h1>
-    <div class="stats">${s.key ? `<div class="stat"><b>${esc(pretty(s.key))}</b><span>key</span></div>` : ""}${s.capo ? `<div class="stat"><b>${esc(s.capo)}</b><span>capo</span></div>` : ""}${s.timeSig ? `<div class="stat"><b>${esc(s.timeSig)}</b><span>time</span></div>` : ""}${s.difficulty ? `<div class="stat"><b>${esc(DIFF[s.difficulty]?.[0] || "")}</b><span>overall</span></div>` : ""}${s.learned ? `<div class="stat"><b>${fmtLearned(s.learned)}</b><span>learned</span></div>` : ""}</div>
+    <div class="stats">${s.key ? `<div class="stat"><b>${esc(pretty(s.key))}</b><span>key</span></div>` : ""}${s.capo ? `<div class="stat"><b>${esc(s.capo)}</b><span>capo</span></div>` : ""}${s.timeSig ? `<div class="stat"><b>${esc(s.timeSig)}</b><span>time</span></div>` : ""}${s.difficulty ? `<div class="stat"><b>${esc(DIFF[s.difficulty]?.[0] || "")}</b><span>overall</span></div>` : ""}${S.drills.filter((d) => d.linkType === "song" && d.linkId === s.id).map((d) => { const l = series(d.id).at(-1); return `<div class="stat"><b>${l ? `♩=${l.bpm}` : "–"}</b><span>${l ? `last clean run, ${l.k === dayKey() ? "today" : fmtDate(fromKey(l.k), { day: "numeric", month: "short" })}` : "no clean run yet"}</span></div>`; }).join("")}${s.learned ? `<div class="stat"><b>${fmtLearned(s.learned)}</b><span>learned</span></div>` : ""}</div>
     ${s.milestone ? `<p style="margin-top:10px"><span class="milestone">★ ${esc(s.milestone)}</span></p>` : ""}</section>`;
   h += `<div class="btns" style="margin-top:14px"><span class="statuspick" role="group" aria-label="Status">${STATUSES.map(([k, l]) => `<button data-setstatus="${k}" aria-pressed="${(s.status || "learning") === k}">${l}</button>`).join("")}</span>${delBtn}</div>`;
 
