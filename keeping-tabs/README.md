@@ -21,6 +21,24 @@ A daily learning habit about the things I care about: feminism and women's right
 - **Every day:** a "Did you know?" fact, a word of the day and someone to know.
 - **🔥 Streak** and progress rings.
 
+## 🎯 Next role
+
+This tab replaces "Senior → Staff". It's interview prep for senior and staff data platform and infrastructure roles in AI, at Anthropic, OpenAI, Databricks and similar companies:
+- **Should I grind LeetCode?** How each company is reported to interview, and how to split your practice time.
+- **Roles that fit you** at each company, with how they interview, how to prepare, and links.
+- **An 8-week plan** with checkable tasks. The current week is highlighted.
+- **Practice:**
+  - 8 practical coding builds that grow level by level
+  - 8 data and AI system design prompts, with what a strong answer covers
+  - 7 AI-for-infra-engineers primers
+  - 6 behavioural stories to draft
+
+  Each one has notes and a mock interview with Claude, who plays the interviewer and gives a hire signal at the end.
+- **About me:** your background, which the mock interviews use.
+- **Grow towards staff:** the placement quiz, lessons and the senior/staff checklist from before.
+
+Content lives in `career.js`. How these companies interview is based on what candidates commonly report, so confirm with recruiters.
+
 ## Keeping up
 
 - **News** on each topic in 10 regions. Words from the glossary are highlighted, and you can tap one for its meaning.

@@ -1,6 +1,7 @@
 import { TOPICS, REGIONS } from "./topics.js";
 import { SKILLS } from "./skills.js";
-import { ai, explain, brief, conversation, md } from "./ai.js";
+import { ai, explain, brief, conversation, mock, md } from "./ai.js";
+import { PROFILE, VERDICT, COMPANIES, ALSO, PLAN, PRACTICE } from "./career.js";
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -79,7 +80,7 @@ function knowSummary(track) {
 const TABS = [
   ...TOPICS.map((t) => ({ id: t.id, label: `${t.icon} ${t.label}` })),
   { id: "eng", label: "💻 Engineering" },
-  { id: "skills", label: "📈 Senior → Staff" },
+  { id: "skills", label: "🎯 Next role" },
   { id: "saved", label: "★ Saved" },
 ];
 function paintTabs() {
@@ -98,7 +99,7 @@ addEventListener("pagehide", () => { ST.seen[ST.tab] = new Date().toISOString();
 function paint() {
   document.body.dataset.tab = ST.tab;
   const t = TOPICS.find((x) => x.id === ST.tab);
-  $("main").innerHTML = t ? topicView(t) : ST.tab === "eng" ? engView() : ST.tab === "skills" ? skillsView() : savedView();
+  $("main").innerHTML = t ? topicView(t) : ST.tab === "eng" ? engView() : ST.tab === "skills" ? careerView() : savedView();
   wire($("main"));
 }
 
@@ -226,7 +227,7 @@ function engView() {
   const hnCard = (h) => { remember(h, "discussion");
     return `<article class="item hn${isNew("eng", h.date) ? " fresh" : ""}"><span class="pts">${h.points}<small>points</small></span><div><button type="button" class="open" data-item="${esc(h.url)}"><h4>${esc(h.title)}</h4></button><p class="meta"><a href="${esc(safeUrl(h.discuss))}" target="_blank" rel="noopener">${h.comments} comments</a> · ${esc(ago(h.date))}</p><div class="acts"><button type="button" class="pill ai" data-item="${esc(h.url)}">✨ What's this about?</button></div></div>${star(h.url)}</article>`; };
   return `<section class="hero slim"><div class="hero-t"><span class="kicker">💻 Engineering</span><h2>Today's reading, <em>explained</em></h2><p>Fresh writing from engineers worth learning from, what engineers are arguing about, and new research. Tap anything for the key ideas and how you could use them at work.</p>
-    <div class="hero-b"><button type="button" class="btn ghost" data-go="skills">📈 Your senior → staff plan</button></div></div></section>
+    <div class="hero-b"><button type="button" class="btn ghost" data-go="skills">🎯 Your next-role plan</button></div></div></section>
   ${dailyCards(track)}
   <div class="cols three">
     <section class="col"><header class="col-h"><h3>From the blogs</h3></header>
@@ -237,13 +238,98 @@ function engView() {
   </div>`;
 }
 
+/* ---------------- next role: interview prep for data/infra roles in AI ---------------- */
+const C = (ST.career ||= { done: {}, notes: {}, kind: "coding" });
+const PKINDS = [["coding", "💻 Coding builds"], ["design", "🏗️ System design"], ["ai", "🧠 AI for infra engineers"], ["stories", "🗣️ Your stories"]];
+const planWeek = () => (C.start ? Math.min(PLAN.length, Math.floor((Date.now() - new Date(C.start)) / (7 * DAY)) + 1) : 0);
+const lvTag = (v) => `<span class="lvt lvt-${/^high/i.test(v) ? "hi" : /^low/i.test(v) ? "lo" : "mid"}">${esc(v)}</span>`;
+function careerView() {
+  const wk = planWeek(), keys = PLAN.flatMap((w, i) => w.tasks.map((_, j) => `${i}.${j}`)), done = keys.filter((k) => C.done[k]).length, pct = Math.round((done / keys.length) * 100);
+  const items = PRACTICE[C.kind] || [];
+  return `<section class="hero">
+    <div class="hero-t"><span class="kicker">🎯 Next role${streak() > 1 ? ` · 🔥 ${streak()}-day streak` : ""}</span>
+      <h2>Data platforms <em>for AI</em></h2>
+      <p>Senior and staff roles at Anthropic, OpenAI, Databricks and companies like them. Practise the way they actually interview: build working systems fast, design data and AI systems out loud, and tell sharp stories about your work.</p>
+      <div class="hero-b">${wk ? `<a class="btn big" href="#plan">Week ${wk}: ${esc(PLAN[wk - 1].focus)} →</a>` : `<button type="button" class="btn big" data-cstart>Start my 8-week plan →</button>`}<a class="btn ghost" href="#practice">🎤 Mock interview</a></div></div>
+    <div class="hero-r"><div class="ring big" style="--p:${pct}%"><b>${pct}%<small>of the plan</small></b></div>
+      <ul class="lv-list">${COMPANIES.map((c) => `<li><span>${c.icon} ${esc(c.name)}</span><i class="lv lv1">${c.roles.length} roles that fit</i></li>`).join("")}</ul></div>
+  </section>
+
+  <section class="sec"><header class="sec-h"><h3>${esc(VERDICT.title)}</h3><p>${esc(VERDICT.answer)}</p></header>
+    <div class="verdict"><table><thead><tr><th></th><th>Coding round</th><th>Algorithms</th><th>System design</th><th>Project deep dive</th><th>Values / mission</th></tr></thead>
+      <tbody>${VERDICT.rows.map((r) => `<tr><th>${esc(r.co)}</th><td>${esc(r.coding)}</td><td>${lvTag(r.dsa)}</td><td>${lvTag(r.design)}</td><td>${lvTag(r.deep)}</td><td>${lvTag(r.values)}</td></tr>`).join("")}</tbody></table></div>
+    <h4 class="mixh">How to split your practice time</h4>
+    <div class="mix">${VERDICT.mix.map(([t, n, d]) => `<div class="mixrow"><span><b>${esc(t)}</b><small>${esc(d)}</small></span><i style="--p:${n * 2.5}%"></i><em>${n}%</em></div>`).join("")}</div>
+    <p class="soft small">How these companies interview is based on what candidates commonly report. Loops change and differ by team, so confirm with your recruiter.</p></section>
+
+  <section class="sec"><header class="sec-h"><h3>Roles that fit you</h3><p>Where data platform, infrastructure and ETL experience is exactly what they need.</p></header>
+    <div class="cos">${COMPANIES.map((c) => `<article class="co">
+      <h4>${c.icon} ${esc(c.name)}</h4><p class="fit">${esc(c.fit)}</p>
+      <ul class="roles">${c.roles.map((r) => `<li><b>${esc(r.title)}</b><span>${esc(r.why)}</span></li>`).join("")}</ul>
+      <details><summary>How they interview</summary><ol class="proc">${c.process.map(([t, d]) => `<li><b>${esc(t)}.</b> ${esc(d)}</li>`).join("")}</ol></details>
+      <details><summary>How to prepare</summary><ul class="prep">${c.prep.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></details>
+      <p class="links">${c.links.map(([t, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(t)} ↗</a>`).join("")}</p></article>`).join("")}</div>
+    <p class="also"><b>Also worth a look:</b> ${ALSO.map(([n, d]) => `${esc(n)} <span class="soft">(${esc(d)})</span>`).join(" · ")}</p>
+    <p class="soft small">Team names and titles change often: search each careers page for "data", "infrastructure" and "pretraining".</p></section>
+
+  <section class="sec" id="plan"><header class="sec-h"><h3>Your 8-week plan</h3><p>About 6–8 hours a week. ${wk ? `You're in week ${wk}. ${done} of ${keys.length} tasks done.` : "Start it whenever you're ready; the weeks count from that day."}</p></header>
+    <div class="weeks">${PLAN.map((w, i) => `<div class="week${wk === i + 1 ? " now" : ""}${w.tasks.every((_, j) => C.done[`${i}.${j}`]) ? " done" : ""}"><span class="wk">Week ${i + 1}</span><b class="wf">${esc(w.focus)}</b>
+      ${w.tasks.map((t, j) => `<label class="ctask"><input type="checkbox" data-ctask="${i}.${j}"${C.done[`${i}.${j}`] ? " checked" : ""}><span>${esc(t)}</span></label>`).join("")}</div>`).join("")}</div>
+    ${wk ? `<p class="soft small"><button type="button" class="link" data-cstart>Restart the plan from this week</button></p>` : ""}</section>
+
+  <section class="sec" id="practice"><header class="sec-h"><h3>Practice</h3><p>Open anything to read the brief, keep notes, and run a mock interview with Claude.</p></header>
+    <div class="chips">${PKINDS.map(([k, l]) => `<button type="button" class="chip${C.kind === k ? " on" : ""}" data-pk="${k}">${l}</button>`).join("")}</div>
+    <div class="grid">${items.map((x, i) => practiceCard(C.kind, x, i)).join("")}</div></section>
+
+  <section class="sec"><header class="sec-h"><h3>About me</h3><p>Claude uses this in mock interviews. Edit it to match your real experience.</p></header>
+    <textarea id="profile" rows="4">${esc(C.profile || PROFILE)}</textarea></section>
+  ${growSection()}`;
+}
+function practiceCard(kind, x, i) {
+  const noted = C.notes[`${kind}:${i}`]?.trim();
+  if (kind === "coding") return `<button type="button" class="pcard" data-prac="${kind}:${i}"><span class="pk">💻 ${x.time} min · ${x.levels.length} levels</span><b>${esc(x.title)}</b><small>${esc(x.why)}</small>${noted ? `<i>✎ notes</i>` : ""}</button>`;
+  if (kind === "design") return `<button type="button" class="pcard" data-prac="${kind}:${i}"><span class="pk">🏗️ 45 min</span><b>${esc(x.title)}</b><small>${esc(x.prompt)}</small>${noted ? `<i>✎ notes</i>` : ""}</button>`;
+  if (kind === "ai") return `<button type="button" class="pcard" data-prac="${kind}:${i}"><span class="pk">🧠 5 min read</span><b>${esc(x.title)}</b><small>${esc(x.points[0])}</small></button>`;
+  return `<button type="button" class="pcard" data-prac="${kind}:${i}"><span class="pk">🗣️ Story</span><b>${esc(x.q)}</b><small>${esc(x.tip)}</small>${noted ? `<i>✎ drafted</i>` : ""}</button>`;
+}
+function openPractice(ref) {
+  const [kind, i] = ref.split(":"), x = PRACTICE[kind][+i], key = `${kind}:${i}`, profile = C.profile || PROFILE;
+  let body = "", kickoff = "", label = ["Start a mock interview", "Claude plays the interviewer. Type your answers; say “hint” or “feedback” any time."];
+  if (kind === "coding") {
+    body = `<span class="kicker">💻 Coding build · ${x.time} minutes</span><h2>${esc(x.title)}</h2><p class="hook">${esc(x.why)}</p>
+      <div class="takeaways"><h4>How to practise</h4><ul><li>Set a ${x.time}-minute timer and use your strongest language.</li><li>Finish each level with working code and 2–3 quick tests before reading the next one.</li><li>Talk out loud: say what you're choosing and why.</li></ul></div>
+      <h4>Level 1</h4><p>${esc(x.levels[0])}</p>
+      <details class="abs"><summary>Show the next levels (spoilers)</summary><ol start="2">${x.levels.slice(1).map((l) => `<li>${esc(l)}</li>`).join("")}</ol></details>`;
+    kickoff = `Let's do a practical coding interview: "${x.title}". Time budget ${x.time} minutes. All the levels, to reveal one at a time and never ahead: ${x.levels.map((l, n) => `Level ${n + 1}: ${l}`).join(" | ")}. Start by presenting level 1 as the interviewer would.`;
+  } else if (kind === "design") {
+    body = `<span class="kicker">🏗️ System design · 45 minutes</span><h2>${esc(x.title)}</h2><p class="hook">${esc(x.prompt)}</p>
+      <div class="takeaways"><h4>How to practise</h4><ul><li>Clarify requirements and numbers first (users, data size, latency).</li><li>Sketch the high-level flow, then go deep on the hardest part.</li><li>Name trade-offs and failure modes before you're asked.</li></ul></div>
+      <details class="abs"><summary>What a strong answer covers</summary><ul>${x.cover.map((c) => `<li>${esc(c)}</li>`).join("")}</ul></details>
+      <details class="abs"><summary>Follow-ups to expect</summary><ul>${x.follow.map((c) => `<li>${esc(c)}</li>`).join("")}</ul></details>`;
+    kickoff = `System design interview. Prompt: ${x.prompt} Areas a strong answer covers (keep these to yourself): ${x.cover.join("; ")}. Follow-ups to use later: ${x.follow.join("; ")}. Start by giving me the prompt and inviting clarifying questions.`;
+  } else if (kind === "ai") {
+    body = `<span class="kicker">🧠 AI for infra engineers</span><h2>${esc(x.title)}</h2><div class="takeaways"><h4>The essentials</h4><ul>${x.points.map((p) => `<li>${esc(p)}</li>`).join("")}</ul></div>`;
+    kickoff = `Teach me "${x.title}" as a data and infrastructure engineer preparing for interviews at AI labs. Start from these essentials: ${x.points.join(" ")} Then give one concrete example from real systems and one question an interviewer might ask me about it.`;
+    label = ["Teach me more", "A deeper explanation, a real example and a likely interview question"];
+  } else {
+    body = `<span class="kicker">🗣️ Your story</span><h2>${esc(x.q)}</h2><div class="takeaways"><h4>What makes it strong</h4><p>${esc(x.tip)}</p></div>`;
+    kickoff = `Behavioural interview. Ask me: "${x.q}" Then ask 2–3 follow-ups that dig for my own role, numbers and what I learned.`;
+  }
+  openSheet(`<article class="lesson">${body}
+    <div class="think"><h4>${kind === "stories" ? "✍️ Draft your story" : "📝 Your notes"}</h4><textarea id="pnote" rows="5" placeholder="${kind === "stories" ? "Situation, your role, what you did, the result (with numbers), what you learned…" : "Approach, mistakes, what to do differently next time…"}">${esc(C.notes[key] || "")}</textarea></div>
+    ${aiBox(`mock:${key}`, kind === "ai" ? ["How does this show up in interviews?", "Give me a harder example", "How would I explain this to a researcher?"] : ["hint", "Can you clarify the requirements?", "feedback"])}</article>`, "s-lesson");
+  const note = $("pnote"); note.oninput = () => { C.notes[key] = note.value; save(); };
+  wireAI(`mock:${key}`, () => (kind === "ai" ? conversation(kickoff, { web: false }) : mock(profile, kickoff)), false, label);
+}
+
 /* ---------------- senior → staff ---------------- */
 const itemKey = (s, lvl, i) => `${s.id}.${lvl}.${i}`;
-function skillsView() {
+function growSection() {
   const track = TRACKS.eng;
   const tally = (lvl) => SKILLS.reduce((a, s) => [a[0] + s[lvl].filter((_, i) => ST.done[itemKey(s, lvl, i)]).length, a[1] + s[lvl].length], [0, 0]);
   const [sd, st] = tally("senior"), [fd, ft] = tally("staff");
-  return `${hero(track, "Senior → Staff", "📈")}${dailyCards(track)}${planSection(track)}
+  return `<section class="sec" id="grow"><header class="sec-h"><h3>Grow towards staff</h3><p>The skills behind the interviews: a placement quiz, short lessons and a checklist of what senior and staff look like.</p></header>
+    ${track && !ST.place.eng ? `<button type="button" class="brief" data-place="eng"><span>📝</span><b>Find my level in engineering</b><small>${track.placement.length} quick questions, then a plan of short lessons that skips what you know</small></button>` : ""}</section>${planSection(track)}
   <section class="sec"><header class="sec-h"><h3>Where you are</h3><p>Tick what's true today. One small practice per area, changing every week.</p></header>
     <div class="bars"><div class="bar"><span>Senior</span><i style="--p:${(sd / st) * 100}%"></i><b>${sd}/${st}</b></div><div class="bar staff"><span>Staff</span><i style="--p:${(fd / ft) * 100}%"></i><b>${fd}/${ft}</b></div></div>
     <div class="skills">${SKILLS.map((s) => {
@@ -393,11 +479,11 @@ function connectBox() {
     <form id="key-form" class="row"><input id="key-in" type="password" placeholder="sk-ant-…" autocomplete="off" aria-label="Claude API key"><button type="submit" class="btn">Connect</button></form>
     <p class="soft">No key yet? Create one at <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a>. Each explanation costs a few cents.</p></div>`;
 }
-function wireAI(key, start, autoStart) {
+function wireAI(key, start, autoStart, label = ["Ask Claude about this lesson", "Go deeper, get examples, or ask anything"]) {
   const out = $("ai-out"), ask = $("ai-ask");
   if (!ai.key) {
     out.innerHTML = connectBox();
-    $("key-form").onsubmit = (e) => { e.preventDefault(); const k = $("key-in").value.trim(); if (!k) return; ai.setKey(k); wireAI(key, start, autoStart); };
+    $("key-form").onsubmit = (e) => { e.preventDefault(); const k = $("key-in").value.trim(); if (!k) return; ai.setKey(k); wireAI(key, start, autoStart, label); };
     return;
   }
   let chat = CHATS.get(key);
@@ -411,12 +497,12 @@ function wireAI(key, start, autoStart) {
     if ($("aibox")?.dataset.key === key) { paintChat(); if (q) out.lastElementChild?.scrollIntoView({ block: "start", behavior: "smooth" }); }
   };
   $("ai-form").onsubmit = (e) => { e.preventDefault(); const q = $("ai-q").value.trim(); if (!q || !chat) return; $("ai-q").value = ""; send(q); };
-  $("ai-forget").onclick = () => { ai.forget(); CHATS.clear(); ask.hidden = true; wireAI(key, start, autoStart); };
+  $("ai-forget").onclick = () => { ai.forget(); CHATS.clear(); ask.hidden = true; wireAI(key, start, autoStart, label); };
   ask.querySelectorAll("[data-ask]").forEach((b) => (b.onclick = () => chat && send(b.dataset.ask)));
   if (chat) return paintChat();
   const begin = () => { chat = { conv: start(), turns: [] }; CHATS.set(key, chat); send(null); };
   if (autoStart) begin();
-  else { out.innerHTML = `<button type="button" class="brief small" id="ai-start"><span>✨</span><b>Ask Claude about this lesson</b><small>Go deeper, get examples, or ask anything</small></button>`; $("ai-start").onclick = begin; }
+  else { out.innerHTML = `<button type="button" class="brief small" id="ai-start"><span>✨</span><b>${esc(label[0])}</b><small>${esc(label[1])}</small></button>`; $("ai-start").onclick = begin; }
 }
 
 /* ---------------- wiring ---------------- */
@@ -446,6 +532,11 @@ function wire(root) {
   const uni = root.querySelector("#uni"); if (uni) uni.onchange = () => { ST.uni[ST.tab] = uni.value; save(); paint(); };
   const f = root.querySelector("#search"); if (f) f.onsubmit = runSearch;
   root.querySelectorAll("[data-open]").forEach((b) => (b.onclick = () => { ST.open = ST.open === b.dataset.open ? null : b.dataset.open; save(); paint(); $(`sk-${b.dataset.open}`)?.scrollIntoView({ block: "nearest", behavior: "smooth" }); }));
+  root.querySelectorAll("[data-ctask]").forEach((c) => (c.onchange = () => { if (c.checked) C.done[c.dataset.ctask] = true; else delete C.done[c.dataset.ctask]; save(); const y = scrollY; paint(); scrollTo(0, y); }));
+  root.querySelectorAll("[data-cstart]").forEach((b) => (b.onclick = () => { C.start = new Date().toISOString(); save(); paint(); }));
+  root.querySelectorAll("[data-pk]").forEach((b) => (b.onclick = () => { C.kind = b.dataset.pk; save(); const y = scrollY; paint(); scrollTo(0, y); }));
+  root.querySelectorAll("[data-prac]").forEach((b) => (b.onclick = () => openPractice(b.dataset.prac)));
+  const prof = root.querySelector("#profile"); if (prof) prof.oninput = () => { C.profile = prof.value; save(); };
   root.querySelectorAll("[data-done]").forEach((c) => (c.onchange = () => { if (c.checked) ST.done[c.dataset.done] = true; else delete ST.done[c.dataset.done]; save(); const y = scrollY; paint(); scrollTo(0, y); }));
 }
 

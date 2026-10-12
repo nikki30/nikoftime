@@ -46,7 +46,7 @@ async function client() {
 }
 
 // One conversation per item: start it with explain() or brief(), continue with ask().
-export function conversation(firstPrompt, { web = true } = {}) {
+export function conversation(firstPrompt, { web = true, system = TEACHER } = {}) {
   const messages = [{ role: "user", content: firstPrompt }];
   const tools = web ? [
     { type: "web_fetch_20260209", name: "web_fetch", max_uses: 2 },
@@ -62,7 +62,7 @@ export function conversation(firstPrompt, { web = true } = {}) {
           model: MODEL, max_tokens: 16000,
           betas: ["server-side-fallback-2026-07-01"], fallbacks: "default",
           output_config: { effort: "medium" },
-          system: TEACHER, messages, ...(tools ? { tools } : {}),
+          system, messages, ...(tools ? { tools } : {}),
         }, { signal });
       } catch (e) {
         if (e instanceof SDK.AuthenticationError) throw new Error("That API key didn't work. Check it and try again.");
@@ -108,3 +108,16 @@ export function md(text) {
   if (list) out.push(`<ul>${list.join("")}</ul>`);
   return out.join("");
 }
+
+// A mock interviewer for "Next role" practice.
+const INTERVIEWER = (profile) => `You are an experienced interviewer at a top AI company (think Anthropic, OpenAI or Databricks), running a realistic but kind mock interview inside a practice app.
+The candidate: ${profile}
+
+How to run it:
+- Behave like a real interviewer: give the problem, then wait for the candidate. Ask one thing at a time. Keep your turns short.
+- Coding: present level 1 only. When they share an approach or code, review it briefly (correctness, edge cases, clarity), then reveal the next level. Never write the solution unless they ask for it.
+- System design: give the prompt, let them ask clarifying questions and answer them with realistic numbers, then probe trade-offs, bottlenecks and failure modes. Push on scale and data correctness.
+- Behavioural: ask the question, then 2–3 follow-ups that dig for their own role, numbers and what they learned.
+- If they say "hint", give a small one. If they say "done" or "feedback", stop and give feedback: what went well, what to improve, and a hire signal (strong yes / yes / lean no / no) for a senior or staff level, with one sentence why.
+- Use light formatting: "## " headings, "- " bullets, **bold**. Code in plain text lines.`;
+export const mock = (profile, kickoff) => conversation(kickoff, { web: false, system: INTERVIEWER(profile) });
