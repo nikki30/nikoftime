@@ -1553,8 +1553,8 @@
    "linkId": "minor-pent",
    "linkType": "theory",
    "minutes": 4,
-   "name": "A minor pentatonic, up and down",
-   "order": 3,
+   "name": "A minor pentatonic (form 1), up and down",
+   "order": 4,
    "startBpm": 60
   },
   "c-major-pent": {
@@ -1572,8 +1572,8 @@
    "linkId": "major-pent",
    "linkType": "theory",
    "minutes": 4,
-   "name": "C major pentatonic, up and down",
-   "order": 2,
+   "name": "C major pentatonic (form 5), up and down",
+   "order": 3,
    "startBpm": 60
   },
   "chromatic": {
@@ -1600,7 +1600,7 @@
    "how": "The key changes every day. Start on the root on the 6th (low E) string, climb across to the root on the 1st (high e) string, then come back down to the root you started on. The root rings twice each time you change direction: the top root at the turnaround, and the bottom root when you go round again. Let each note ring and say each note name.",
    "minutes": 4,
    "name": "Major pentatonic of the day, up and down",
-   "order": 4,
+   "order": 8,
    "rotateFrom": "A",
    "rotateStart": "2026-10-04",
    "startBpm": 60
@@ -1616,9 +1616,77 @@
    "how": "The relative minor of today's major key: the same five notes, but home is the 6th note of the major scale. Start on that root on the 6th (low E) string, climb to the root on the 1st (high e) string, then come back down to where you started. The root rings twice each time you change direction. Let each note ring and say each note name.",
    "minutes": 4,
    "name": "Its relative minor pentatonic, up and down",
-   "order": 5,
+   "order": 9,
    "rotateFrom": "A",
    "rotateStart": "2026-10-04",
+   "startBpm": 60
+  },
+  "chromatic-muted": {
+   "active": true,
+   "category": "warmup",
+   "ex": {
+    "last": 9,
+    "type": "spider",
+    "muted": true
+   },
+   "how": "The same 1-2-3-4 spider crawl, but palm muted: rest the fleshy edge of your picking hand lightly on the strings right where they meet the bridge, so every note comes out short and thuddy instead of ringing. Too far forward and the notes die completely; too far back and they ring. Keep alternate picking and one finger per fret, and say each note. It trains picking accuracy and keeps the strings you aren't playing quiet.",
+   "minutes": 4,
+   "name": "Muted spider crawl, 1-2-3-4",
+   "order": 2,
+   "startBpm": 60
+  },
+  "a-minor-pent-f2": {
+   "active": true,
+   "category": "scale",
+   "ex": {
+    "dir": "both",
+    "hi": 10,
+    "lo": 7,
+    "root": "A",
+    "scale": "minpent"
+   },
+   "how": "Frets 7–10, one box up from form 1. Start on C (low E string, 8th fret): C D · E G · A C · D E · G A · C D, then back down. Form 2’s lowest A is on the D string, 7th fret. Say each note.",
+   "linkId": "minor-pent",
+   "linkType": "theory",
+   "minutes": 3,
+   "name": "A minor pentatonic (form 2), up and down",
+   "order": 5,
+   "startBpm": 60
+  },
+  "a-minor-pent-f3": {
+   "active": true,
+   "category": "scale",
+   "ex": {
+    "dir": "both",
+    "hi": 13,
+    "lo": 9,
+    "root": "A",
+    "scale": "minpent"
+   },
+   "how": "Frets 9–13. Start on D (low E string, 10th fret): D E · G A · C D · E G · A C · D E, then back down. The roots (A) are on the A string 12th fret and the B string 10th fret. Say each note.",
+   "linkId": "minor-pent",
+   "linkType": "theory",
+   "minutes": 3,
+   "name": "A minor pentatonic (form 3), up and down",
+   "order": 6,
+   "startBpm": 60
+  },
+  "a-minor-pent-f4": {
+   "active": true,
+   "category": "scale",
+   "ex": {
+    "dir": "both",
+    "hi": 15,
+    "lo": 12,
+    "root": "A",
+    "scale": "minpent"
+   },
+   "how": "Frets 12–15, the octave-up twin of the open E shape. Start on E (low E string, 12th fret): E G · A C · D E · G A · C D · E G, then back down. The roots (A) are on the A string 12th fret and the G string 14th fret. Say each note.",
+   "linkId": "minor-pent",
+   "linkType": "theory",
+   "minutes": 3,
+   "name": "A minor pentatonic (form 4), up and down",
+   "order": 7,
    "startBpm": 60
   }
  },
