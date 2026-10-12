@@ -111,10 +111,10 @@ function hero(track, title, icon) {
     <div class="hero-t">
       <span class="kicker">${icon} ${esc(title)}${s > 1 ? ` · 🔥 ${s}-day streak` : ""}</span>
       <h2>${p ? (p.next ? `Next up: <em>${esc(p.next.title)}</em>` : "You've finished your plan 🎉") : "What do you already know?"}</h2>
-      <p>${p ? (p.next ? esc(p.next.hook) : "Revisit any lesson, or retake the quiz to build a deeper plan.") : esc(track.intro) + " Take a 10-question quiz and I'll build you a plan that skips what you know."}</p>
+      <p>${p ? (p.next ? esc(p.next.hook) : "Revisit any lesson, or retake the quiz to build a deeper plan.") : esc(track.intro) + ` Take a ${track.placement.length}-question quiz and I'll build you a plan that skips what you know.`}</p>
       <div class="hero-b">${p
         ? `${p.next ? `<button type="button" class="btn big" data-lesson="${p.next.id}" data-track="${track.id}">Start lesson · ${p.next.minutes} min →</button>` : ""}<button type="button" class="btn ghost" data-place="${track.id}">Retake the quiz</button>`
-        : `<button type="button" class="btn big" data-place="${track.id}">Find my level · 3 min →</button>`}</div>
+        : `<button type="button" class="btn big" data-place="${track.id}">Find my level · ${Math.ceil(track.placement.length / 3.5)} min →</button>`}</div>
     </div>
     <div class="hero-r">${p ? `<div class="ring big" style="--p:${pct}%"><b>${pct}%<small>of your plan</small></b></div>
       <ul class="lv-list">${track.topics.map((t) => `<li><span>${t.icon} ${esc(t.title)}</span><i class="lv lv${ST.place[track.id].scores[t.id] ?? 0}">${LEVELS[ST.place[track.id].scores[t.id] ?? 0]}</i></li>`).join("")}</ul>`
