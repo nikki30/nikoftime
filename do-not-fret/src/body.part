@@ -446,11 +446,11 @@ function sparkline(points) {
 
 /* ================= play-along engine =================
    Steps through a list (tab columns, chord bars, or scale notes) on the metronome's beats. */
-const P = { list: null, i: -1, count: 0, beatsPer: 1, countIn: 4, loop: true, label: "" };
+const P = { list: null, i: -1, count: 0, beatsPer: 1, countIn: 4, loop: true, label: "", timed: false, left: 0, loopFrom: 0 };
 function startPlay(kind, key, list, opts = {}) {
   stopPlay();
   S.play = { kind, key };
-  P.list = list; P.i = -1; P.count = 0; P.beatsPer = opts.beatsPer || 1; P.countIn = opts.countIn ?? M.beats; P.loop = opts.loop ?? true; P.label = opts.label || "";
+  P.list = list; P.i = -1; P.count = 0; P.beatsPer = opts.beatsPer || 1; P.countIn = opts.countIn ?? M.beats; P.loop = opts.loop ?? true; P.label = opts.label || ""; P.timed = !!opts.timed; P.left = 0; P.loopFrom = opts.loopFrom || 0;
   if (opts.bpm) mSet(opts.bpm, opts.label);
   else M.ctx = opts.label || M.ctx;
   M.listeners.add(onBeat);
@@ -462,6 +462,7 @@ function onBeat(n) {
   if (n < 0) { stopPlay(); return; }
   if (!P.list) return;
   if (P.count < P.countIn) { P.count++; flashCount(P.countIn - P.count + 1); return; }
+  if (P.timed) { P.count++; slot(); setTimeout(slot, 30000 / M.bpm); return; }
   const k = P.count - P.countIn; P.count++;
   if (k % P.beatsPer !== 0) return;
   let i = P.i + 1;
@@ -470,6 +471,19 @@ function onBeat(n) {
   const item = P.list[i];
   if (item && item.midi && S.play?.kind === "ex" && S.exSound) item.midi.forEach((m) => pluck(m, 0, 0.25));
   markNow();
+}
+// Timed play-along: called every half beat (an eighth note). Each step lasts its own "dur" in beats.
+function slot() {
+  if (!P.list) return;
+  if (P.left <= 0) {
+    let i = P.i + 1;
+    if (i >= P.list.length) { if (!P.loop) { stopPlay(); mStop(); return; } i = P.loopFrom; }
+    P.i = i; P.left = P.list[i].dur || 1;
+    const item = P.list[i];
+    if (item.midi?.length && S.play?.kind === "ex" && S.exSound) { const t = audio().currentTime; item.midi.forEach((m, j) => pluck(m, t + j * 0.014, item.midi.length > 1 ? 0.18 : 0.3)); }
+    markNow();
+  }
+  P.left -= 0.5;
 }
 function followNote(n) {
   const box = n.closest(".fb-scroll"); if (!box) return;
@@ -490,8 +504,10 @@ function markNow() {
   } else if (S.play.kind === "bars") {
     document.querySelector(`.cbar[data-sec="${CSS.escape(S.play.key)}"][data-i="${it.idx}"]`)?.classList.add("now");
   } else if (S.play.kind === "ex") {
-    const n = document.querySelector(`.note[data-fb="${CSS.escape(S.play.key)}"][data-k="${it.s}:${it.f}"]`);
-    if (n) { n.classList.add("now"); followNote(n); }
+    (it.shape || (it.s != null ? [[it.s, it.f]] : [])).forEach(([s, f], j) => {
+      const n = document.querySelector(`.note[data-fb="${CSS.escape(S.play.key)}"][data-k="${s}:${f}"]`);
+      if (n) { n.classList.add("now"); if (!j) followNote(n); }
+    });
   }
   const lab = document.querySelector("[data-nowlabel]"); if (lab) lab.textContent = it.label || "";
 }
@@ -522,7 +538,7 @@ function viewToday() {
         <span class="check ${done ? (done.noClean ? "part" : "on") : ""}" aria-label="${done ? "Logged today" : "Not logged yet"}">✓</span>
         <span class="t">${esc(drillName(d))}<br><span class="meta">${done?.noClean ? `Practised today, no clean run${done.note ? ` · “${esc(done.note)}”` : ""}` : done ? `Clean at ♩=${done.bpm} today` : last ? `Last clean ♩=${last.bpm}${best > last.bpm ? ` · best ${best}` : ""}` : `Start around ♩=${d.startBpm || 60}`}</span></span>
         <span class="pill cat-${esc(d.category || "scale")}">${d.minutes || 0} min</span></button>
-        ${open ? `<div class="item-body">${lastCleanHTML(d.id)}${d.how ? `<p class="howto">${esc(d.how)}</p>` : ""}
+        ${open ? `<div class="item-body">${lastCleanHTML(d.id)}${d.how ? `<p class="howto">${esc(d.how)}</p>` : ""}${d.ex?.type === "rounds" ? roundsTable(d.ex) : ""}
           ${(() => { const ex = drillEx(d); return ex ? exerciseBlock("drill-" + d.id, ex, `data-playdrill="${esc(d.id)}"`) : ""; })()}
           <div class="btns"><button class="btn" data-settempo="${esc(d.id)}" data-bpm="${start}">Metronome to ♩=${start}</button></div>
           <div class="btns"><button class="btn primary" data-logbpm="${esc(d.id)}">Got a clean run: save ♩=<span data-live-bpm>${M.bpm}</span></button>
@@ -562,10 +578,29 @@ function spiderSeq(lastPos = 9) {
   }
   return out;
 }
+// The "7 notes, then a chord 3 times" table for song drills.
+function roundsTable(ex) {
+  const nm = (s, f) => pretty(SHARP_NAMES[(OPEN[s - 1] + f) % 12]);
+  const chordTxt = (cs) => cs.every((c) => c === cs[0]) ? `<b>${esc(cs[0])}</b> ×${cs.length}` : cs.map((c) => `<b>${esc(c)}</b>`).join(", ");
+  return `<div class="rounds"><table><thead><tr><th>#</th><th>The ${ex.rounds[0].notes.length} notes</th><th>Where (string·fret)</th><th>Then strum</th></tr></thead><tbody>
+    ${ex.rounds.map((r, i) => `<tr><td>${i + 1}</td><td class="mono">${r.notes.map(([s, f], j) => j === r.notes.length - 1 ? `<b>${nm(s, f)}</b>` : nm(s, f)).join(" ")}</td><td class="mono small">${r.notes.map(([s, f], j) => j === r.notes.length - 1 ? `<b>${s}·${f}</b>` : `${s}·${f}`).join(", ")}</td><td>${chordTxt(r.chords)}</td></tr>`).join("")}</tbody></table>
+    ${ex.after ? `<p class="small">${esc(ex.after)}</p>` : ""}
+    <p class="small"><b>Rhythm:</b> the first 6 notes are eighths (two per click), the 7th is a quarter note on beat 1; then the chord: short (beat 2), held (beats 3–4), short (next beat 1).</p>
+    <p class="small mono">${Object.entries(ex.shapes).map(([c, sh]) => { const fr = { 6: "x", 5: "x", 4: "x", 3: "x", 2: "x", 1: "x" }; sh.forEach(([s, f]) => (fr[s] = f)); return `${esc(c)} = ${[6, 5, 4, 3, 2, 1].map((s) => fr[s]).join(" ")}`; }).join(" · ")}</p></div>`;
+}
 function rootFret6(note) { const pc = parseNote(note).pc; return (pc - 4 + 12) % 12; }
 function drillEx(d) {
   const ex = d.ex; if (!ex) return null;
   if (ex.type === "spider") return { title: (ex.muted ? "Muted spider crawl" : "Spider crawl") + ", positions 1–" + (ex.last || 9), root: "C", scale: "chromatic", seq: spiderSeq(ex.last || 9) };
+  if (ex.type === "rounds") {
+    const nm = (s, f) => pretty(SHARP_NAMES[(OPEN[s - 1] + f) % 12]), seq = [{ dur: 1, label: "Pickup: rest for one beat, then go" }];
+    ex.rounds.forEach((r, ri) => {
+      r.notes.forEach(([s, f], j) => seq.push({ s, f, dur: j < r.notes.length - 1 ? 0.5 : 1, label: `Round ${ri + 1} · note ${j + 1} of ${r.notes.length}: ${nm(s, f)}` }));
+      r.chords.forEach((c, j) => seq.push({ shape: ex.shapes[c], dur: [1, 2, 1][j] ?? 1, label: `Round ${ri + 1} · ${c} ${["(short)", "(hold for 2 beats)", "(short)"][j] || ""}` }));
+    });
+    const fbSeq = [...new Map([...ex.rounds.flatMap((r) => r.notes), ...Object.values(ex.shapes).flat()].map(([s, f]) => [`${s}:${f}`, { s, f }])).values()];
+    return { title: ex.title || d.name, root: ex.root || "E", scale: "chromatic", seq, fbSeq, timed: true, loopFrom: 1 };
+  }
   if (ex.type === "seq") return { title: ex.title || d.name, root: ex.root || "C", scale: ex.scale || "chromatic", seq: ex.seq };
   let root = ex.root, scale = ex.scale, lo = ex.lo, hi = ex.hi;
   if (ex.rotate) {
@@ -582,12 +617,12 @@ function drillEx(d) {
 }
 const drillName = (d) => { const e = d.ex?.rotate ? drillEx(d) : null; return e ? `${d.name}: ${e.title}` : d.name; };
 function exerciseBlock(id, ex, playAttrs, how) {
-  const seq = ex.seq, playing = S.play?.kind === "ex" && S.play.key === id;
-  const fs = seq.map((p) => p.f), lo = Math.min(...fs), hi = Math.max(...fs), st = lo > 1 ? lo - 1 : 0;
+  const seq = ex.fbSeq || ex.seq, playing = S.play?.kind === "ex" && S.play.key === id;
+  const fs = seq.filter((p) => p.f != null).map((p) => p.f), lo = Math.min(...fs), hi = Math.max(...fs), st = lo > 1 ? lo - 1 : 0;
   return `<div class="callout" style="display:grid;gap:10px">
-    <div class="sec-head"><b>${esc(ex.title || "Play along")}</b><span class="small soft">${seq.length} notes · one per click</span></div>
+    <div class="sec-head"><b>${esc(ex.title || "Play along")}</b><span class="small soft">${ex.timed ? "In the song's rhythm: riff notes are eighths (two per click), chords are short (1 beat), held (2 beats), short (1 beat)" : `${seq.length} notes · one per click`}</span></div>
     ${how ? `<p class="small">${esc(how)}</p>` : ""}
-    ${fretboard(ex.root, ex.scale, "notes", { start: st, frets: Math.max(4, hi - st + 1), seq, now: playing ? P.i : -1, id })}
+    ${fretboard(ex.root, ex.scale, "notes", { start: st, frets: Math.max(4, hi - st + 1), seq, now: playing && !ex.timed ? P.i : -1, id })}
     <div class="btns">${playing ? `<button class="btn" data-stopplay>Stop</button>` : `<button class="btn primary" ${playAttrs}>Play along at ♩=<span data-live-bpm>${M.bpm}</span></button>`}
       <label class="small soft"><input type="checkbox" id="ex-sound" ${S.exSound ? "checked" : ""}> Play each note</label><span class="small soft" data-countin></span></div>
     <p class="small soft" data-nowlabel></p></div>`;
@@ -992,6 +1027,7 @@ document.addEventListener("click", (e) => {
   if (ds.setstatus) { const s = S.songs.find((x) => x.id === S.song); if (s) { s.status = ds.setstatus; const upd = { status: ds.setstatus }; if (ds.setstatus === "polished") { upd.polishedOn = dayKey(); s.polishedOn = upd.polishedOn; } save("songs/" + s.id, (r) => r.update(upd)); render(); } return; }
   if (ds.done) { const d = { ...(S.progress.done || {}) }; d[ds.done] ? delete d[ds.done] : (d[ds.done] = dayKey()); S.progress = { done: d }; save("progress/theory", (r) => r.set({ done: d })); return render(); }
   if (ds.playdrill) { const d = S.drills.find((x) => x.id === ds.playdrill), ex = drillEx(d);
+    if (ex.timed) { startPlay("ex", "drill-" + d.id, ex.seq.map((p) => ({ ...p, midi: (p.shape || (p.s != null ? [[p.s, p.f]] : [])).map(([s, f]) => OPEN[s - 1] + f) })), { label: drillName(d), loop: true, timed: true, loopFrom: ex.loopFrom }); return render(); }
     startPlay("ex", "drill-" + d.id, ex.seq.map((p) => ({ ...p, midi: [OPEN[p.s - 1] + p.f], label: pretty(SHARP_NAMES[(OPEN[p.s - 1] + p.f) % 12]) })), { label: drillName(d), loop: true }); return render(); }
   if (ds.playex) { const l = S.theory.find((x) => x.id === ds.playex), ex = l.exercises[+ds.ex], id = `${l.id}-ex${ds.ex}`;
     const seq = ex.seq || scaleRun(ex.root, ex.scale, ex.lo ?? 0, ex.hi ?? 4, ex.updown !== false);

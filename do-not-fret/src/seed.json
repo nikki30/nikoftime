@@ -1702,86 +1702,308 @@
    "linkType": "song",
    "linkId": "texas-rock",
    "ex": {
-    "type": "seq",
-    "title": "Texas Rock: the three riffs (E, A, walk-up to B)",
+    "type": "rounds",
+    "title": "Texas Rock in rhythm: 6 rounds, then round again",
     "root": "E",
-    "scale": "chromatic",
-    "seq": [
+    "rounds": [
      {
-      "s": 6,
-      "f": 0
+      "notes": [
+       [
+        6,
+        0
+       ],
+       [
+        6,
+        3
+       ],
+       [
+        5,
+        0
+       ],
+       [
+        5,
+        2
+       ],
+       [
+        4,
+        0
+       ],
+       [
+        4,
+        2
+       ],
+       [
+        6,
+        0
+       ]
+      ],
+      "chords": [
+       "E7",
+       "E7",
+       "E7"
+      ]
      },
      {
-      "s": 6,
-      "f": 3
+      "notes": [
+       [
+        6,
+        0
+       ],
+       [
+        6,
+        3
+       ],
+       [
+        5,
+        0
+       ],
+       [
+        5,
+        2
+       ],
+       [
+        4,
+        0
+       ],
+       [
+        4,
+        2
+       ],
+       [
+        6,
+        0
+       ]
+      ],
+      "chords": [
+       "E7",
+       "E7",
+       "E7"
+      ]
      },
      {
-      "s": 5,
-      "f": 0
+      "notes": [
+       [
+        6,
+        0
+       ],
+       [
+        6,
+        3
+       ],
+       [
+        5,
+        0
+       ],
+       [
+        5,
+        2
+       ],
+       [
+        4,
+        0
+       ],
+       [
+        4,
+        2
+       ],
+       [
+        5,
+        0
+       ]
+      ],
+      "chords": [
+       "A7",
+       "A7",
+       "A7"
+      ]
      },
      {
-      "s": 5,
-      "f": 2
+      "notes": [
+       [
+        5,
+        0
+       ],
+       [
+        5,
+        3
+       ],
+       [
+        4,
+        0
+       ],
+       [
+        4,
+        2
+       ],
+       [
+        3,
+        0
+       ],
+       [
+        3,
+        2
+       ],
+       [
+        6,
+        0
+       ]
+      ],
+      "chords": [
+       "E7",
+       "E7",
+       "E7"
+      ]
      },
      {
-      "s": 4,
-      "f": 0
+      "notes": [
+       [
+        6,
+        0
+       ],
+       [
+        6,
+        3
+       ],
+       [
+        5,
+        0
+       ],
+       [
+        5,
+        1
+       ],
+       [
+        5,
+        2
+       ],
+       [
+        4,
+        0
+       ],
+       [
+        5,
+        2
+       ]
+      ],
+      "chords": [
+       "B7",
+       "B7",
+       "A7"
+      ]
      },
      {
-      "s": 4,
-      "f": 2
-     },
-     {
-      "s": 5,
-      "f": 0
-     },
-     {
-      "s": 5,
-      "f": 3
-     },
-     {
-      "s": 4,
-      "f": 0
-     },
-     {
-      "s": 4,
-      "f": 2
-     },
-     {
-      "s": 3,
-      "f": 0
-     },
-     {
-      "s": 3,
-      "f": 2
-     },
-     {
-      "s": 6,
-      "f": 0
-     },
-     {
-      "s": 6,
-      "f": 3
-     },
-     {
-      "s": 5,
-      "f": 0
-     },
-     {
-      "s": 5,
-      "f": 1
-     },
-     {
-      "s": 5,
-      "f": 2
-     },
-     {
-      "s": 4,
-      "f": 0
+      "notes": [
+       [
+        6,
+        0
+       ],
+       [
+        6,
+        3
+       ],
+       [
+        5,
+        0
+       ],
+       [
+        5,
+        2
+       ],
+       [
+        4,
+        0
+       ],
+       [
+        4,
+        2
+       ],
+       [
+        6,
+        0
+       ]
+      ],
+      "chords": [
+       "E7",
+       "E7",
+       "E7"
+      ]
      }
-    ]
+    ],
+    "shapes": {
+     "E7": [
+      [
+       6,
+       0
+      ],
+      [
+       5,
+       2
+      ],
+      [
+       4,
+       2
+      ],
+      [
+       3,
+       1
+      ],
+      [
+       2,
+       3
+      ],
+      [
+       1,
+       0
+      ]
+     ],
+     "A7": [
+      [
+       5,
+       0
+      ],
+      [
+       4,
+       2
+      ],
+      [
+       3,
+       2
+      ],
+      [
+       2,
+       2
+      ],
+      [
+       1,
+       3
+      ]
+     ],
+     "B7": [
+      [
+       5,
+       2
+      ],
+      [
+       4,
+       1
+      ],
+      [
+       3,
+       2
+      ],
+      [
+       2,
+       0
+      ],
+      [
+       1,
+       2
+      ]
+     ]
+    },
+    "after": "After round 6, go back to round 1. To finish, let the last E7 of round 6 ring."
    },
-   "how": "12-bar blues in E. The notes you need:\n• Riff on E: E G A B D E (low E open, 3rd fret · A open, 2nd fret · D open, 2nd fret).\n• Riff on A: A C D E G A (A open, 3rd fret · D open, 2nd fret · G open, 2nd fret).\n• Walk-up to B: E G A A♯ B D (low E open, 3rd fret · A open, 1st, 2nd fret · D open).\n• E7 = 022130 (E B E G♯ D E), A7 = x02223 (A E A C♯ G), B7 = x21202 (B D♯ A B F♯).\nForm: pickup riff · E7 ×4 bars · A7 ×2 · E7 ×2 (ending in the walk-up) · B7 · A7 · E7 · E7 (back to the top, then end on E7). Play the riffs below along with the metronome, then open the song for the full tab with the chord stabs."
+   "how": "The whole song: 7 notes, then a chord 3 times. The 7th note (bold) is the bass note under the chord that follows."
   }
  },
  "songs": {
