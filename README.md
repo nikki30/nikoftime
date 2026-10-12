@@ -11,6 +11,7 @@ A shelf of little apps you can use right now, in the spirit of [neal.fun](https:
 | [**My Roamin' Empire**](roamin-empire/) | Float to any of 196 countries. Cards pop up around the globe: the #1 song, how to say hello (and where the language comes from), a must-eat vegetarian dish, a must-visit spot, an "only here" fact, today's headline, a historical novel, typical names, who runs the country, and the local time and weather. Zoom in for a tour of the streets, then pass a quiz to earn your next title. [README](roamin-empire/README.md) |
 | [**Playing the Lang Game**](lang-game/) | Learn to *speak* Malayalam, Telugu or Spanish through the languages you already know (Tamil, Hindi, English): three short daily rounds (warm-up words linked to your languages, colour-matched sentence ladders, and conversations you answer out loud), with 🔊 and 🎤 on everything. [README](lang-game/README.md) |
 | [**Borders Through Time**](borders/) | A world map with a year slider from 123,000 BC to 2010 (54 snapshots). Watch empires grow and shrink, see what was lost as dashed outlines, and read why each change happened, plus what was going on in India at the time. [README](borders/README.md) |
+| [**Keeping Tabs**](keeping-tabs/) | A daily catch-up on what I care about: this week's news on feminism and LGBTQIA+ rights in 10 regions, the newest research from 32 leading universities (with a live search), engineering blogs, Hacker News discussions and arXiv papers, and a senior-to-staff skills tracker with a weekly practice. [README](keeping-tabs/README.md) |
 | [**Radio Roam**](radio-roam/) | Inspired by [radio.garden](https://radio.garden). Float to a random place on Earth in a hot-air balloon and hear its radio live, with what's playing, a fact about the artist, a one-tap "Save to YouTube Music" for songs you love, and a passport of the countries you've visited. [README](radio-roam/README.md) |
 
 More tiles are on the way.
@@ -28,7 +29,10 @@ radio-roam/     the Radio Roam app (with its own README)
 roamin-empire/  the My Roamin' Empire app (with its own README)
 lang-game/      the Playing the Lang Game app (with its own README)
 borders/        the Borders Through Time app (with its own README)
+keeping-tabs/   the Keeping Tabs app (with its own README)
 tools/charts.mjs  fetches this week's top songs for My Roamin' Empire during the daily build
+tools/news.mjs    fetches today's headlines for My Roamin' Empire
+tools/feeds.mjs   fetches the daily news, research and engineering feed for Keeping Tabs
 vendor/         shared libraries: the Anthropic SDK, d3-geo/topojson, MapLibre and world map shapes
 .github/workflows/pages.yml   publishes the site on every push to main, and once a day
 ```

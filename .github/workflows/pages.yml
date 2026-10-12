@@ -33,6 +33,10 @@ jobs:
         continue-on-error: true
         timeout-minutes: 6
         run: node tools/news.mjs
+      - name: Fetch today's feed for Keeping Tabs
+        continue-on-error: true
+        timeout-minutes: 8
+        run: node tools/feeds.mjs
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .
