@@ -579,13 +579,16 @@ function keyOfDay(d, date = new Date()) {
   const minor = spellScale(major, "major")[5].name;
   return { major, minor };
 }
-function spiderSeq(lastPos = 9) {
+function spiderSeq(lastPos = 9, back = false) {
   const out = [];
-  for (let p = 1; p <= lastPos; p++) {
-    const strings = p % 2 ? [6, 5, 4, 3, 2, 1] : [1, 2, 3, 4, 5, 6];
-    // odd positions: low E → high e, frets low → high; even positions: high e → low E, frets high → low (pinky to index)
-    strings.forEach((s) => { const fr = [p, p + 1, p + 2, p + 3]; (p % 2 ? fr : fr.reverse()).forEach((f) => out.push({ s, f })); });
-  }
+  // Up: positions 1..lastPos. Back (optional): one fret lower each time, starting from the string you ended on.
+  const order = [...Array(lastPos)].map((_, i) => i + 1);
+  if (back) for (let p = lastPos - 1; p >= 1; p--) order.push(p);
+  order.forEach((p, n) => {
+    const strings = n % 2 ? [1, 2, 3, 4, 5, 6] : [6, 5, 4, 3, 2, 1];
+    // low E → high e: frets low → high (index to pinky); high e → low E: frets high → low (pinky to index)
+    strings.forEach((s) => { const fr = [p, p + 1, p + 2, p + 3]; (n % 2 ? fr.reverse() : fr).forEach((f) => out.push({ s, f })); });
+  });
   return out;
 }
 // The "7 notes, then a chord 3 times" table for song drills.
@@ -601,7 +604,7 @@ function roundsTable(ex) {
 function rootFret6(note) { const pc = parseNote(note).pc; return (pc - 4 + 12) % 12; }
 function drillEx(d) {
   const ex = d.ex; if (!ex) return null;
-  if (ex.type === "spider") return { title: (ex.muted ? "Muted spider crawl" : "Spider crawl") + ", positions 1–" + (ex.last || 9), root: "C", scale: "chromatic", seq: spiderSeq(ex.last || 9) };
+  if (ex.type === "spider") return { title: (ex.muted ? "Muted spider crawl" : "Spider crawl") + `, frets 1–${(ex.last || 9) + 3}${ex.back ? " and back" : ""}`, root: "C", scale: "chromatic", seq: spiderSeq(ex.last || 9, !!ex.back) };
   if (ex.type === "rounds") {
     const nm = (s, f) => pretty(SHARP_NAMES[(OPEN[s - 1] + f) % 12]), seq = [{ dur: 1, label: "Pickup: rest for one beat, then go" }];
     ex.rounds.forEach((r, ri) => {
