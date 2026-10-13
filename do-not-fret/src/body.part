@@ -368,6 +368,16 @@ function lastCleanHTML(id) {
   return `<p class="lastclean">Last clean run: <b>♩=${last.bpm}</b> <span class="soft">${when}</span>${best > last.bpm ? ` · best <b>♩=${best}</b>` : ""}</p>`;
 }
 const practicedOn = (k) => { const l = S.logs[k]; return !!l && (Object.keys(l.items || {}).length > 0 || !!l.note || (l.minutes || 0) > 0); };
+// Every day from your first practice day to today: a tick for each day you practised.
+function allDays() {
+  const first = Object.keys(S.logs).filter(practicedOn).sort()[0], end = new Date(); end.setHours(0, 0, 0, 0);
+  const d = first ? fromKey(first) : new Date(end), days = [];
+  for (; d <= end; d.setDate(d.getDate() + 1)) days.push(new Date(d));
+  const n = days.filter((x) => practicedOn(dayKey(x))).length;
+  return `<div class="week days" aria-label="Every day since you started">${days.map((x) => { const k = dayKey(x), on = practicedOn(k), first1 = x.getDate() === 1 || x === days[0];
+    return `<i class="${on ? "on" : ""} ${k === dayKey() ? "today" : ""}" title="${fmtDate(x, { weekday: "short", day: "numeric", month: "short" })}${on ? `: practised${S.logs[k]?.minutes ? ` ${S.logs[k].minutes} min` : ""}` : ": no practice"}">${on ? "✓" : x.getDate()}${first1 ? `<b>${fmtDate(x, { month: "short" })}</b>` : ""}</i>`; }).join("")}</div>
+    <span>since ${fmtDate(days[0], { day: "numeric", month: "short" })} · practised ${n} of ${days.length} day${days.length === 1 ? "" : "s"}</span>`;
+}
 function streak() { let d = new Date(), n = 0; if (!practicedOn(dayKey(d))) d.setDate(d.getDate() - 1); while (practicedOn(dayKey(d))) { n++; d.setDate(d.getDate() - 1); } return n; }
 function weekNo(d = new Date()) { const st = settings(), s = fromKey(st.firstClass || st.startedOn || dayKey()); s.setHours(0, 0, 0, 0); return Math.max(1, Math.floor((d - s) / 864e5 / 7) + 1); }
 function nextClass() { if (!hasClasses()) return null; const st = settings(), [hh, mm] = String(st.classTime || "00:00").split(":").map(Number), cd = +st.classDay; const d = new Date(), n = new Date(d); n.setHours(hh || 0, mm || 0, 0, 0); n.setDate(d.getDate() + ((cd - d.getDay() + 7) % 7)); if (n.getTime() + 2 * 36e5 < d.getTime()) n.setDate(n.getDate() + 7); return n; }
@@ -524,7 +534,7 @@ function viewToday() {
   h += `<section class="hero"><div class="eyebrow">Week ${weekNo()} · ${fmtDate(now, { weekday: "long" })}</div><h1>${fmtDate(now, { day: "numeric", month: "long" })}</h1>
     <div class="stats"><div class="stat"><b>${streak()}</b><span>day streak</span></div>
     <div class="stat"><b>${doneMin}<span class="soft small"> / ${total} min</span></b><span>practised today</span></div>
-    <div class="stat"><div class="week" aria-label="This week">${week.map((d) => `<i class="${practicedOn(dayKey(d)) ? "on" : ""} ${dayKey(d) === dayKey() ? "today" : ""}" title="${fmtDate(d, { weekday: "long" })}${practicedOn(dayKey(d)) ? `: practised${S.logs[dayKey(d)]?.minutes ? ` ${S.logs[dayKey(d)].minutes} min` : ""}` : ""}">${practicedOn(dayKey(d)) ? "✓" : fmtDate(d, { weekday: "narrow" })}</i>`).join("")}</div><span>this week</span></div></div></section>`;
+    <div class="stat stat-days">${allDays()}</div></div></section>`;
   h += staff("Today's routine", `${total} minutes · 75% review, 25% new`);
   h += `<div class="cleanrule"><b>What counts as a clean run</b><span>Alternate picking (down-up) the whole way · every note named out loud · not a single mistake. One clean run is enough: save the tempo as soon as you get one.${drills.some((d) => d.noNames) ? " The spider crawls don't need the notes named." : ""}</span></div>`;
   if (loading("drills")) h += `<div class="sheet empty">Loading your routine…</div>`;
