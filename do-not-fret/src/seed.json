@@ -1559,7 +1559,7 @@
    "startBpm": 60
   },
   "c-major-pent": {
-   "active": true,
+   "active": false,
    "category": "scale",
    "ex": {
     "dir": "both",
