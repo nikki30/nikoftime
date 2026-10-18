@@ -1636,7 +1636,7 @@
    "how": "The same 1-2-3-4 spider crawl, up to the 12th fret and back, but palm muted: rest the fleshy edge of your picking hand lightly on the strings right where they meet the bridge, so every note comes out short and thuddy instead of ringing. Too far forward and the notes die completely; too far back and they ring. Keep alternate picking and one finger per fret. It trains picking accuracy and keeps the strings you aren't playing quiet.",
    "minutes": 6,
    "name": "Muted spider crawl, 1-2-3-4",
-   "order": 2,
+   "order": 1,
    "startBpm": 60,
    "noNames": true
   },
@@ -2006,6 +2006,22 @@
     "after": "After round 6, go back to round 1. To finish, let the last E7 of round 6 ring."
    },
    "how": "The whole song: 7 notes, then a chord 3 times. The 7th note (bold) is the bass note under the chord that follows."
+  },
+  "spider-hopo": {
+   "active": true,
+   "category": "warmup",
+   "name": "Spider crawl, hammer-ons and pull-offs",
+   "order": 2,
+   "minutes": 6,
+   "startBpm": 60,
+   "noNames": true,
+   "ex": {
+    "type": "spider",
+    "last": 9,
+    "back": true,
+    "legato": true
+   },
+   "how": "The same path as the spider crawl (frets 1–12 and back), but only pick the first note on each string.\nGoing from the low E towards the high e (index → middle → ring → pinky): pick the first note, then hammer on the other three. Hammer firmly with the fingertip, right behind the fret, so each note rings as loud as the picked one.\nComing back from the high e towards the low E (pinky → ring → middle → index): pick the first note, then pull off the other three. Pull slightly down and off the string (a small flick), with the lower fingers already in place.\nKeep the fingers you're not using close to the strings."
   }
  },
  "songs": {

@@ -553,7 +553,7 @@ function viewToday() {
           <div class="btns"><button class="btn" data-settempo="${esc(d.id)}" data-bpm="${start}">Metronome to ♩=${start}</button></div>
           <div class="btns"><button class="btn primary" data-logbpm="${esc(d.id)}">Got a clean run: save ♩=<span data-live-bpm>${M.bpm}</span></button>
             <button class="btn" data-noclean="${esc(d.id)}">No clean run today</button>
-          <span class="small soft">Save only after a run with alternate picking${d.noNames ? "" : ", every note named"} and no mistakes. It saves the metronome's current tempo.</span></div>${link}</div>` : ""}</div>`;
+          <span class="small soft">Save only after a run with ${d.ex?.legato ? "one pick per string, every hammer-on and pull-off ringing clearly," : "alternate picking"}${d.noNames ? "" : ", every note named"} and no mistakes. It saves the metronome's current tempo.</span></div>${link}</div>` : ""}</div>`;
     }).join("")}</div>`;
   }
   h += staff("How did it go?", "Practice note");
@@ -604,7 +604,7 @@ function roundsTable(ex) {
 function rootFret6(note) { const pc = parseNote(note).pc; return (pc - 4 + 12) % 12; }
 function drillEx(d) {
   const ex = d.ex; if (!ex) return null;
-  if (ex.type === "spider") return { title: (ex.muted ? "Muted spider crawl" : "Spider crawl") + `, frets 1–${(ex.last || 9) + 3}${ex.back ? " and back" : ""}`, root: "C", scale: "chromatic", seq: spiderSeq(ex.last || 9, !!ex.back) };
+  if (ex.type === "spider") return { title: (ex.muted ? "Muted spider crawl" : ex.legato ? "Hammer-on & pull-off spider crawl" : "Spider crawl") + `, frets 1–${(ex.last || 9) + 3}${ex.back ? " and back" : ""}`, root: "C", scale: "chromatic", seq: spiderSeq(ex.last || 9, !!ex.back) };
   if (ex.type === "rounds") {
     const nm = (s, f) => pretty(SHARP_NAMES[(OPEN[s - 1] + f) % 12]), seq = [{ dur: 1, label: "Pickup: rest for one beat, then go" }];
     ex.rounds.forEach((r, ri) => {
