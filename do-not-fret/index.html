@@ -682,7 +682,9 @@ document.getElementById("m-tap").onclick = () => {
    {Am} chord strum      "cue text" small label above the next column
 */
 function parseTab(src) {
-  const toks = src.replace(/\(/g, " ( ").replace(/\)\s*x(\d+)/g, " )x$1 ").replace(/\[/g, " [ ").replace(/\]/g, " ] ").match(/"[^"]*"|\S+/g) || [];
+  const toks0 = src.replace(/\(/g, " ( ").replace(/\)\s*x(\d+)/g, " )x$1 ").replace(/\[/g, " [ ").replace(/\]/g, " ] ").match(/"[^"]*"|\S+/g) || [];
+  // "3:7@2" or "[...] @2": the column lasts 2 beats (only used by timed play-alongs)
+  const toks = toks0.flatMap((t) => { const m = !t.startsWith('"') && t.match(/^(.+?)(@[\d.]+)$/); return m ? [m[1], m[2]] : [t]; });
   let i = 0;
   function seq(stopper) {
     const out = [];
@@ -691,6 +693,7 @@ function parseTab(src) {
       const t = toks[i];
       if (stopper && t.startsWith(")")) return out;
       i++;
+      if (/^@[\d.]+$/.test(t)) { for (let k = out.length - 1; k >= 0; k--) if (!out[k].bar) { out[k].dur = +t.slice(1); break; } continue; }
       if (t === "(") {
         const inner = seq(true);
         const end = toks[i++] || ")x1";
@@ -989,7 +992,7 @@ function slot() {
     if (i >= P.list.length) { if (!P.loop) { stopPlay(); mStop(); return; } i = P.loopFrom; }
     P.i = i; P.left = P.list[i].dur || 1;
     const item = P.list[i];
-    if (item.midi?.length && S.play?.kind === "ex" && S.exSound) { const t = audio().currentTime; item.midi.forEach((m, j) => pluck(m, t + j * 0.014, item.midi.length > 1 ? 0.18 : 0.3)); }
+    if (item.midi?.length && (S.play?.kind === "ex" || S.play?.kind === "tab") && S.exSound) { const t = audio().currentTime; item.midi.forEach((m, j) => pluck(m, t + j * 0.014, item.midi.length > 1 ? 0.18 : 0.3)); }
     markNow();
   }
   P.left -= 0.5;
@@ -1265,7 +1268,7 @@ function viewSongs() {
   return h;
 }
 function sectionItems(sec, sid) {
-  if (sec.tab) return parseTab(sec.tab).map((c, idx) => ({ ...c, idx })).filter((c) => !c.bar).map((c) => ({ idx: c.idx, label: c.cue || "" }));
+  if (sec.tab) return parseTab(sec.tab).map((c, idx) => ({ ...c, idx })).filter((c) => !c.bar).map((c) => ({ idx: c.idx, label: c.cue || "", dur: c.dur || 1, midi: (c.notes || []).filter((n) => n.f != null).sort((a, b) => b.s - a.s).map((n) => OPEN[n.s - 1] + n.f) }));
   if (sec.bars) return parseBars(sec.bars).map((b, idx) => ({ idx, label: b.cue || "" }));
   return [];
 }
@@ -1546,7 +1549,7 @@ document.addEventListener("click", (e) => {
     startPlay("ex", id, seq.map((p) => ({ ...p, midi: [OPEN[p.s - 1] + p.f] })), { label: ex.title || l.title, loop: true }); return render(); }
   if (ds.playsec) { const s = S.songs.find((x) => x.id === ds.playsec), sec = s.sections[+ds.i], sid = `${s.id}::${ds.i}`;
     const items = sectionItems(sec, sid);
-    startPlay(sec.tab ? "tab" : "bars", sid, items, { label: `${s.title} · ${sec.name}`, loop: S.loopSec !== false, beatsPer: sec.bars ? (parseInt(s.timeSig) || 4) : (sec.beatsPer || 1) });
+    startPlay(sec.tab ? "tab" : "bars", sid, items, { label: `${s.title} · ${sec.name}`, loop: S.loopSec !== false, beatsPer: sec.bars ? (parseInt(s.timeSig) || 4) : (sec.beatsPer || 1), timed: !!(sec.timed && sec.tab) });
     return render(); }
   if ("ptstart" in ds) return ptStart();
   if ("ptstop" in ds) return ptStop();
