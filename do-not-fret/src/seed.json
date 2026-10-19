@@ -1547,10 +1547,9 @@
     "hi": 8,
     "lo": 5,
     "root": "A",
-    "scale": "minpent",
-    "rootToRoot": true
+    "scale": "minpent"
    },
-   "how": "Frets 5–8. Start on A (low E string, 5th fret) and climb to the A on the high e string, 5th fret: A C D E G A C D E G A (6S 5-8, 5S 5-7, 4S 5-7, 3S 5-7, 2S 5-8, 1S 5). Play that top A again and come back down to the A you started on. Say each note. Palm mute the whole way: rest the edge of your picking hand lightly on the strings at the bridge, so each note is short and thuddy.",
+   "how": "Frets 5–8, the whole box. Start on A (low E string, 5th fret) and climb to the C on the high e string, 8th fret: A C · D E · G A · C D · E G · A C (6S 5, 8 · 5S 5, 7 · 4S 5, 7 · 3S 5, 7 · 2S 5, 8 · 1S 5, 8). Play the top C again and come back down to the A you started on. Say each note, and say the A's louder: they're home (low E 5th fret, D string 7th fret, high e 5th fret). Palm mute the whole way: rest the edge of your picking hand lightly on the strings at the bridge, so each note is short and thuddy.",
    "linkId": "minor-pent",
    "linkType": "theory",
    "minutes": 4,
