@@ -819,6 +819,7 @@ function viewSong(s) {
       const runs = S.runs[sid] || 0;
       h += `<div class="sheet" id="sec-${i}" style="margin-top:14px;padding:14px;display:grid;gap:10px">
         <div class="sec-head"><h4>${sec.learnOrder ? `<span class="soft" style="font-size:.85rem">${sec.learnOrder}.</span> ` : ""}${esc(sec.name)}</h4>${sec.tab || sec.bars ? `<button class="btn ${playing ? "" : "primary"}" data-playsec="${esc(s.id)}" data-i="${i}">${playing ? "Restart" : "▶ Play"}</button>` : ""}</div>
+        ${sec.words ? `<p class="words">🎤 <span>Words start:</span> ${esc(sec.words)}</p>` : ""}
         ${sec.difficulty || sec.uses > 1 || sec.sameAs ? `<div class="btns">${diffPill(sec.difficulty)}${sec.uses > 1 ? `<span class="pill">Plays ${sec.uses}×</span>` : ""}${sec.sameAs ? `<span class="pill">Builds on ${esc(sec.sameAs)}</span>` : ""}</div>` : ""}
         ${sec.teach ? `<div class="callout"><b>How to learn it:</b> ${esc(sec.teach)}</div>` : ""}
         ${sec.note ? `<p class="small">${esc(sec.note)}</p>` : ""}
@@ -834,6 +835,9 @@ function viewSong(s) {
       </div>`;
     });
   }
+  // Your own photos of this song's notebook pages (private copy only: uploaded pages are served from the artifact's storage).
+  const photos = (s.notePages || []).map((n) => S.pages.find((pg) => pg.kind === "image" && pg.asset && String(pg.name || "").includes(String(n)))).filter(Boolean);
+  if (photos.length) h += staff("Your notebook pages", "With the lyrics in your own handwriting") + `<div class="sheet notepics">${photos.map((pg) => `<a href="/_blob/${esc(pg.asset)}" target="_blank" rel="noopener"><img src="/_blob/${esc(pg.asset)}" alt="${esc(pg.name || "Notebook page")}" loading="lazy"></a>`).join("")}</div>`;
   if (s.tips?.length) h += staff("Tips from your notes", "") + `<div class="sheet" style="padding:14px 16px"><ul style="margin:0;padding-left:1.1em;display:grid;gap:6px">${s.tips.map((t) => `<li>${esc(t)}</li>`).join("")}</ul></div>`;
   return h;
 }
