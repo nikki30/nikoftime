@@ -835,7 +835,7 @@
    "exercises": [
     {
      "hi": 12,
-     "how": "Say each note name out loud.",
+     "how": "Play the natural notes up the 6th string to the 12th fret and back.",
      "root": "C",
      "scale": "major",
      "seq": [
@@ -1549,7 +1549,7 @@
     "root": "A",
     "scale": "minpent"
    },
-   "how": "Frets 5–8, the whole box. Start on A (low E string, 5th fret) and climb to the C on the high e string, 8th fret: A C · D E · G A · C D · E G · A C (6S 5, 8 · 5S 5, 7 · 4S 5, 7 · 3S 5, 7 · 2S 5, 8 · 1S 5, 8). Play the top C again and come back down to the A you started on. Say each note, and say the A's louder: they're home (low E 5th fret, D string 7th fret, high e 5th fret). Palm mute the whole way: rest the edge of your picking hand lightly on the strings at the bridge, so each note is short and thuddy.",
+   "how": "Frets 5–8, the whole box. Start on A (low E string, 5th fret) and climb to the C on the high e string, 8th fret: A C · D E · G A · C D · E G · A C (6S 5, 8 · 5S 5, 7 · 4S 5, 7 · 3S 5, 7 · 2S 5, 8 · 1S 5, 8). Play the top C again and come back down to the A you started on. The A's are home (low E 5th fret, D string 7th fret, high e 5th fret). Palm mute the whole way: rest the edge of your picking hand lightly on the strings at the bridge, so each note is short and thuddy.",
    "linkId": "minor-pent",
    "linkType": "theory",
    "minutes": 4,
@@ -1568,7 +1568,7 @@
     "rootToRoot": true,
     "scale": "majpent"
    },
-   "how": "Same box as A minor pentatonic (frets 5–8), but start and end on C: begin on the low E string, 8th fret, climb to the C on the high e, 8th fret, and come back down to where you started. Say each note: C D E G A C D E G A C. Palm mute the whole way: rest the edge of your picking hand lightly on the strings at the bridge, so each note is short and thuddy.",
+   "how": "Same box as A minor pentatonic (frets 5–8), but start and end on C: begin on the low E string, 8th fret, climb to the C on the high e, 8th fret, and come back down to where you started. Palm mute the whole way: rest the edge of your picking hand lightly on the strings at the bridge, so each note is short and thuddy.",
    "linkId": "major-pent",
    "linkType": "theory",
    "minutes": 4,
@@ -1599,7 +1599,7 @@
     "rootToRoot": true,
     "dir": "both"
    },
-   "how": "The key changes every day. Start on the root on the 6th (low E) string, climb across to the root on the 1st (high e) string, then come back down to the root you started on. The root rings twice each time you change direction: the top root at the turnaround, and the bottom root when you go round again. Let each note ring and say each note name.",
+   "how": "The key changes every day. Start on the root on the 6th (low E) string, climb across to the root on the 1st (high e) string, then come back down to the root you started on. The root rings twice each time you change direction: the top root at the turnaround, and the bottom root when you go round again. Let each note ring.",
    "minutes": 4,
    "name": "Major pentatonic of the day, up and down",
    "order": 8,
@@ -1615,7 +1615,7 @@
     "rootToRoot": true,
     "dir": "both"
    },
-   "how": "The relative minor of today's major key: the same five notes, but home is the 6th note of the major scale. Start on that root on the 6th (low E) string, climb to the root on the 1st (high e) string, then come back down to where you started. The root rings twice each time you change direction. Let each note ring and say each note name.",
+   "how": "The relative minor of today's major key: the same five notes, but home is the 6th note of the major scale. Start on that root on the 6th (low E) string, climb to the root on the 1st (high e) string, then come back down to where you started. The root rings twice each time you change direction. Let each note ring.",
    "minutes": 4,
    "name": "Its relative minor pentatonic, up and down",
    "order": 9,
@@ -1649,7 +1649,7 @@
     "root": "A",
     "scale": "minpent"
    },
-   "how": "Frets 7–10, the whole box. Start on C (low E string, 8th fret) and climb to the D on the high e string, 10th fret: C D · E G · A C · D E · G A · C D (6S 8, 10 · 5S 7, 10 · 4S 7, 10 · 3S 7, 9 · 2S 8, 10 · 1S 8, 10). Play the top D again and come back down. Say each note, and say the A's louder: they're home (D string 7th fret, B string 10th fret). Palm mute the whole way: rest the edge of your picking hand lightly on the strings at the bridge, so each note is short and thuddy.",
+   "how": "Frets 7–10, the whole box. Start on C (low E string, 8th fret) and climb to the D on the high e string, 10th fret: C D · E G · A C · D E · G A · C D (6S 8, 10 · 5S 7, 10 · 4S 7, 10 · 3S 7, 9 · 2S 8, 10 · 1S 8, 10). Play the top D again and come back down. The A's are home (D string 7th fret, B string 10th fret). Palm mute the whole way: rest the edge of your picking hand lightly on the strings at the bridge, so each note is short and thuddy.",
    "linkId": "minor-pent",
    "linkType": "theory",
    "minutes": 3,
@@ -1667,7 +1667,7 @@
     "root": "A",
     "scale": "minpent"
    },
-   "how": "Frets 9–13, the whole box. Start on D (low E string, 10th fret) and climb to the E on the high e string, 12th fret: D E · G A · C D · E G · A C · D E (6S 10, 12 · 5S 10, 12 · 4S 10, 12 · 3S 9, 12 · 2S 10, 13 · 1S 10, 12). Play the top E again and come back down. Say each note, and say the A's louder: they're home (A string 12th fret, B string 10th fret). Palm mute the whole way: rest the edge of your picking hand lightly on the strings at the bridge, so each note is short and thuddy.",
+   "how": "Frets 9–13, the whole box. Start on D (low E string, 10th fret) and climb to the E on the high e string, 12th fret: D E · G A · C D · E G · A C · D E (6S 10, 12 · 5S 10, 12 · 4S 10, 12 · 3S 9, 12 · 2S 10, 13 · 1S 10, 12). Play the top E again and come back down. The A's are home (A string 12th fret, B string 10th fret). Palm mute the whole way: rest the edge of your picking hand lightly on the strings at the bridge, so each note is short and thuddy.",
    "linkId": "minor-pent",
    "linkType": "theory",
    "minutes": 3,
@@ -1685,7 +1685,7 @@
     "root": "A",
     "scale": "minpent"
    },
-   "how": "Frets 12–15, the whole box. Start on E (low E string, 12th fret) and climb to the G on the high e string, 15th fret: E G · A C · D E · G A · C D · E G (6S 12, 15 · 5S 12, 15 · 4S 12, 14 · 3S 12, 14 · 2S 13, 15 · 1S 12, 15). Play the top G again and come back down. Say each note, and say the A's louder: they're home (A string 12th fret, G string 14th fret). Palm mute the whole way: rest the edge of your picking hand lightly on the strings at the bridge, so each note is short and thuddy.",
+   "how": "Frets 12–15, the whole box. Start on E (low E string, 12th fret) and climb to the G on the high e string, 15th fret: E G · A C · D E · G A · C D · E G (6S 12, 15 · 5S 12, 15 · 4S 12, 14 · 3S 12, 14 · 2S 13, 15 · 1S 12, 15). Play the top G again and come back down. The A's are home (A string 12th fret, G string 14th fret). Palm mute the whole way: rest the edge of your picking hand lightly on the strings at the bridge, so each note is short and thuddy.",
    "linkId": "minor-pent",
    "linkType": "theory",
    "minutes": 3,
@@ -2021,6 +2021,317 @@
     "legato": true
    },
    "how": "The same path as the spider crawl (frets 1–12 and back), but only pick the first note on each string.\nGoing from the low E towards the high e (index → middle → ring → pinky): pick the first note, then hammer on the other three. Hammer firmly with the fingertip, right behind the fret, so each note rings as loud as the picked one.\nComing back from the high e towards the low E (pinky → ring → middle → index): pick the first note, then pull off the other three. Pull slightly down and off the string (a small flick), with the lower fingers already in place.\nKeep the fingers you're not using close to the strings."
+  },
+  "spider-124": {
+   "active": true,
+   "category": "warmup",
+   "name": "Spider crawl 1-2-4 (skip the ring finger)",
+   "order": 3,
+   "minutes": 6,
+   "startBpm": 60,
+   "noNames": true,
+   "ex": {
+    "type": "spider",
+    "last": 9,
+    "back": true,
+    "fingers": [
+     1,
+     2,
+     4
+    ]
+   },
+   "how": "The spider crawl path (up to the 12th fret and back), but only three notes per string, using index, middle and pinky: fret 1, 2 and 4 in the first position (then 2, 3, 5 and so on). Leave the ring finger out completely.\nGoing from the low E towards the high e: index → middle → pinky. Coming back from the high e towards the low E: pinky → middle → index.\nThe stretch from middle to pinky is the point: it strengthens the pinky and the stretch you need for scales and blues licks. Keep your thumb low behind the neck and your fingers close to the strings. Alternate picking."
+  },
+  "blues-rock": {
+   "active": true,
+   "category": "song",
+   "name": "Blues rock in E",
+   "order": 8.5,
+   "minutes": 6,
+   "startBpm": 70,
+   "ex": {
+    "type": "bars",
+    "title": "Blues rock in E: 12 bars, strummed in rhythm",
+    "root": "E",
+    "shapes": {
+     "E7": [
+      [
+       6,
+       0
+      ],
+      [
+       5,
+       2
+      ],
+      [
+       4,
+       0
+      ],
+      [
+       3,
+       1
+      ],
+      [
+       2,
+       0
+      ],
+      [
+       1,
+       0
+      ]
+     ],
+     "A5": [
+      [
+       5,
+       0
+      ],
+      [
+       4,
+       2
+      ],
+      [
+       3,
+       2
+      ]
+     ],
+     "A7": [
+      [
+       5,
+       0
+      ],
+      [
+       4,
+       2
+      ],
+      [
+       3,
+       0
+      ],
+      [
+       2,
+       2
+      ],
+      [
+       1,
+       0
+      ]
+     ],
+     "D7": [
+      [
+       4,
+       0
+      ],
+      [
+       3,
+       2
+      ],
+      [
+       2,
+       1
+      ],
+      [
+       1,
+       2
+      ]
+     ],
+     "E7 (7th-fret barre)": [
+      [
+       5,
+       7
+      ],
+      [
+       4,
+       9
+      ],
+      [
+       3,
+       7
+      ],
+      [
+       2,
+       9
+      ],
+      [
+       1,
+       7
+      ]
+     ],
+     "E7 (C7 shape, 7th fret)": [
+      [
+       5,
+       7
+      ],
+      [
+       4,
+       6
+      ],
+      [
+       3,
+       7
+      ],
+      [
+       2,
+       5
+      ]
+     ]
+    },
+    "bars": [
+     {
+      "chord": "E7",
+      "hits": [
+       1,
+       1,
+       1,
+       1
+      ]
+     },
+     {
+      "chord": "E7",
+      "hits": [
+       1,
+       1,
+       1,
+       1
+      ]
+     },
+     {
+      "chord": "E7",
+      "hits": [
+       1,
+       1,
+       1,
+       1
+      ]
+     },
+     {
+      "chord": "E7",
+      "hits": [
+       1,
+       1,
+       1,
+       1
+      ]
+     },
+     {
+      "chord": "A5",
+      "hits": [
+       0.5,
+       0.5,
+       0.5,
+       0.5,
+       0.5,
+       0.5,
+       0.5,
+       0.5
+      ],
+      "how": "palm-muted chugs"
+     },
+     {
+      "chord": "A7",
+      "hits": [
+       1,
+       1,
+       1,
+       1
+      ]
+     },
+     {
+      "chord": "E7 (7th-fret barre)",
+      "hits": [
+       1,
+       1,
+       1,
+       1
+      ]
+     },
+     {
+      "chord": "E7 (C7 shape, 7th fret)",
+      "hits": [
+       1,
+       1,
+       1,
+       1
+      ]
+     },
+     {
+      "chord": "D7",
+      "hits": [
+       1,
+       1,
+       1,
+       1
+      ]
+     },
+     {
+      "chord": "A7",
+      "hits": [
+       1,
+       1,
+       1,
+       1
+      ]
+     },
+     {
+      "chord": "E7 (7th-fret barre)",
+      "hits": [
+       1,
+       1,
+       1,
+       1
+      ]
+     },
+     {
+      "chord": "E7 (C7 shape, 7th fret)",
+      "hits": [
+       1,
+       1,
+       1,
+       1
+      ],
+      "how": "then back to bar 1"
+     }
+    ],
+    "chords": [
+     {
+      "name": "E7 (open)",
+      "frets": "0 2 0 1 0 0",
+      "fingers": "Middle: A string 2nd fret. Index: G string 1st fret. Strum all six.",
+      "tip": "An E major chord with the ring finger lifted: the open D string is the 7th that gives the bluesy sound. (The 0 2 2 1 3 0 version from Texas Rock is also E7.)"
+     },
+     {
+      "name": "A5",
+      "frets": "x 0 2 2 x x",
+      "fingers": "Index: D string 2nd fret. Ring: G string 2nd fret. Only strike strings 5, 4, 3.",
+      "tip": "A power chord: just A and E, no major or minor third, which is why it sounds tough. Palm-mute it for rock chugs."
+     },
+     {
+      "name": "A7",
+      "frets": "x 0 2 0 2 0",
+      "fingers": "Middle: D string 2nd fret. Ring: B string 2nd fret. Don't strum the low E.",
+      "tip": "An A major chord with the G string left open: that open G is the 7th."
+     },
+     {
+      "name": "D7",
+      "frets": "x x 0 2 1 2",
+      "fingers": "Index: B string 1st fret. Middle: G string 2nd fret. Ring: high e 2nd fret. Strum only the top four strings.",
+      "tip": "Looks like a backwards D major. In a blues in E, D7 is the ♭VII chord that gives the rock flavour."
+     },
+     {
+      "name": "E7 (7th-fret barre)",
+      "frets": "x 7 9 7 9 7",
+      "fingers": "Index barres the 7th fret from the A string down. Ring: D string 9th fret. Pinky: B string 9th fret. Mute the low E with the tip of the index.",
+      "tip": "The open A7 shape slid up to the 7th fret, so the root (E) is on the A string, 7th fret."
+     },
+     {
+      "name": "E7 (C7 shape, 7th fret)",
+      "frets": "x 7 6 7 5 x",
+      "fingers": "Ring: A string 7th fret (the root, E). Middle: D string 6th fret. Pinky: G string 7th fret. Index: B string 5th fret. Mute the low E and high e.",
+      "tip": "The open C7 shape (x 3 2 3 1 0) moved up 4 frets. Same chord as the barre version, different sound: brighter and jazzier."
+     }
+    ],
+    "after": "Four strums a bar (one per click); bar 5 is eight quick palm-muted chugs on A5. Bars 7–8 and 11–12 move up the neck: E7 as a barre at the 7th fret, then the C7 shape at the 7th fret."
+   },
+   "how": "A 12-bar blues rock in E built from the chords your teacher gave you: E7, A5, A7, D7 and the two E7 shapes at the 7th fret (barre, and the C7 shape). Learn the six shapes in the table first, then play the 12 bars with the play-along. If your teacher's sheet has the chords in a different order, tell me and I'll match it."
   }
  },
  "songs": {
@@ -2215,7 +2526,7 @@
      "difficulty": "easy",
      "tab": "\"rest 1 beat, then\" 6:0 6:3 5:0 5:2 4:0 4:2",
      "orig": "N.C. quarter rest, then eighths: 6S open, 6S3F, 5S open, 5S2F, 4S open, 4S2F",
-     "teach": "Notes: E G A B D E. These are E minor pentatonic notes (plus the octave E), climbing the bottom three strings: open, 3rd fret on the low E; open, 2nd fret on A; open, 2nd fret on D. Eighth notes, so two notes per click. Alternate picking, say each note."
+     "teach": "Notes: E G A B D E. These are E minor pentatonic notes (plus the octave E), climbing the bottom three strings: open, 3rd fret on the low E; open, 2nd fret on A; open, 2nd fret on D. Eighth notes, so two notes per click. Alternate picking."
     },
     {
      "name": "Bars 1–4: E7 (bass, stab, stab · stab, riff)",

@@ -25,7 +25,7 @@
   <ol class="wl-steps">
     <li><span><b>Press “Start today's practice”.</b> A 25-minute timer runs while you work through the routine. You can pause it.</span></li>
     <li><span><b>Open an exercise and press “Play along”.</b> Each note lights up on the fretboard, on the beat. Turn your sound on.</span></li>
-    <li><span><b>Played it clean?</b> That means alternate picking, saying every note out loud, and no mistakes. Save the tempo and watch it climb on the Progress page.</span></li>
+    <li><span><b>Played it clean?</b> That means alternate picking and no mistakes. Save the tempo and watch it climb on the Progress page.</span></li>
   </ol>
   <p class="wl-note">No account needed. Everything you log stays in this browser. Export a backup from Progress any time.</p>
   <div class="btns wl-btns"><button class="btn primary big" data-wl="go">Let's play</button><button class="btn" data-wl="new">I'm brand new to guitar</button></div>
@@ -539,7 +539,7 @@ function viewToday() {
     <div class="stat"><b>${doneMin}<span class="soft small"> / ${total} min</span></b><span>practised today</span></div>
     <div class="stat stat-days">${allDays()}</div></div></section>`;
   h += staff("Today's routine", `${total} minutes · 75% review, 25% new`);
-  h += `<div class="cleanrule"><b>What counts as a clean run</b><span>Alternate picking (down-up) the whole way · every note named out loud · not a single mistake. One clean run is enough: save the tempo as soon as you get one.${drills.some((d) => d.noNames) ? " The spider crawls don't need the notes named." : ""}</span></div>`;
+  h += `<div class="cleanrule"><b>What counts as a clean run</b><span>Alternate picking (down-up) the whole way · not a single mistake. One clean run is enough: save the tempo as soon as you get one.</span></div>`;
   if (loading("drills")) h += `<div class="sheet empty">Loading your routine…</div>`;
   else if (!drills.length) h += `<div class="sheet empty"><b>No routine yet.</b>It'll be built from your songs, scales and skills.</div>`;
   else {
@@ -551,12 +551,12 @@ function viewToday() {
         <span class="check ${done ? (done.noClean ? "part" : "on") : ""}" aria-label="${done ? "Logged today" : "Not logged yet"}">✓</span>
         <span class="t">${esc(drillName(d))}<br><span class="meta">${done?.noClean ? `Practised today, no clean run${done.note ? ` · “${esc(done.note)}”` : ""}` : done ? `Clean at ♩=${done.bpm} today` : last ? `Last clean ♩=${last.bpm}${best > last.bpm ? ` · best ${best}` : ""}` : `Start around ♩=${d.startBpm || 60}`}</span></span>
         <span class="pill cat-${esc(d.category || "scale")}">${d.minutes || 0} min</span></button>
-        ${open ? `<div class="item-body">${lastCleanHTML(d.id)}${d.how ? `<p class="howto">${esc(d.how)}</p>` : ""}${d.ex?.type === "rounds" ? roundsTable(d.ex) : ""}
+        ${open ? `<div class="item-body">${lastCleanHTML(d.id)}${d.how ? `<p class="howto">${esc(d.how)}</p>` : ""}${d.ex?.type === "rounds" ? roundsTable(d.ex) : ""}${d.ex?.type === "bars" ? barsTable(d.ex) : ""}
           ${(() => { const ex = drillEx(d); return ex ? exerciseBlock("drill-" + d.id, ex, `data-playdrill="${esc(d.id)}"`) : ""; })()}
           <div class="btns"><button class="btn" data-settempo="${esc(d.id)}" data-bpm="${start}">Metronome to ♩=${start}</button></div>
           <div class="btns"><button class="btn primary" data-logbpm="${esc(d.id)}">Got a clean run: save ♩=<span data-live-bpm>${M.bpm}</span></button>
             <button class="btn" data-noclean="${esc(d.id)}">No clean run today</button>
-          <span class="small soft">Save only after a run with ${d.ex?.legato ? "one pick per string, every hammer-on and pull-off ringing clearly," : "alternate picking"}${d.noNames ? "" : ", every note named"} and no mistakes. It saves the metronome's current tempo.</span></div>${link}</div>` : ""}</div>`;
+          <span class="small soft">Save only after a run with ${d.ex?.legato ? "one pick per string, every hammer-on and pull-off ringing clearly," : "alternate picking"} and no mistakes. It saves the metronome's current tempo.</span></div>${link}</div>` : ""}</div>`;
     }).join("")}</div>`;
   }
   h += staff("How did it go?", "Practice note");
@@ -582,7 +582,7 @@ function keyOfDay(d, date = new Date()) {
   const minor = spellScale(major, "major")[5].name;
   return { major, minor };
 }
-function spiderSeq(lastPos = 9, back = false) {
+function spiderSeq(lastPos = 9, back = false, fingers = [1, 2, 3, 4]) {
   const out = [];
   // Up: positions 1..lastPos. Back (optional): one fret lower each time, starting from the string you ended on.
   const order = [...Array(lastPos)].map((_, i) => i + 1);
@@ -590,9 +590,16 @@ function spiderSeq(lastPos = 9, back = false) {
   order.forEach((p, n) => {
     const strings = n % 2 ? [1, 2, 3, 4, 5, 6] : [6, 5, 4, 3, 2, 1];
     // low E → high e: frets low → high (index to pinky); high e → low E: frets high → low (pinky to index)
-    strings.forEach((s) => { const fr = [p, p + 1, p + 2, p + 3]; (n % 2 ? fr.reverse() : fr).forEach((f) => out.push({ s, f })); });
+    strings.forEach((s) => { const fr = fingers.map((fg) => p + fg - 1); (n % 2 ? fr.reverse() : fr).forEach((f) => out.push({ s, f })); });
   });
   return out;
+}
+// Chord shapes to learn, and the bar-by-bar form, for chord-progression drills.
+function barsTable(ex) {
+  return `<div class="rounds"><table><thead><tr><th>Chord</th><th>Frets (low E → high e)</th><th>Fingers</th></tr></thead><tbody>
+    ${ex.chords.map((c) => `<tr><td><b>${esc(c.name)}</b></td><td class="mono">${esc(c.frets)}</td><td class="small">${esc(c.fingers)}${c.tip ? `<br><span class="soft">${esc(c.tip)}</span>` : ""}</td></tr>`).join("")}</tbody></table>
+    <p class="small"><b>The 12 bars:</b> ${ex.bars.map((b, i) => `<span class="mono">${i + 1}</span> ${esc(b.chord)}${b.how ? ` <span class="soft">(${esc(b.how)})</span>` : ""}`).join(" · ")}</p>
+    ${ex.after ? `<p class="small">${esc(ex.after)}</p>` : ""}</div>`;
 }
 // The "7 notes, then a chord 3 times" table for song drills.
 function roundsTable(ex) {
@@ -607,7 +614,13 @@ function roundsTable(ex) {
 function rootFret6(note) { const pc = parseNote(note).pc; return (pc - 4 + 12) % 12; }
 function drillEx(d) {
   const ex = d.ex; if (!ex) return null;
-  if (ex.type === "spider") return { title: (ex.muted ? "Muted spider crawl" : ex.legato ? "Hammer-on & pull-off spider crawl" : "Spider crawl") + `, frets 1–${(ex.last || 9) + 3}${ex.back ? " and back" : ""}`, root: "C", scale: "chromatic", seq: spiderSeq(ex.last || 9, !!ex.back) };
+  if (ex.type === "spider") return { title: (ex.muted ? "Muted spider crawl" : ex.legato ? "Hammer-on & pull-off spider crawl" : "Spider crawl") + (ex.fingers ? ` ${ex.fingers.join("-")}` : "") + `, frets 1–${(ex.last || 9) + 3}${ex.back ? " and back" : ""}`, root: "C", scale: "chromatic", seq: spiderSeq(ex.last || 9, !!ex.back, ex.fingers || [1, 2, 3, 4]) };
+  if (ex.type === "bars") {
+    const seq = [];
+    ex.bars.forEach((b, bi) => b.hits.forEach((d, j) => seq.push({ shape: ex.shapes[b.chord], dur: d, label: `Bar ${bi + 1} of ${ex.bars.length} · ${b.chord}${b.how ? ` (${b.how})` : ""}` })));
+    const fbSeq = [...new Map(Object.values(ex.shapes).flat().map(([s, f]) => [`${s}:${f}`, { s, f }])).values()];
+    return { title: ex.title || d.name, root: ex.root || "E", scale: "chromatic", seq, fbSeq, timed: true, loopFrom: 0 };
+  }
   if (ex.type === "rounds") {
     const nm = (s, f) => pretty(SHARP_NAMES[(OPEN[s - 1] + f) % 12]), seq = [{ dur: 1, label: "Pickup: rest for one beat, then go" }];
     ex.rounds.forEach((r, ri) => {

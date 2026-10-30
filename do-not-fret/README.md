@@ -32,7 +32,7 @@ The metronome is docked at the bottom of every page: tap tempo, time signature, 
 
 ### The one rule: what counts as a clean run
 
-A tempo only counts if you played the whole exercise with **alternate picking** (down-up), **said every note out loud**, and made **no mistakes**. One clean run is enough to save it. If you practised but never got a clean run, tap **No clean run today**: the day still counts, and it shows as a 0 on the chart so you can see it.
+A tempo only counts if you played the whole exercise with **alternate picking** (down-up) and made **no mistakes**. One clean run is enough to save it. If you practised but never got a clean run, tap **No clean run today**: the day still counts, and it shows as a 0 on the chart so you can see it.
 
 ---
 
