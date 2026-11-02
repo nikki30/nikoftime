@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Roamance</title>
+<meta name="description" content="Swipe on places and experiences around the world like dating profiles. Roamance learns your type and pitches 5 to 30 day trips from San Francisco.">
+<meta name="theme-color" content="#e8efe9">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%23f3c64b' stroke='%2310363a' stroke-width='4'/%3E%3Cpath d='M32 46s-14-8-14-17a7 7 0 0 1 14-2 7 7 0 0 1 14 2c0 9-14 17-14 17z' fill='%231d5c3a'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Work+Sans:wght@400;500;600;700&family=Chivo+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="top">
+  <a class="home" href="../">← <span class="lbl">More apps</span></a>
+  <div class="brand"><h1>Roamance</h1><p>Swipe right on the world</p></div>
+  <button type="button" class="enough" id="enough">Enough swiping, show me plans</button>
+</header>
+<nav class="tabs" id="tabs" aria-label="Sections">
+  <a href="#swipe" data-tab="swipe">Swipe</a>
+  <a href="#type" data-tab="type">Your type</a>
+  <a href="#matches" data-tab="matches">Matches <b id="nmatch"></b></a>
+  <a href="#plans" data-tab="plans">Plans</a>
+</nav>
+<main id="main" class="main"></main>
+<footer class="foot">
+  Photos from <a href="https://www.wikipedia.org" target="_blank" rel="noopener">Wikipedia</a> and Wikimedia Commons. Your swipes stay in this browser.
+  Fresh cards, your written type and polished plans come from Claude, with your own API key.
+</footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script type="module" src="app.js"></script>
+</body>
+</html>

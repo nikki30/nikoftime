@@ -159,6 +159,16 @@ a { color: inherit; text-decoration: none; }
 .a-tabs .nw { transform-box: fill-box; transform-origin: center; animation: ktpulse 2.4s ease-in-out infinite; }
 @keyframes ktpulse { 50% { transform: scale(1.25); } }
 
+.a-roam { background: #e8efe9; }
+.a-roam .topo circle { fill: none; stroke: #1f7a72; stroke-opacity: .25; stroke-width: 1.5; }
+.a-roam .c2 rect { fill: #b9cfc4; stroke: #10363a; stroke-width: 3; transform-box: fill-box; transform-origin: center; transform: rotate(8deg); }
+.a-roam .c1 > rect:first-child { fill: #fff; stroke: #10363a; stroke-width: 3; }
+.a-roam .pic { fill: #1f7a72; } .a-roam .tag { fill: #f3c64b; } .a-roam text { font: 600 8px ui-monospace, monospace; fill: #10363a; }
+.a-roam .ln { fill: #10363a; } .a-roam .l2 { fill: #b9cfc4; }
+.a-roam .btn rect { stroke: #10363a; stroke-width: 2.5; } .a-roam .no { fill: #f6b3a8; } .a-roam .st { fill: #f08a24; } .a-roam .yes { fill: #1d5c3a; } .a-roam .h { fill: #fff; }
+.a-roam .c1 { transition: transform .5s cubic-bezier(.3, 1.4, .5, 1); transform-box: view-box; transform-origin: 170px 260px; }
+.tile:hover .a-roam .c1 { transform: translateX(40px) rotate(10deg); }
+
 footer { margin-top: 110px; padding: 26px 0 40px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; font-size: 14px; color: var(--soft); }
 footer a:hover { color: var(--ink); }
 
