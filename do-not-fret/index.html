@@ -1051,7 +1051,7 @@ function viewToday() {
         <span class="check ${done ? (done.noClean ? "part" : "on") : ""}" aria-label="${done ? "Logged today" : "Not logged yet"}">✓</span>
         <span class="t">${esc(drillName(d))}<br><span class="meta">${done?.noClean ? `Practised today, no clean run${done.note ? ` · “${esc(done.note)}”` : ""}` : done ? `Clean at ♩=${done.bpm} today` : last ? `Last clean ♩=${last.bpm}${best > last.bpm ? ` · best ${best}` : ""}` : `Start around ♩=${d.startBpm || 60}`}</span></span>
         <span class="pill cat-${esc(d.category || "scale")}">${d.minutes || 0} min</span></button>
-        ${open ? `<div class="item-body">${lastCleanHTML(d.id)}${d.how ? `<p class="howto">${esc(d.how)}</p>` : ""}${d.ex?.type === "rounds" ? roundsTable(d.ex) : ""}${d.ex?.type === "bars" ? barsTable(d.ex) : ""}
+        ${open ? `<div class="item-body">${lastCleanHTML(d.id)}${d.how ? `<p class="howto">${esc(d.how)}</p>` : ""}${d.ex?.type === "rounds" ? roundsTable(d.ex) : ""}${d.ex?.type === "bars" || d.ex?.type === "timedseq" ? barsTable(d.ex) : ""}
           ${(() => { const ex = drillEx(d); return ex ? exerciseBlock("drill-" + d.id, ex, `data-playdrill="${esc(d.id)}"`) : ""; })()}
           <div class="btns"><button class="btn" data-settempo="${esc(d.id)}" data-bpm="${start}">Metronome to ♩=${start}</button></div>
           <div class="btns"><button class="btn primary" data-logbpm="${esc(d.id)}">Got a clean run: save ♩=<span data-live-bpm>${M.bpm}</span></button>
@@ -1120,6 +1120,12 @@ function drillEx(d) {
     ex.bars.forEach((b, bi) => b.hits.forEach((d, j) => seq.push({ shape: ex.shapes[b.chord], dur: d, label: `Bar ${bi + 1} of ${ex.bars.length} · ${b.chord}${b.how ? ` (${b.how})` : ""}` })));
     const fbSeq = [...new Map(Object.values(ex.shapes).flat().map(([s, f]) => [`${s}:${f}`, { s, f }])).values()];
     return { title: ex.title || d.name, root: ex.root || "E", scale: "chromatic", seq, fbSeq, timed: true, loopFrom: 0 };
+  }
+  // A whole tune written out note by note: each item is a note {s, f}, a chord {shape}, or a rest, with its length in beats and what to do.
+  if (ex.type === "timedseq") {
+    const seq = ex.seq.map((it) => ({ ...(it.chord ? { shape: ex.shapes[it.chord] } : it.s != null ? { s: it.s, f: it.f } : {}), dur: it.dur, label: it.label }));
+    const fbSeq = [...new Map([...ex.seq.filter((it) => it.s != null).map((it) => [it.s, it.f]), ...Object.values(ex.shapes).flat()].map(([s, f]) => [`${s}:${f}`, { s, f }])).values()];
+    return { title: ex.title || d.name, root: ex.root || "A", scale: "chromatic", seq, fbSeq, timed: true, loopFrom: ex.loopFrom || 0 };
   }
   if (ex.type === "rounds") {
     const nm = (s, f) => pretty(SHARP_NAMES[(OPEN[s - 1] + f) % 12]), seq = [{ dur: 1, label: "Pickup: rest for one beat, then go" }];
